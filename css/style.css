@@ -1,5 +1,6 @@
 :root{ --bg:#0c0f14; --card:#151a22; --text:#e8eef9; --muted:#9fb3c8; --accent:#2aa198; }
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
 .container{max-width:1100px;margin:auto;padding:16px}
 .site-header,.site-footer{background:#0e131b;border-bottom:1px solid #202735}
 .site-footer{border-top:1px solid #202735;border-bottom:none;padding:16px;text-align:center;color:var(--muted)}
@@ -8,24 +9,16 @@
 #main-nav{margin-left:auto}
 #main-nav a{color:var(--text);text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
 #main-nav a:hover{background:#202735}
+#main-nav a.active{background:#202735;outline:2px solid var(--accent)}
 
-
-/* Banner circular */
+/* Noticias */
 .circle-banner{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
 .circle-card{background:var(--card);padding:12px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
 .circle-card img{width:96px;height:96px;border-radius:50%;object-fit:cover}
-.circle-card h4{margin:0;font-size:.95rem}
-.circle-card time{color:var(--muted);font-size:.8rem}
-
-
-/* Histórico noticias */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .news-card{background:var(--card);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .news-card img{width:100%;aspect-ratio:16/9;object-fit:cover}
 .news-card .content{padding:12px}
-.news-card h3{margin:0 0 6px}
-.news-card p{margin:0;color:var(--muted);font-size:.95rem}
-
 
 /* Tabla */
 .table-wrap{overflow:auto;background:var(--card);border-radius:16px;padding:8px}
@@ -34,7 +27,6 @@ th,td{padding:10px;border-bottom:1px solid #202735;text-align:left}
 th{color:var(--muted);font-weight:600}
 tbody tr:hover{background:#101521}
 
-
 /* Tabs */
 .tabs{display:flex;gap:8px;margin-bottom:12px}
 .tabs button{background:var(--card);border:1px solid #202735;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
@@ -42,37 +34,18 @@ tbody tr:hover{background:#101521}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-
-/* Jornada */
+/* Plantillas */
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
 .player-card{background:var(--card);border-radius:16px;padding:12px}
 .player-card h4{margin:0 0 6px}
 .player-card .meta{color:var(--muted);font-size:.9rem}
 .video{aspect-ratio:16/9;width:100%;border:none;border-radius:12px;overflow:hidden}
 
-/* ---- Campo y alineación ---- */
-.pitch {
-  background: repeating-linear-gradient(
-    to bottom,
-    #1a7f2e 0, #1a7f2e 24px,
-    #1c8a32 24px, #1c8a32 48px
-  );
-  border: 4px solid #fff;
-  border-radius: 16px;
-  padding: 12px;
+/* Campo táctico */
+.field{
+  position:relative;height:480px;border:4px solid #fff;border-radius:16px;padding:6px;
+  background:repeating-linear-gradient(to bottom,#1a7f2e 0,#1a7f2e 24px,#1c8a32 24px,#1c8a32 48px);
 }
-.pitch .lines { border: 2px solid #fff; border-radius: 12px; padding: 10px; }
-.pitch .row { display: flex; justify-content: space-evenly; gap: 8px; margin: 14px 0; }
-.player {
-  display:flex; flex-direction:column; align-items:center; gap:6px;
-  min-width:72px;
-}
-.player .avatar {
-  width:64px;height:64px;border-radius:50%;
-  background:#0e131b;border:2px solid #fff; display:grid;place-items:center;
-  overflow:hidden;
-}
-.player .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-.player .name { font-size:.9rem; text-align:center }
-.formacion-bar { display:flex; align-items:center; gap:10px; margin:12px 0; }
-.formacion-bar select { background:var(--card); color:var(--text); border:1px solid #202735; border-radius:8px; padding:6px 10px; }
+.position{position:absolute;transform:translate(-50%,-50%);text-align:center;color:#fff}
+.position .avatar{width:52px;height:52px;border-radius:50%;background:#0e131b;border:2px solid #fff;margin:0 auto 6px}
+.position .name{font-size:.85rem;line-height:1.1}
