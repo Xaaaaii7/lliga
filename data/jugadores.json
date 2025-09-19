@@ -1,9 +1,91 @@
 {
-"parametros": {"zamora_min_pj": 2},
-"jugadores": [
-{"nombre":"Alex Pérez","equipo":"Los Tigres","posicion":"DEL","goles":4,"ta":1,"tr":0,"mvp":1,"pj":3,"min":210},
-{"nombre":"David Soto","equipo":"La Peña","posicion":"DEL","goles":3,"ta":0,"tr":0,"mvp":2,"pj":3,"min":230},
-{"nombre":"J. Romero","equipo":"Vecinos FC","posicion":"POR","gc":3,"pj":3,"min":180,"mvp":1},
-{"nombre":"Carlos Gil","equipo":"Rayo B","posicion":"POR","gc":1,"pj":2,"min":120}
-]
+  "parametros": {
+    "zamora_min_pj": 2
+  },
+  "equipos": [
+    {
+      "nombre": "Los Tigres",
+      "jugadores": [
+        {
+          "nombre": "Alex Pérez",
+          "posicion": "DEL",
+          "dorsal": 9,
+          "goles": 4,
+          "assists": 1,
+          "ta": 1,
+          "tr": 0,
+          "mvp": 1,
+          "pj": 3,
+          "min": 210
+        },
+        {
+          "nombre": "Raúl Sánchez",
+          "posicion": "MED",
+          "dorsal": 6,
+          "goles": 1,
+          "assists": 2,
+          "ta": 0,
+          "tr": 0,
+          "mvp": 0,
+          "pj": 3,
+          "min": 230
+        }
+      ]
+    },
+    {
+      "nombre": "La Peña",
+      "jugadores": [
+        {
+          "nombre": "David Soto",
+          "posicion": "DEL",
+          "dorsal": 11,
+          "goles": 3,
+          "assists": 0,
+          "ta": 0,
+          "tr": 0,
+          "mvp": 2,
+          "pj": 3,
+          "min": 230
+        },
+        {
+          "nombre": "Sergio López",
+          "posicion": "DEF",
+          "dorsal": 4,
+          "goles": 0,
+          "assists": 0,
+          "ta": 2,
+          "tr": 1,
+          "pj": 3,
+          "min": 270
+        }
+      ]
+    },
+    {
+      "nombre": "Vecinos FC",
+      "jugadores": [
+        {
+          "nombre": "J. Romero",
+          "posicion": "POR",
+          "dorsal": 1,
+          "gc": 3,
+          "pj": 3,
+          "min": 180,
+          "mvp": 1
+        }
+      ]
+    },
+    {
+      "nombre": "Rayo B",
+      "jugadores": [
+        {
+          "nombre": "Carlos Gil",
+          "posicion": "POR",
+          "dorsal": 13,
+          "gc": 1,
+          "pj": 2,
+          "min": 120
+        }
+      ]
+    }
+  ]
 }
