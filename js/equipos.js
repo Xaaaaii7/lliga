@@ -1,0 +1,47 @@
+(async () => {
+const data = await loadJSON('data/jugadores.json');
+const root = document.getElementById('equipos');
+
+
+// Soporta el formato antiguo (jugadores[]) y el nuevo (equipos[])
+let equipos = [];
+if (Array.isArray(data.equipos)) {
+equipos = data.equipos;
+} else if (Array.isArray(data.jugadores)) {
+// fallback: crea un pseudo equipo "Sin equipo"
+equipos = [{ nombre: 'General', jugadores: data.jugadores }];
+}
+
+
+// Render
+root.innerHTML = equipos.map(eq => {
+const cards = (eq.jugadores||[]).map(j => {
+const linea1 = `${j.posicion || ''} ${j dorsal?`#${j.dorsal}`:''}`.trim();
+const stats = [
+j.goles!=null?`⚽ ${j.goles}`:null,
+j.assists!=null?`🅰️ ${j.assists}`:null,
+j.ta!=null?`🟨 ${j.ta}`:null,
+j.tr!=null?`🟥 ${j.tr}`:null,
+j.mvp!=null?`⭐ ${j.mvp}`:null,
+j.gc!=null?`🛑 GC ${j.gc}`:null,
+j.pj!=null?`PJ ${j.pj}`:null,
+j.min!=null?`${j.min}’`:null
+].filter(Boolean).join(' · ');
+
+
+return `
+<div class="player-card">
+<h4>${j.nombre}</h4>
+<div class="meta">${linea1}${linea1? ' — ': ''}${eq.nombre}</div>
+${stats?`<div class="meta">${stats}</div>`:''}
+</div>`;
+}).join('');
+
+
+return `
+<section class="equipo">
+<h2>${eq.nombre}</h2>
+<div class="team-grid">${cards}</div>
+</section>`;
+}).join('');
+})();
