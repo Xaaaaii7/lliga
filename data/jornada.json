@@ -1,18 +1,9 @@
-[
 {
-"numero": 1,
-"fecha": "2025-09-05",
-"partidos": [
-{"local":"Los Tigres","visitante":"La Peña","goles_local":3,"goles_visitante":2,"youtube":"https://youtu.be/XXXXX"},
-{"local":"Vecinos FC","visitante":"Rayo B","goles_local":1,"goles_visitante":1,"stream":"https://twitch.tv/mi_torneo"}
-]
-},
-{
-"numero": 2,
-"fecha": "2025-09-12",
-"partidos": [
-{"local":"La Peña","visitante":"Vecinos FC"},
-{"local":"Rayo B","visitante":"Los Tigres"}
-]
+"jornada": 1,
+"equipo": [
+{"nombre":"Alex Pérez","equipo":"Los Tigres","posicion":"DEL","detalles":"2 goles y 1 asistencia"},
+{"nombre":"J. Romero","equipo":"Vecinos FC","posicion":"POR","detalles":"Paradas clave"}
+],
+"gol_youtube": "dQw4w9WgXcQ",
+"mej_jugador": {"nombre":"David Soto","equipo":"La Peña","motivo":"Doblete decisivo"}
 }
-]
