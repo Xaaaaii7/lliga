@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Torneo — Jugadores</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+<img src="img/logo.png" alt="Logo Torneo" class="logo" />
+<h1>Estadísticas de Jugadores</h1>
+<nav id="main-nav"></nav>
+</header>
+<main class="container">
+<div class="tabs">
+<button data-tab="pichichi" class="active">Pichichi</button>
+<button data-tab="zamora">Zamora</button>
+<button data-tab="tarjetas">Tarjetas</button>
+<button data-tab="mvp">MVP</button>
+</div>
+<section id="pichichi" class="tab-panel active"><ol id="lista-pichichi"></ol></section>
+<section id="zamora" class="tab-panel"><ol id="lista-zamora"></ol></section>
+<section id="tarjetas" class="tab-panel">
+<h3>Amarillas</h3><ol id="lista-amarillas"></ol>
+<h3>Rojas</h3><ol id="lista-rojas"></ol>
+</section>
+<section id="mvp" class="tab-panel"><ol id="lista-mvp"></ol></section>
+</main>
+<footer class="site-footer">© Torneo entre amigos</footer>
+<script src="js/common.js"></script>
+<script src="js/jugadores.js"></script>
+</body>
+</html>
