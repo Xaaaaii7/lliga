@@ -49,3 +49,30 @@ tbody tr:hover{background:#101521}
 .player-card h4{margin:0 0 6px}
 .player-card .meta{color:var(--muted);font-size:.9rem}
 .video{aspect-ratio:16/9;width:100%;border:none;border-radius:12px;overflow:hidden}
+
+/* ---- Campo y alineación ---- */
+.pitch {
+  background: repeating-linear-gradient(
+    to bottom,
+    #1a7f2e 0, #1a7f2e 24px,
+    #1c8a32 24px, #1c8a32 48px
+  );
+  border: 4px solid #fff;
+  border-radius: 16px;
+  padding: 12px;
+}
+.pitch .lines { border: 2px solid #fff; border-radius: 12px; padding: 10px; }
+.pitch .row { display: flex; justify-content: space-evenly; gap: 8px; margin: 14px 0; }
+.player {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  min-width:72px;
+}
+.player .avatar {
+  width:64px;height:64px;border-radius:50%;
+  background:#0e131b;border:2px solid #fff; display:grid;place-items:center;
+  overflow:hidden;
+}
+.player .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.player .name { font-size:.9rem; text-align:center }
+.formacion-bar { display:flex; align-items:center; gap:10px; margin:12px 0; }
+.formacion-bar select { background:var(--card); color:var(--text); border:1px solid #202735; border-radius:8px; padding:6px 10px; }
