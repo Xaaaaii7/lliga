@@ -1,0 +1,27 @@
+[
+{
+"id": 3,
+"titulo": "Final anunciada para el 12/10",
+"resumen": "Todo listo para la gran final en el campo municipal.",
+"img": "https://picsum.photos/seed/final/800/450",
+"fecha": "2025-09-10",
+"destacado": true,
+"link": "https://twitch.tv/mi_torneo"
+},
+{
+"id": 2,
+"titulo": "Crónica Jornada 1",
+"resumen": "Partidos intensos y muchas ocasiones.",
+"img": "https://picsum.photos/seed/j1/800/450",
+"fecha": "2025-09-05",
+"destacado": true
+},
+{
+"id": 1,
+"titulo": "Bienvenida al Torneo 2025",
+"resumen": "Reglas, calendario y equipos confirmados.",
+"img": "https://picsum.photos/seed/welcome/800/450",
+"fecha": "2025-09-01",
+"destacado": false
+}
+]
