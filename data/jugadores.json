@@ -1,0 +1,9 @@
+{
+"parametros": {"zamora_min_pj": 2},
+"jugadores": [
+{"nombre":"Alex Pérez","equipo":"Los Tigres","posicion":"DEL","goles":4,"ta":1,"tr":0,"mvp":1,"pj":3,"min":210},
+{"nombre":"David Soto","equipo":"La Peña","posicion":"DEL","goles":3,"ta":0,"tr":0,"mvp":2,"pj":3,"min":230},
+{"nombre":"J. Romero","equipo":"Vecinos FC","posicion":"POR","gc":3,"pj":3,"min":180,"mvp":1},
+{"nombre":"Carlos Gil","equipo":"Rayo B","posicion":"POR","gc":1,"pj":2,"min":120}
+]
+}
