@@ -12,37 +12,60 @@
 
 (async () => {
   const data = await loadJSON('data/jugadores.json');
-
-  // Soporta JSON por equipos
+  // Aplana jugadores por equipos
   const jugadores = Array.isArray(data.equipos)
     ? data.equipos.flatMap(eq => (eq.jugadores||[]).map(j => ({...j, equipo:eq.nombre})))
     : (data.jugadores||[]);
 
-  const top = (arr, key, n=20) => arr.slice().sort((a,b)=> (b[key]||0)-(a[key]||0)).slice(0,n);
+  const val = (x)=> x ?? 0;
 
-  // Pichichi
-  document.getElementById('lista-pichichi').innerHTML = top(jugadores,'goles').map((j,i)=>
-    `<li>${i+1}. ${j.nombre} (${j.equipo||''}) — ${j.goles||0} goles</li>`
-  ).join('');
+  // Helpers
+  const topBy = (arr, cmp) => arr.slice().sort(cmp);
+  const row = (...cols) => `<tr>${cols.map(c=>`<td>${c}</td>`).join('')}</tr>`;
+  const setBody = (id, html) => { document.getElementById(id).innerHTML = html; };
 
-  // Zamora
+  // -------- PICHICHI --------
+  const ordenPichichi = (a,b) =>
+    val(b.goles)-val(a.goles) || val(b.mvp)-val(a.mvp) || val(a.min)-val(b.min);
+  const pichichi = topBy(jugadores, ordenPichichi);
+  setBody('tb-pichichi',
+    pichichi.map((j,i)=> row(
+      i+1, j.nombre, j.equipo, val(j.goles), val(j.pj), val(j.min)
+    )).join('')
+  );
+
+  // -------- ZAMORA --------
   const MIN_PJ = data.parametros?.zamora_min_pj ?? 3;
-  const porteros = jugadores.filter(j=> j.posicion==='POR' && (j.pj||0) >= MIN_PJ)
-    .map(j=> ({...j, gc90: (j.gc||0)/Math.max(j.min||j.pj*50, 1)*90 }));
-  document.getElementById('lista-zamora').innerHTML = top(porteros,'gc90').reverse().map((j,i)=>
-    `<li>${i+1}. ${j.nombre} (${j.equipo||''}) — ${(j.gc90).toFixed(2)} GC/90</li>`
-  ).join('');
+  const porterosBase = jugadores.filter(j=> (j.posicion||'').toUpperCase()==='POR' && val(j.pj) >= MIN_PJ)
+    .map(j => {
+      const minutos = val(j.min) || (val(j.pj)*50); // fallback 50’ si no hay minutos
+      const gc90 = minutos ? (val(j.gc)/minutos)*90 : Infinity;
+      return {...j, minutos, gc90};
+    });
+  const zamora = topBy(porterosBase, (a,b)=> a.gc90 - b.gc90 || val(a.minutos)-val(b.minutos));
+  setBody('tb-zamora',
+    zamora.map((j,i)=> row(
+      i+1, j.nombre, j.equipo, val(j.gc), val(j.pj), val(j.minutos), j.gc90.toFixed(2)
+    )).join('')
+  );
 
-  // Tarjetas
-  document.getElementById('lista-amarillas').innerHTML = top(jugadores,'ta').map((j,i)=>
-    `<li>${i+1}. ${j.nombre} (${j.equipo||''}) — ${j.ta||0} amarillas</li>`
-  ).join('');
-  document.getElementById('lista-rojas').innerHTML = top(jugadores,'tr').map((j,i)=>
-    `<li>${i+1}. ${j.nombre} (${j.equipo||''}) — ${j.tr||0} rojas</li>`
-  ).join('');
+  // -------- TARJETAS --------
+  const ordAmar = (a,b)=> val(b.ta)-val(a.ta) || val(b.tr)-val(a.tr) || val(a.min)-val(b.min);
+  const ordRojas = (a,b)=> val(b.tr)-val(a.tr) || val(b.ta)-val(a.ta) || val(a.min)-val(b.min);
+  const amarillas = topBy(jugadores, ordAmar).filter(j=> val(j.ta)>0);
+  const rojas = topBy(jugadores, ordRojas).filter(j=> val(j.tr)>0);
 
-  // MVP
-  document.getElementById('lista-mvp').innerHTML = top(jugadores,'mvp').map((j,i)=>
-    `<li>${i+1}. ${j.nombre} (${j.equipo||''}) — ${j.mvp||0} MVPs</li>`
-  ).join('');
+  setBody('tb-amarillas',
+    amarillas.map((j,i)=> row(i+1, j.nombre, j.equipo, val(j.ta), val(j.pj), val(j.min))).join('')
+  );
+  setBody('tb-rojas',
+    rojas.map((j,i)=> row(i+1, j.nombre, j.equipo, val(j.tr), val(j.pj), val(j.min))).join('')
+  );
+
+  // -------- MVP --------
+  const ordMvp = (a,b)=> val(b.mvp)-val(a.mvp) || val(b.goles)-val(a.goles) || val(a.min)-val(b.min);
+  const mvp = topBy(jugadores, ordMvp).filter(j=> val(j.mvp)>0);
+  setBody('tb-mvp',
+    mvp.map((j,i)=> row(i+1, j.nombre, j.equipo, val(j.mvp), val(j.pj), val(j.min))).join('')
+  );
 })();
