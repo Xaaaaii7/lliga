@@ -1,32 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Torneo — Jugadores</title>
-<link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Jugadores</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 <header class="site-header">
-<img src="img/logo.png" alt="Logo Torneo" class="logo" />
-<h1>Estadísticas de Jugadores</h1>
-<nav id="main-nav"></nav>
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Estadísticas de Jugadores</h1>
+  <nav id="main-nav"></nav>
 </header>
+
 <main class="container">
-<div class="tabs">
-<button data-tab="pichichi" class="active">Pichichi</button>
-<button data-tab="zamora">Zamora</button>
-<button data-tab="tarjetas">Tarjetas</button>
-<button data-tab="mvp">MVP</button>
-</div>
-<section id="pichichi" class="tab-panel active"><ol id="lista-pichichi"></ol></section>
-<section id="zamora" class="tab-panel"><ol id="lista-zamora"></ol></section>
-<section id="tarjetas" class="tab-panel">
-<h3>Amarillas</h3><ol id="lista-amarillas"></ol>
-<h3>Rojas</h3><ol id="lista-rojas"></ol>
-</section>
-<section id="mvp" class="tab-panel"><ol id="lista-mvp"></ol></section>
+  <div class="tabs">
+    <button data-tab="pichichi" class="active">Pichichi</button>
+    <button data-tab="zamora">Zamora</button>
+    <button data-tab="tarjetas">Tarjetas</button>
+    <button data-tab="mvp">MVP</button>
+  </div>
+
+  <!-- Pichichi -->
+  <section id="pichichi" class="tab-panel active">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th><th>PJ</th><th>Min</th></tr>
+        </thead>
+        <tbody id="tb-pichichi"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Zamora -->
+  <section id="zamora" class="tab-panel">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Portero</th><th>Equipo</th><th>GC</th><th>PJ</th><th>Min</th><th>GC/90</th></tr>
+        </thead>
+        <tbody id="tb-zamora"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Tarjetas -->
+  <section id="tarjetas" class="tab-panel">
+    <h3>Amarillas</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Amarillas</th><th>PJ</th><th>Min</th></tr></thead>
+        <tbody id="tb-amarillas"></tbody>
+      </table>
+    </div>
+    <h3>Rojas</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Rojas</th><th>PJ</th><th>Min</th></tr></thead>
+        <tbody id="tb-rojas"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MVP -->
+  <section id="mvp" class="tab-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>MVPs</th><th>PJ</th><th>Min</th></tr></thead>
+        <tbody id="tb-mvp"></tbody>
+      </table>
+    </div>
+  </section>
 </main>
+
 <footer class="site-footer">© Torneo entre amigos</footer>
 <script src="js/common.js"></script>
 <script src="js/jugadores.js"></script>
