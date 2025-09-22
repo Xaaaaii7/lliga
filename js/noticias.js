@@ -1,17 +1,15 @@
 (async () => {
   const data = await loadJSON('data/noticias.json');
-  // Normaliza y ordena
   data.forEach(n => n.fechaObj = new Date(n.fecha));
   data.sort((a,b)=> b.fechaObj - a.fechaObj);
 
-  // ---------- HERO CARRUSEL (destacadas) ----------
+  // ---------- HERO CARRUSEL ----------
   const destacadas = data.filter(n=>n.destacado);
   const track = document.getElementById('hero-track');
   const dots  = document.getElementById('hero-dots');
   const prev  = document.getElementById('hero-prev');
   const next  = document.getElementById('hero-next');
 
-  // Cada destacada admite n.imagenes (array) o usa n.img única
   const heroSlides = destacadas.map(n => ({
     id: n.id,
     titulo: n.titulo,
@@ -51,7 +49,7 @@
     dots.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=> go(+b.dataset.i)));
     go(0);
 
-    // Click en slide abre popup de la noticia
+    // Click en slide abre popup
     track.querySelectorAll('.hero-slide').forEach(sl => {
       sl.style.cursor = 'pointer';
       sl.addEventListener('click', ()=>{
@@ -61,22 +59,6 @@
       });
     });
   }
-
-  // ---------- BANNER CIRCULAR DESTACADAS ----------
-  const banner = document.getElementById('banner');
-  banner.innerHTML = destacadas.slice(0,8).map(n=>`
-    <button class="circle-card" data-id="${n.id}" aria-label="Abrir noticia">
-      <img src="${n.img}" alt="${n.titulo}">
-      <h4>${n.titulo}</h4>
-      <time>${fmtDate(n.fecha)}</time>
-    </button>
-  `).join('');
-  banner.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const nota = data.find(n=> String(n.id) === String(b.dataset.id));
-      openNewsModal(nota);
-    });
-  });
 
   // ---------- HISTÓRICO ----------
   const grid = document.getElementById('news-grid');
@@ -108,8 +90,6 @@
 
   const open = ()=> { backdrop.hidden = false; };
   const close = ()=> { backdrop.hidden = true; titleEl.textContent=''; metaEl.textContent=''; bodyEl.innerHTML=''; };
-
-  close(); // aseguramos cerrado al cargar
   closeBtn.addEventListener('click', close);
   backdrop.addEventListener('click', (e)=> { if (e.target === backdrop) close(); });
   document.addEventListener('keydown', (e)=> { if (e.key === 'Escape' && !backdrop.hidden) close(); });
@@ -118,8 +98,6 @@
     if (!n) return;
     titleEl.textContent = n.titulo;
     metaEl.textContent  = fmtDate(n.fecha);
-
-    // Contenido: usa n.contenido (HTML) o, si no, resumen + imágenes
     const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
     const galeria = imgs.length ? `
       <div class="hero-carousel" style="margin:10px 0">
@@ -127,12 +105,7 @@
           <div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
         </div>
       </div>` : '';
-
-    bodyEl.innerHTML = (n.contenido
-      ? n.contenido
-      : `<p>${n.resumen || ''}</p>`) + galeria;
-
-    // Pequeña auto-rotación en galería del modal
+    bodyEl.innerHTML = (n.contenido ? n.contenido : `<p>${n.resumen || ''}</p>`) + galeria;
     const gt = document.getElementById('galeria-track');
     if (gt && imgs.length>1){
       let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
