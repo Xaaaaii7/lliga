@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const header = document.querySelector('.site-header');
   const nav = document.getElementById('main-nav');
-  if (nav) {
+  if (nav && header) {
+    // Menú
     const links = [
       ['index.html','Noticias'],
       ['clasificacion.html','Clasificación'],
@@ -11,12 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     nav.innerHTML = links.map(([href,label]) =>
       `<a href="${href}" data-href="${href}">${label}</a>`).join('');
+
+    // Activo
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     nav.querySelectorAll('a').forEach(a => {
-      if ((a.getAttribute('data-href')||'').toLowerCase() === here) {
-        a.classList.add('active');
-      }
+      if ((a.getAttribute('data-href')||'').toLowerCase() === here) a.classList.add('active');
     });
+
+    // Botón hamburguesa (insertado si no existe)
+    if (!document.getElementById('menu-toggle')) {
+      const btn = document.createElement('button');
+      btn.id = 'menu-toggle';
+      btn.className = 'menu-toggle';
+      btn.setAttribute('aria-label','Abrir menú');
+      btn.setAttribute('aria-expanded','false');
+      btn.innerHTML = '<span></span><span></span><span></span>';
+      header.insertBefore(btn, nav);
+      btn.addEventListener('click', () => {
+        const open = header.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    }
   }
 });
 
@@ -31,7 +48,7 @@ function fmtDate(iso){
   return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
 
-// Genera alineación automática desde esquema "4-4-2"
+// Alineación automática desde "4-4-2"
 function genAlineacionFromEsquema(esquema){
   const [def, mid, fwd] = (esquema||'4-4-2').split('-').map(n=>parseInt(n,10)||0);
   const fila = (n, row, pref) =>
