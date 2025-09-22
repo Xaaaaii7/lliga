@@ -41,14 +41,14 @@
     if ((b.pts ?? 0) !== (a.pts ?? 0)) return (b.pts ?? 0) - (a.pts ?? 0);
 
     // 2) Mayor diferencia de goles en enfrentamientos entre ambos
-    const na = norm(a.nombre), nb = norm(b.nombre);
-    const ha = h2h[na]?.[nb]; // gf/gc de A vs B
-    const hb = h2h[nb]?.[na]; // gf/gc de B vs A (simétrico)
-    if (ha && hb) {
-      const difA = (ha.gf||0) - (ha.gc||0);
-      const difB = (hb.gf||0) - (hb.gc||0);
-      if (difA !== difB) return difB - difA;
-    }
+    //const na = norm(a.nombre), nb = norm(b.nombre);
+    //const ha = h2h[na]?.[nb]; // gf/gc de A vs B
+    //const hb = h2h[nb]?.[na]; // gf/gc de B vs A (simétrico)
+    //if (ha && hb) {
+    //  const difA = (ha.gf||0) - (ha.gc||0);
+    //  const difB = (hb.gf||0) - (hb.gc||0);
+    //  if (difA !== difB) return difB - difA;
+    //}
 
     // 3) Mayor diferencia de goles en todo el campeonato
     const dA = diff(a), dB = diff(b);
