@@ -105,3 +105,9 @@ tbody tr:hover{background:#101521}
   .modal{ padding:12px }
   .stats-table th, .stats-table td{ padding:8px; font-size:.95rem }
 }
+/* Respetar el atributo hidden en el modal */
+.modal-backdrop[hidden] { display: none !important; }
+
+/* Mejora de accesibilidad/UX en tarjetas de partido */
+.partido-card { cursor: pointer; }
+.partido-card:active { transform: scale(0.99); }
