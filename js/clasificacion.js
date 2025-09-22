@@ -8,7 +8,7 @@
   const equipos = (clasifData?.equipos || []).slice();
 
   // Normalizador para claves (evita problemas con acentos/mayúsculas)
-  const norm = s => String(s||'').toLowerCase()
+  /*const norm = s => String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9\s-]/g,'').trim();
 
@@ -33,7 +33,7 @@
       addH2H(p.visitante, p.local, gv, gl);
     }
   }
-
+*/
   const diff = e => (e.gf ?? 0) - (e.gc ?? 0);
 
   equipos.sort((a,b) => {
