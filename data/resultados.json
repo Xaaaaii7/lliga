@@ -3,7 +3,7 @@
 "numero": 1,
 "fecha": "2025-09-05",
 "partidos": [
-{"local":"Los Tigres","visitante":"La Peña","goles_local":3,"goles_visitante":2,"youtube":"https://youtu.be/XXXXX"},
+{"id":"J1-FRA-ING","local":"Los Tigres","visitante":"La Peña","goles_local":3,"goles_visitante":2,"youtube":"https://youtu.be/XXXXX"},
 {"local":"Vecinos FC","visitante":"Rayo B","goles_local":1,"goles_visitante":1,"stream":"https://twitch.tv/mi_torneo"}
 ]
 },
