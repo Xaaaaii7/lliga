@@ -111,3 +111,12 @@ tbody tr:hover{background:#101521}
 /* Mejora de accesibilidad/UX en tarjetas de partido */
 .partido-card { cursor: pointer; }
 .partido-card:active { transform: scale(0.99); }
+/* Ajustes de visibilidad para los partidos */
+.partido-card {
+  color: var(--text);
+  text-align: center;
+}
+.partido-card strong {
+  color: var(--text);
+}
+
