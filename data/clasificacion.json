@@ -1,5 +1,8 @@
 [
-{"nombre":"Los Tigres","pj":3,"g":2,"e":1,"p":0,"gf":7,"gc":3,"pts":7},
-{"nombre":"La Peña","pj":3,"g":2,"e":0,"p":1,"gf":5,"gc":2,"pts":6},
-{"nombre":"Vecinos FC","pj":3,"g":1,"e":1,"p":1,"gf":3,"gc":3,"pts":4}
+{"nombre":"Jordi","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+{"nombre":"Eudald","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+{"nombre":"Josep","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+{"nombre":"Gimeno","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+{"nombre":"Tes","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+{"nombre":"Vandal","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0}
 ]
