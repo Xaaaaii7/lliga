@@ -1,0 +1,16 @@
+{
+  "J1-FRA-ING": {
+    "Francia": {
+      "goles": 8, "posesion": "63%", "tiros": 13, "tiros_a_puerta": 10,
+      "faltas": 0, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 0,
+      "pases": 66, "pases_completados": 57, "centros": 3,
+      "pases_interceptados": 5, "entradas": 14, "paradas": 0
+    },
+    "Inglaterra": {
+      "goles": 0, "posesion": "37%", "tiros": 0, "tiros_a_puerta": 0,
+      "faltas": 0, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0,
+      "pases": 41, "pases_completados": 34, "centros": 0,
+      "pases_interceptados": 7, "entradas": 1, "paradas": 1
+    }
+  }
+}
