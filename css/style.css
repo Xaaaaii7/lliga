@@ -84,3 +84,24 @@ tbody tr:hover{background:#101521}
   th,td{padding:7px;font-size:.92rem}
   .field{height:340px}
 }
+/* Modal */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.6);
+  display:grid; place-items:center; padding:16px; z-index:50;
+}
+.modal{
+  width:min(920px, 100%); background:var(--card); color:var(--text);
+  border-radius:16px; padding:16px; position:relative; max-height:85vh; overflow:auto;
+  box-shadow:0 10px 40px rgba(0,0,0,.35);
+}
+.modal-close{
+  position:absolute; top:10px; right:10px; border:0; background:#202735; color:var(--text);
+  width:36px; height:36px; border-radius:10px; cursor:pointer;
+}
+.stats-table{ width:100%; border-collapse:collapse; margin-top:8px }
+.stats-table th, .stats-table td{ padding:10px; border-bottom:1px solid #202735; text-align:left }
+.stats-table thead th{ color:var(--muted); font-weight:600 }
+@media (max-width:600px){
+  .modal{ padding:12px }
+  .stats-table th, .stats-table td{ padding:8px; font-size:.95rem }
+}
