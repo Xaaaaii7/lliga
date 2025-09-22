@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ['index.html','Noticias'],
       ['clasificacion.html','Clasificación'],
       ['resultados.html','Resultados'],
-      ['equipos.html','Equipos'],
       ['jugadores.html','Jugadores'],
       ['jornada.html','Jornada']
     ];
