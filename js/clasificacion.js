@@ -3,40 +3,34 @@
   const clasifData = await loadJSON('data/clasificacion.json').catch(() => ({ equipos: [] }));
   let equipos = Array.isArray(clasifData.equipos) ? clasifData.equipos.slice() : [];
 
-  // Normaliza/corrige tipos numéricos y strings
-  const toNum = v => {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  };
+  // Coerción numérica
+  const num = v => Number.isFinite(+v) ? +v : 0;
   equipos = equipos.map(e => ({
     nombre: String(e?.nombre ?? '').trim() || '—',
-    pj: toNum(e?.pj),
-    g:  toNum(e?.g),
-    e:  toNum(e?.e),
-    p:  toNum(e?.p),
-    gf: toNum(e?.gf),
-    gc: toNum(e?.gc),
-    pts:toNum(e?.pts)
+    pj:  num(e?.pj),
+    g:   num(e?.g),
+    e:   num(e?.e),
+    p:   num(e?.p),
+    gf:  num(e?.gf),
+    gc:  num(e?.gc),
+    pts: num(e?.pts)
   }));
 
-  const diff = e => (e.gf - e.gc);
+  // Diferencia de goles
+  const dg = e => e.gf - e.gc;
 
-  // Orden: PTS → DIF general → GF → nombre
+  // Orden actual: Pts → DG → GF → nombre (alfabético)
   equipos.sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
-    const dA = diff(a), dB = diff(b);
+    const dA = dg(a), dB = dg(b);
     if (dA !== dB) return dB - dA;
     if (b.gf !== a.gf) return b.gf - a.gf;
     return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
   });
 
-  // Render seguro
+  // Render con columna DG incluida (coincide con tus <th>)
   const tbody = document.getElementById('tabla-clasificacion');
-  if (!tbody) {
-    console.error('[clasificacion] Falta <tbody id="tabla-clasificacion"> en el HTML.');
-    return;
-  }
-
+  if (!tbody) return console.error('Falta #tabla-clasificacion');
   tbody.innerHTML = equipos.map((e, i) => `
     <tr>
       <td>${i + 1}</td>
@@ -47,10 +41,8 @@
       <td>${e.p}</td>
       <td>${e.gf}</td>
       <td>${e.gc}</td>
+      <td>${dg(e)}</td>
       <td>${e.pts}</td>
     </tr>
   `).join('');
-
-  // Debug opcional (ver en consola)
-  console.table(equipos);
 })();
