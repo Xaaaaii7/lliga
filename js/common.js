@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['clasificacion.html','Clasificación'],
       ['resultados.html','Resultados'],
       ['jugadores.html','Jugadores'],
-      ['jornada.html','Jornada']
+      ['jornada.html','Jornada'],
+      ['reglas.html','Reglas']  // 👈 añadido
     ];
     nav.innerHTML = links.map(([href,label]) =>
       `<a href="${href}" data-href="${href}">${label}</a>`).join('');
