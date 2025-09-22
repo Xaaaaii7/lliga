@@ -29,7 +29,6 @@
       return `
         <button class="player-card partido-card" data-partido-id="${pid}" aria-label="Ver estadísticas">
           <div><strong>${p.local}</strong> vs <strong>${p.visitante}</strong></div>
-          <div class="meta">${j.fecha ? fmtDate(j.fecha): ''}</div>
           <div style="font-size:1.25rem;margin-top:6px">${marcador}</div>
         </button>`;
     }).join('');
