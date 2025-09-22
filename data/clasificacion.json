@@ -1,8 +1,10 @@
-[
-{"nombre":"Jordi","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
-{"nombre":"Eudald","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
-{"nombre":"Josep","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
-{"nombre":"Gimeno","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
-{"nombre":"Tes","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
-{"nombre":"Vandal","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0}
-]
+{
+  "equipos": [
+    {"nombre":"Jordi","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+    {"nombre":"Eudald","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+    {"nombre":"Josep","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+    {"nombre":"Gimeno","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+    {"nombre":"Tes","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0},
+    {"nombre":"Vandal","pj":0,"g":0,"e":0,"p":0,"gf":0,"gc":0,"pts":0}
+  ]
+}
