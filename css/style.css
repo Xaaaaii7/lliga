@@ -142,4 +142,7 @@ tbody tr:hover{background:#101521}
 @media (max-width: 720px){
   .hero-slide{height:240px}
 }
+.rules h2 { margin-top: 20px; }
+.rules ul { padding-left: 20px; line-height: 1.6; }
+.rules li { margin-bottom: 6px; }
 
