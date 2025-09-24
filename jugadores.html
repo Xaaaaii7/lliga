@@ -13,64 +13,29 @@
   <nav id="main-nav"></nav>
 </header>
 
-<main class="container">
-  <div class="tabs">
-    <button data-tab="pichichi" class="active">Pichichi</button>
-    <button data-tab="zamora">Zamora</button>
-    <button data-tab="tarjetas">Tarjetas</button>
-    <button data-tab="mvp">MVP</button>
-  </div>
-
-  <!-- Pichichi -->
-  <section id="pichichi" class="tab-panel active">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th><th>PJ</th><th>Min</th></tr>
-        </thead>
-        <tbody id="tb-pichichi"></tbody>
-      </table>
-    </div>
+<main class="container" id="jugadores">
+  <section class="table-wrap">
+    <h2>Pichichi — Equipos con más goles a favor</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-pichichi"></tbody>
+    </table>
   </section>
 
-  <!-- Zamora -->
-  <section id="zamora" class="tab-panel">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>#</th><th>Portero</th><th>Equipo</th><th>GC</th><th>PJ</th><th>Min</th><th>GC/90</th></tr>
-        </thead>
-        <tbody id="tb-zamora"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Tarjetas -->
-  <section id="tarjetas" class="tab-panel">
-    <h3>Amarillas</h3>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Amarillas</th><th>PJ</th><th>Min</th></tr></thead>
-        <tbody id="tb-amarillas"></tbody>
-      </table>
-    </div>
-    <h3>Rojas</h3>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Rojas</th><th>PJ</th><th>Min</th></tr></thead>
-        <tbody id="tb-rojas"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- MVP -->
-  <section id="mvp" class="tab-panel">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>MVPs</th><th>PJ</th><th>Min</th></tr></thead>
-        <tbody id="tb-mvp"></tbody>
-      </table>
-    </div>
+  <section class="table-wrap" style="margin-top:16px">
+    <h2>Zamora — Equipos con menos goles en contra</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-zamora"></tbody>
+    </table>
   </section>
 </main>
 
