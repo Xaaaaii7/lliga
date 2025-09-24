@@ -1,5 +1,5 @@
 {
-  "J1-jordi-adriel": { "Jordi": {}, "Adriel": {} },
+  "J1-jordi-adriel": { "Jordi": {"goles":1}, "Adriel": {"goles":2} },
   "J1-franco-elian": { "Franco": {}, "Elian": {} },
   "J1-eudald-gimeno": { "Eudald": {}, "Gimeno": {} },
   "J1-vandal-leandro": { "Vandal": {}, "Leandro": {} },
