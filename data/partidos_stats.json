@@ -1,16 +1,78 @@
 {
-  "J1-FRA-ING": {
-    "Francia": {
-      "goles": 8, "posesion": "63%", "tiros": 13, "tiros_a_puerta": 10,
-      "faltas": 0, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 0,
-      "pases": 66, "pases_completados": 57, "centros": 3,
-      "pases_interceptados": 5, "entradas": 14, "paradas": 0
-    },
-    "Inglaterra": {
-      "goles": 0, "posesion": "37%", "tiros": 0, "tiros_a_puerta": 0,
-      "faltas": 0, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0,
-      "pases": 41, "pases_completados": 34, "centros": 0,
-      "pases_interceptados": 7, "entradas": 1, "paradas": 1
-    }
-  }
+  "J1-jordi-franco": { "Jordi": {}, "Franco": {} },
+  "J1-eudald-vandal": { "Eudald": {}, "Vandal": {} },
+  "J1-josep-tes": { "Josep": {}, "Tes": {} },
+  "J1-esteve-leandro": { "Esteve": {}, "Leandro": {} },
+  "J1-gimeno-elian": { "Gimeno": {}, "Elian": {} },
+  "J1-adriel-tiago": { "Adriel": {}, "Tiago": {} },
+
+  "J2-jordi-vandal": { "Jordi": {}, "Vandal": {} },
+  "J2-elian-tes": { "Elian": {}, "Tes": {} },
+  "J2-esteve-gimeno": { "Esteve": {}, "Gimeno": {} },
+  "J2-adriel-josep": { "Adriel": {}, "Josep": {} },
+  "J2-tiago-eudald": { "Tiago": {}, "Eudald": {} },
+  "J2-leandro-franco": { "Leandro": {}, "Franco": {} },
+
+  "J3-jordi-elian": { "Jordi": {}, "Elian": {} },
+  "J3-eudald-tes": { "Eudald": {}, "Tes": {} },
+  "J3-josep-gimeno": { "Josep": {}, "Gimeno": {} },
+  "J3-esteve-adriel": { "Esteve": {}, "Adriel": {} },
+  "J3-vandal-leandro": { "Vandal": {}, "Leandro": {} },
+  "J3-tiago-franco": { "Tiago": {}, "Franco": {} },
+
+  "J4-jordi-gimeno": { "Jordi": {}, "Gimeno": {} },
+  "J4-eudald-elian": { "Eudald": {}, "Elian": {} },
+  "J4-josep-esteve": { "Josep": {}, "Esteve": {} },
+  "J4-tes-adriel": { "Tes": {}, "Adriel": {} },
+  "J4-vandal-tiago": { "Vandal": {}, "Tiago": {} },
+  "J4-leandro-franco": { "Leandro": {}, "Franco": {} },
+
+  "J5-jordi-tes": { "Jordi": {}, "Tes": {} },
+  "J5-eudald-gimeno": { "Eudald": {}, "Gimeno": {} },
+  "J5-josep-elian": { "Josep": {}, "Elian": {} },
+  "J5-esteve-tiago": { "Esteve": {}, "Tiago": {} },
+  "J5-vandal-franco": { "Vandal": {}, "Franco": {} },
+  "J5-leandro-adriel": { "Leandro": {}, "Adriel": {} },
+
+  "J6-jordi-adriel": { "Jordi": {}, "Adriel": {} },
+  "J6-eudald-esteve": { "Eudald": {}, "Esteve": {} },
+  "J6-josep-tiago": { "Josep": {}, "Tiago": {} },
+  "J6-gimeno-elian": { "Gimeno": {}, "Elian": {} },
+  "J6-vandal-leandro": { "Vandal": {}, "Leandro": {} },
+  "J6-tes-franco": { "Tes": {}, "Franco": {} },
+
+  "J7-jordi-tiago": { "Jordi": {}, "Tiago": {} },
+  "J7-eudald-adriel": { "Eudald": {}, "Adriel": {} },
+  "J7-josep-leandro": { "Josep": {}, "Leandro": {} },
+  "J7-esteve-tes": { "Esteve": {}, "Tes": {} },
+  "J7-gimeno-vandal": { "Gimeno": {}, "Vandal": {} },
+  "J7-elian-franco": { "Elian": {}, "Franco": {} },
+
+  "J8-jordi-leandro": { "Jordi": {}, "Leandro": {} },
+  "J8-eudald-tiago": { "Eudald": {}, "Tiago": {} },
+  "J8-josep-vandal": { "Josep": {}, "Vandal": {} },
+  "J8-esteve-elian": { "Esteve": {}, "Elian": {} },
+  "J8-gimeno-adriel": { "Gimeno": {}, "Adriel": {} },
+  "J8-tes-franco": { "Tes": {}, "Franco": {} },
+
+  "J9-jordi-vandal": { "Jordi": {}, "Vandal": {} },
+  "J9-eudald-leandro": { "Eudald": {}, "Leandro": {} },
+  "J9-josep-adriel": { "Josep": {}, "Adriel": {} },
+  "J9-esteve-franco": { "Esteve": {}, "Franco": {} },
+  "J9-gimeno-tiago": { "Gimeno": {}, "Tiago": {} },
+  "J9-elian-tes": { "Elian": {}, "Tes": {} },
+
+  "J10-jordi-esteve": { "Jordi": {}, "Esteve": {} },
+  "J10-eudald-elian": { "Eudald": {}, "Elian": {} },
+  "J10-josep-gimeno": { "Josep": {}, "Gimeno": {} },
+  "J10-tes-adriel": { "Tes": {}, "Adriel": {} },
+  "J10-vandal-tiago": { "Vandal": {}, "Tiago": {} },
+  "J10-leandro-franco": { "Leandro": {}, "Franco": {} },
+
+  "J11-jordi-eudald": { "Jordi": {}, "Eudald": {} },
+  "J11-elian-josep": { "Elian": {}, "Josep": {} },
+  "J11-esteve-vandal": { "Esteve": {}, "Vandal": {} },
+  "J11-adriel-leandro": { "Adriel": {}, "Leandro": {} },
+  "J11-tiago-gimeno": { "Tiago": {}, "Gimeno": {} },
+  "J11-franco-tes": { "Franco": {}, "Tes": {} }
 }
