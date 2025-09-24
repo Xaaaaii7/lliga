@@ -23,26 +23,31 @@
   jornadas.sort((a,b)=> a.numero - b.numero);
 
   root.innerHTML = jornadas.map(j=>{
-    const partidos = (j.partidos||[]).map(p=>{
-      const marcador = (p.goles_local ?? '-') + ' - ' + (p.goles_visitante ?? '-');
-      const pid = p.id || `${j.numero}-${p.local}-${p.visitante}`;
+   const partidos = (j.partidos||[]).map(p=>{
+  const marcador = (p.goles_local ?? '-') + ' - ' + (p.goles_visitante ?? '-');
+  const pid = p.id || `${j.numero}-${p.local}-${p.visitante}`;
 
-      // Enlace a Twitch si existe
-      const streamHTML = p.stream
-        ? `<div style="margin-top:6px;text-align:center;">
-             <a href="${p.stream}" target="_blank" rel="noopener noreferrer">🔴 Ver directo</a>
-           </div>`
-        : '';
+  const fechaHora = (p.fecha && p.hora)
+    ? `<div class="fecha-hora">${fmtDate(p.fecha)} · ${p.hora}</div>`
+    : '';
 
-      return `
-        <div>
-          <button class="player-card partido-card" data-partido-id="${pid}" aria-label="Ver estadísticas">
-            <div><strong>${p.local}</strong> vs <strong>${p.visitante}</strong></div>
-            <div style="font-size:1.25rem;margin-top:6px">${marcador}</div>
-          </button>
-          ${streamHTML}
-        </div>`;
-    }).join('');
+  const streamHTML = p.stream
+    ? `<div style="margin-top:6px;text-align:center;">
+         <a href="${p.stream}" target="_blank" rel="noopener noreferrer">🔴 Ver directo</a>
+       </div>`
+    : '';
+
+  return `
+    <div>
+      <button class="player-card partido-card" data-partido-id="${pid}" aria-label="Ver estadísticas">
+        <div><strong>${p.local}</strong> vs <strong>${p.visitante}</strong></div>
+        ${fechaHora}
+        <div style="font-size:1.25rem;margin-top:6px">${marcador}</div>
+      </button>
+      ${streamHTML}
+    </div>`;
+}).join('');
+
 
     return `
       <section class="jornada">
