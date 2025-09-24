@@ -1,27 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Torneo — Jugadores</title>
-  <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Estadísticas</h1>
-  <nav id="main-nav"></nav>
-</header>
-
 <main class="container" id="jugadores">
   <section class="table-wrap">
     <h2>Pichichi — Equipos con más goles a favor</h2>
     <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
+      </tr></thead>
       <tbody id="tabla-pichichi"></tbody>
     </table>
   </section>
@@ -29,18 +12,51 @@
   <section class="table-wrap" style="margin-top:16px">
     <h2>Zamora — Equipos con menos goles en contra</h2>
     <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>DG</th>
+      </tr></thead>
       <tbody id="tabla-zamora"></tbody>
     </table>
   </section>
-</main>
 
-<footer class="site-footer">© Torneo entre amigos</footer>
-<script src="js/common.js"></script>
-<script src="js/jugadores.js"></script>
-</body>
-</html>
+  <!-- NUEVAS CLASIFICACIONES POR EQUIPO (desde partidos_stats.json) -->
+  <section class="table-wrap" style="margin-top:24px">
+    <h2>Posesión — media por partido (equipos)</h2>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ con datos</th><th>Posesión media</th>
+      </tr></thead>
+      <tbody id="tabla-posesion-eq"></tbody>
+    </table>
+  </section>
+
+  <section class="table-wrap" style="margin-top:16px">
+    <h2>Juego limpio — índice (más alto, mejor)</h2>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ con datos</th><th>Entradas</th><th>Faltas</th><th>Índice</th>
+      </tr></thead>
+      <tbody id="tabla-fairplay-eq"></tbody>
+    </table>
+  </section>
+
+  <section class="table-wrap" style="margin-top:16px">
+    <h2>Precisión de pase — media</h2>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ con datos</th><th>Pases</th><th>Completados</th><th>Accuracy</th>
+      </tr></thead>
+      <tbody id="tabla-pass-eq"></tbody>
+    </table>
+  </section>
+
+  <section class="table-wrap" style="margin-top:16px">
+    <h2>Precisión de tiro — media</h2>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Equipo</th><th>PJ con datos</th><th>Tiros</th><th>T a puerta</th><th>Goles</th><th>Índice</th>
+      </tr></thead>
+      <tbody id="tabla-shot-eq"></tbody>
+    </table>
+  </section>
+</main>
