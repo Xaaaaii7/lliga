@@ -2,7 +2,7 @@
   {
     "numero": 1,
     "partidos": [
-      { "id": "J1-jordi-adriel", "local": "Jordi", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00" },
+      { "id": "J1-jordi-adriel", "local": "Jordi", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00","goles_local":1,"goles_visitante":2 },
       { "id": "J1-franco-elian", "local": "Franco", "visitante": "Elian", "fecha": "2025-09-23", "hora": "20:30" },
       { "id": "J1-eudald-gimeno", "local": "Eudald", "visitante": "Gimeno", "fecha": "2025-09-24", "hora": "21:00" },
       { "id": "J1-vandal-leandro", "local": "Vandal", "visitante": "Leandro", "fecha": "2025-09-25", "hora": "21:30" },
