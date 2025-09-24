@@ -26,7 +26,19 @@
 
   // ---------- NUEVO: Rankings por EQUIPO desde partidos_stats.json ----------
   const statsIndex = await loadJSON('data/partidos_stats.json').catch(()=>null);
-  if (!statsIndex) return;
+
+  // 🛟 Si no hay datos de stats, muestra “No hay datos aún” en las 4 tablas y sal.
+  const showEmpty = (id, cols) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:#9fb3c8;padding:12px">No hay datos aún</td></tr>`;
+  };
+  if (!statsIndex || !Object.keys(statsIndex).length) {
+    showEmpty('tabla-posesion-eq', 4);
+    showEmpty('tabla-fairplay-eq', 6);
+    showEmpty('tabla-pass-eq',     6);
+    showEmpty('tabla-shot-eq',     7);
+    return;
+  }
 
   // Acumuladores por equipo
   const agg = new Map(); // nombreEquipo -> { pj:0,posSum:0,posCount:0,faltas:0,entradas:0,pases:0,completados:0,tiros:0,taPuerta:0,goles:0 }
@@ -45,7 +57,6 @@
     for (const eqName of Object.keys(porEquipo)) {
       const te = porEquipo[eqName] || {};
       const a = teamAgg(eqName);
-      // Si hay al menos un dato numérico relevante, contamos PJ con datos
       const hasAny = ['posesion','faltas','entradas','pases','pases_completados','tiros','tiros_a_puerta','goles']
         .some(k => te[k] !== undefined);
       if (hasAny) a.pj++;
@@ -72,22 +83,21 @@
   const shot   = t => t.tiros>0 ? ((t.taPuerta||0)+(t.goles||0)) / t.tiros : NaN;       // 0..>1
   const fmtPct = v => isNaN(v) ? '—' : (v*100).toFixed(1) + '%';
 
-  // Ordenaciones (Top 20 por si son muchos)
   const TOP = 20;
   const posesionTop = arr.filter(t=>!isNaN(posMed(t))).sort((a,b)=> posMed(b)-posMed(a)).slice(0,TOP);
   const fairTop     = arr.slice().sort((a,b)=> fair(b)-fair(a)).slice(0,TOP);
   const passTop     = arr.filter(t=>!isNaN(pass(t))).sort((a,b)=> pass(b)-pass(a)).slice(0,TOP);
   const shotTop     = arr.filter(t=>!isNaN(shot(t))).sort((a,b)=> shot(b)-shot(a)).slice(0,TOP);
 
-  // Render
   const rPos  = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${isNaN(posMed(t))?'—':posMed(t).toFixed(1)+'%'}</td></tr>`;
   const rFair = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><td>${fair(t).toFixed(2)}</td></tr>`;
   const rPass = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td></tr>`;
   const rShot = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.tiros}</td><td>${t.taPuerta}</td><td>${t.goles}</td><td>${fmtPct(shot(t))}</td></tr>`;
 
   const set = (id, rows) => { const el = document.getElementById(id); if (el) el.innerHTML = rows.join(''); };
-  set('tabla-posesion-eq', posesionTop.map(rPos));
-  set('tabla-fairplay-eq', fairTop.map(rFair));
-  set('tabla-pass-eq',     passTop.map(rPass));
-  set('tabla-shot-eq',     shotTop.map(rShot));
+  // Si no hay TOPs, pinta vacío en cada tabla
+  set('tabla-posesion-eq', posesionTop.length ? posesionTop.map(rPos) : [`<tr><td colspan="4" style="text-align:center;color:#9fb3c8;padding:12px">No hay datos aún</td></tr>`]);
+  set('tabla-fairplay-eq', fairTop.length     ? fairTop.map(rFair)   : [`<tr><td colspan="6" style="text-align:center;color:#9fb3c8;padding:12px">No hay datos aún</td></tr>`]);
+  set('tabla-pass-eq',     passTop.length     ? passTop.map(rPass)   : [`<tr><td colspan="6" style="text-align:center;color:#9fb3c8;padding:12px">No hay datos aún</td></tr>`]);
+  set('tabla-shot-eq',     shotTop.length     ? shotTop.map(rShot)   : [`<tr><td colspan="7" style="text-align:center;color:#9fb3c8;padding:12px">No hay datos aún</td></tr>`]);
 })();
