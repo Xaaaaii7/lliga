@@ -146,3 +146,9 @@ tbody tr:hover{background:#101521}
 .rules ul { padding-left: 20px; line-height: 1.6; }
 .rules li { margin-bottom: 6px; }
 
+.fecha-hora {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: #ccc;
+}
+
