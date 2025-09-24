@@ -1,35 +1,33 @@
 (async () => {
-  const setHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  const need = id => document.getElementById(id);
+  const setHTML = (id, html) => { const el = need(id); if (el) el.innerHTML = html; };
   const emptyRow = (cols, txt='No hay datos aún') => `<tr><td colspan="${cols}" style="text-align:center;color:#9fb3c8;padding:12px">${txt}</td></tr>`;
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').trim();
 
-  // ---------- PICHICHI / ZAMORA desde resultados.json ----------
+  // ——— PICHICHI / ZAMORA (desde resultados.json) ———
   let jornadas = [];
   try { jornadas = await loadJSON('data/resultados.json'); }
-  catch { jornadas = []; }
+  catch (e) { console.warn('[jugadores] No se pudo cargar resultados.json', e); jornadas = []; }
 
   const teams = new Map(); // norm -> {nombre,pj,gf,gc}
-  const getTeam = name => {
-    const k = norm(name);
-    if (!teams.has(k)) teams.set(k, { nombre:name, pj:0, gf:0, gc:0 });
-    return teams.get(k);
-  };
+  const getTeam = name => { const k = norm(name); if (!teams.has(k)) teams.set(k, { nombre:name, pj:0, gf:0, gc:0 }); return teams.get(k); };
 
   if (Array.isArray(jornadas)) {
     for (const j of jornadas) for (const p of (j?.partidos||[])) {
       if (!p?.local || !p?.visitante) continue;
-      // asegúralos en tablas aunque no haya marcador
+      // asegurar presencia
       const L = getTeam(p.local), V = getTeam(p.visitante);
       const gl = Number.isFinite(+p?.goles_local) ? +p.goles_local : null;
       const gv = Number.isFinite(+p?.goles_visitante) ? +p.goles_visitante : null;
       if (gl === null || gv === null) continue; // pendiente
       L.pj++; V.pj++; L.gf += gl; L.gc += gv; V.gf += gv; V.gc += gl;
     }
+  } else {
+    console.warn('[jugadores] resultados.json no es un array');
   }
 
   const dg = t => t.gf - t.gc;
   const equiposArr = Array.from(teams.values());
-
   if (equiposArr.length) {
     const pichichiEq = equiposArr.slice().sort((a,b)=> b.gf - a.gf || (dg(b)-dg(a)) || (a.gc-b.gc) || a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'}));
     const zamoraEq   = equiposArr.slice().sort((a,b)=> a.gc - b.gc || (dg(b)-dg(a)) || (b.gf-a.gf) || a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'}));
@@ -41,21 +39,21 @@
     setHTML('tabla-zamora',   emptyRow(6));
   }
 
-  // ---------- NUEVAS CLASIFICACIONES por EQUIPO desde partidos_stats.json ----------
-  let statsIndex = null;
+  // ——— CLASIFICACIONES extra por EQUIPO (desde partidos_stats.json) ———
+  let statsIndex = {};
   try { statsIndex = await loadJSON('data/partidos_stats.json'); }
-  catch { statsIndex = null; }
+  catch (e) { console.warn('[jugadores] No se pudo cargar partidos_stats.json', e); statsIndex = {}; }
 
-  if (!statsIndex || !Object.keys(statsIndex).length) {
+  // Si no hay nada, pinta “vacío” y termina
+  if (!statsIndex || typeof statsIndex !== 'object' || !Object.keys(statsIndex).length) {
     setHTML('tabla-posesion-eq', emptyRow(4));
     setHTML('tabla-fairplay-eq', emptyRow(6));
     setHTML('tabla-pass-eq',     emptyRow(6));
     setHTML('tabla-shot-eq',     emptyRow(7));
-    return; // nada más que hacer
+    return;
   }
 
-  // Acumuladores
-  const agg = new Map(); // equipo -> stats
+  const agg = new Map(); // equipo -> stats acumuladas
   const teamAgg = name => {
     if (!agg.has(name)) agg.set(name, { nombre:name, pj:0, posSum:0, posCount:0, faltas:0, entradas:0, pases:0, completados:0, tiros:0, taPuerta:0, goles:0 });
     return agg.get(name);
@@ -67,12 +65,12 @@
   const addNum = (o,k,v) => { o[k] += (Number.isFinite(+v) ? +v : 0); };
 
   for (const mid of Object.keys(statsIndex)) {
-    const porEquipo = statsIndex[mid] || {};
+    const porEquipo = statsIndex[mid];
+    if (!porEquipo || typeof porEquipo !== 'object') continue;
     for (const eq of Object.keys(porEquipo)) {
       const te = porEquipo[eq] || {};
       const a = teamAgg(eq);
 
-      // ¿hay algún dato?
       const hasAny = ['posesion','faltas','entradas','pases','pases_completados','tiros','tiros_a_puerta','goles'].some(k => te[k] !== undefined);
       if (hasAny) a.pj++;
 
