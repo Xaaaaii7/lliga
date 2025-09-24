@@ -2,122 +2,144 @@
   {
     "numero": 1,
     "partidos": [
-      { "id": "J1-jordi-adriel", "local": "Jordi", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00","goles_local":1,"goles_visitante":2 },
-      { "id": "J1-franco-elian", "local": "Franco", "visitante": "Elian", "fecha": "2025-09-23", "hora": "20:30" },
-      { "id": "J1-eudald-gimeno", "local": "Eudald", "visitante": "Gimeno", "fecha": "2025-09-24", "hora": "21:00" },
-      { "id": "J1-vandal-leandro", "local": "Vandal", "visitante": "Leandro", "fecha": "2025-09-25", "hora": "21:30" },
-      { "id": "J1-josep-esteve", "local": "Josep", "visitante": "Esteve", "fecha": "2025-09-26", "hora": "22:00" },
-      { "id": "J1-tes-tiago", "local": "Tes", "visitante": "Tiago", "fecha": "2025-09-28", "hora": "22:30" }
+      { "id": "J1-adriel-gimeno", "local": "Adriel", "visitante": "Gimeno", "fecha": "2025-09-22", "hora": "20:00" },
+      { "id": "J1-elian-leandro", "local": "Elian", "visitante": "Leandro", "fecha": "2025-09-23", "hora": "20:30" },
+      { "id": "J1-esteve-tes", "local": "Esteve", "visitante": "Tes", "fecha": "2025-09-24", "hora": "21:00" },
+      { "id": "J1-franco-josep", "local": "Franco", "visitante": "Josep", "fecha": "2025-09-25", "hora": "21:30" },
+      { "id": "J1-jordi-vandal", "local": "Jordi", "visitante": "Vandal", "fecha": "2025-09-26", "hora": "22:00" },
+      { "id": "J1-joel-eudald", "local": "Joel", "visitante": "Eudald", "fecha": "2025-09-28", "hora": "22:30" }
     ]
   },
   {
     "numero": 2,
     "partidos": [
-      { "id": "J2-adriel-elian", "local": "Adriel", "visitante": "Elian", "fecha": "2025-09-29", "hora": "20:45" },
-      { "id": "J2-jordi-gimeno", "local": "Jordi", "visitante": "Gimeno", "fecha": "2025-09-30", "hora": "21:15" },
-      { "id": "J2-franco-leandro", "local": "Franco", "visitante": "Leandro", "fecha": "2025-10-01", "hora": "22:00" },
-      { "id": "J2-eudald-esteve", "local": "Eudald", "visitante": "Esteve", "fecha": "2025-10-02", "hora": "22:30" },
-      { "id": "J2-vandal-tes", "local": "Vandal", "visitante": "Tes", "fecha": "2025-10-03", "hora": "23:15" },
-      { "id": "J2-josep-tiago", "local": "Josep", "visitante": "Tiago", "fecha": "2025-10-05", "hora": "20:00" }
+      { "id": "J2-gimeno-elian", "local": "Gimeno", "visitante": "Elian", "fecha": "2025-09-29", "hora": "20:45" },
+      { "id": "J2-leandro-esteve", "local": "Leandro", "visitante": "Esteve", "fecha": "2025-09-30", "hora": "21:15" },
+      { "id": "J2-tes-franco", "local": "Tes", "visitante": "Franco", "fecha": "2025-10-01", "hora": "22:00" },
+      { "id": "J2-josep-jordi", "local": "Josep", "visitante": "Jordi", "fecha": "2025-10-02", "hora": "22:30" },
+      { "id": "J2-vandal-joel", "local": "Vandal", "visitante": "Joel", "fecha": "2025-10-03", "hora": "23:15" },
+      { "id": "J2-eudald-adriel", "local": "Eudald", "visitante": "Adriel", "fecha": "2025-10-05", "hora": "20:00" }
     ]
   },
   {
     "numero": 3,
     "partidos": [
-      { "id": "J3-elian-gimeno", "local": "Elian", "visitante": "Gimeno", "fecha": "2025-10-06", "hora": "20:15" },
-      { "id": "J3-adriel-leandro", "local": "Adriel", "visitante": "Leandro", "fecha": "2025-10-07", "hora": "21:45" },
-      { "id": "J3-jordi-esteve", "local": "Jordi", "visitante": "Esteve", "fecha": "2025-10-08", "hora": "22:15" },
-      { "id": "J3-franco-tes", "local": "Franco", "visitante": "Tes", "fecha": "2025-10-09", "hora": "22:45" },
-      { "id": "J3-eudald-josep", "local": "Eudald", "visitante": "Josep", "fecha": "2025-10-10", "hora": "23:15" },
-      { "id": "J3-vandal-tiago", "local": "Vandal", "visitante": "Tiago", "fecha": "2025-10-12", "hora": "20:30" }
+      { "id": "J3-elian-leandro", "local": "Elian", "visitante": "Leandro", "fecha": "2025-10-06", "hora": "20:15" },
+      { "id": "J3-esteve-gimeno", "local": "Esteve", "visitante": "Gimeno", "fecha": "2025-10-07", "hora": "21:45" },
+      { "id": "J3-franco-vandal", "local": "Franco", "visitante": "Vandal", "fecha": "2025-10-08", "hora": "22:15" },
+      { "id": "J3-jordi-eudald", "local": "Jordi", "visitante": "Eudald", "fecha": "2025-10-09", "hora": "22:45" },
+      { "id": "J3-joel-josep", "local": "Joel", "visitante": "Josep", "fecha": "2025-10-10", "hora": "23:15" },
+      { "id": "J3-adriel-tes", "local": "Adriel", "visitante": "Tes", "fecha": "2025-10-12", "hora": "20:30" }
     ]
   },
   {
     "numero": 4,
     "partidos": [
-      { "id": "J4-gimeno-leandro", "local": "Gimeno", "visitante": "Leandro", "fecha": "2025-10-13", "hora": "20:00" },
-      { "id": "J4-elian-esteve", "local": "Elian", "visitante": "Esteve", "fecha": "2025-10-14", "hora": "20:30" },
-      { "id": "J4-adriel-tes", "local": "Adriel", "visitante": "Tes", "fecha": "2025-10-15", "hora": "21:00" },
-      { "id": "J4-jordi-josep", "local": "Jordi", "visitante": "Josep", "fecha": "2025-10-16", "hora": "21:30" },
-      { "id": "J4-franco-vandal", "local": "Franco", "visitante": "Vandal", "fecha": "2025-10-17", "hora": "22:00" },
-      { "id": "J4-eudald-tiago", "local": "Eudald", "visitante": "Tiago", "fecha": "2025-10-19", "hora": "22:30" }
+      { "id": "J4-leandro-gimeno", "local": "Leandro", "visitante": "Gimeno", "fecha": "2025-10-13", "hora": "20:00" },
+      { "id": "J4-esteve-elian", "local": "Esteve", "visitante": "Elian", "fecha": "2025-10-14", "hora": "20:30" },
+      { "id": "J4-franco-joel", "local": "Franco", "visitante": "Joel", "fecha": "2025-10-15", "hora": "21:00" },
+      { "id": "J4-jordi-adriel", "local": "Jordi", "visitante": "Adriel", "fecha": "2025-10-16", "hora": "21:30" },
+      { "id": "J4-vandal-tes", "local": "Vandal", "visitante": "Tes", "fecha": "2025-10-17", "hora": "22:00" },
+      { "id": "J4-eudald-josep", "local": "Eudald", "visitante": "Josep", "fecha": "2025-10-19", "hora": "22:30" }
     ]
   },
   {
     "numero": 5,
     "partidos": [
-      { "id": "J5-leandro-esteve", "local": "Leandro", "visitante": "Esteve", "fecha": "2025-10-20", "hora": "20:45" },
-      { "id": "J5-gimeno-tes", "local": "Gimeno", "visitante": "Tes", "fecha": "2025-10-21", "hora": "21:15" },
-      { "id": "J5-elian-josep", "local": "Elian", "visitante": "Josep", "fecha": "2025-10-22", "hora": "21:45" },
-      { "id": "J5-adriel-vandal", "local": "Adriel", "visitante": "Vandal", "fecha": "2025-10-23", "hora": "22:15" },
-      { "id": "J5-jordi-eudald", "local": "Jordi", "visitante": "Eudald", "fecha": "2025-10-24", "hora": "22:45" },
-      { "id": "J5-franco-tiago", "local": "Franco", "visitante": "Tiago", "fecha": "2025-10-26", "hora": "23:15" }
+      { "id": "J5-gimeno-esteve", "local": "Gimeno", "visitante": "Esteve", "fecha": "2025-10-20", "hora": "20:45" },
+      { "id": "J5-elian-franco", "local": "Elian", "visitante": "Franco", "fecha": "2025-10-21", "hora": "21:15" },
+      { "id": "J5-leandro-jordi", "local": "Leandro", "visitante": "Jordi", "fecha": "2025-10-22", "hora": "21:45" },
+      { "id": "J5-tes-joel", "local": "Tes", "visitante": "Joel", "fecha": "2025-10-23", "hora": "22:15" },
+      { "id": "J5-josep-adriel", "local": "Josep", "visitante": "Adriel", "fecha": "2025-10-24", "hora": "22:45" },
+      { "id": "J5-vandal-eudald", "local": "Vandal", "visitante": "Eudald", "fecha": "2025-10-26", "hora": "23:15" }
     ]
   },
   {
     "numero": 6,
     "partidos": [
-      { "id": "J6-esteve-tes", "local": "Esteve", "visitante": "Tes", "fecha": "2025-10-27", "hora": "20:00" },
-      { "id": "J6-leandro-josep", "local": "Leandro", "visitante": "Josep", "fecha": "2025-10-28", "hora": "20:30" },
-      { "id": "J6-gimeno-vandal", "local": "Gimeno", "visitante": "Vandal", "fecha": "2025-10-29", "hora": "21:00" },
-      { "id": "J6-elian-eudald", "local": "Elian", "visitante": "Eudald", "fecha": "2025-10-30", "hora": "21:30" },
-      { "id": "J6-adriel-franco", "local": "Adriel", "visitante": "Franco", "fecha": "2025-10-31", "hora": "22:00" },
-      { "id": "J6-jordi-tiago", "local": "Jordi", "visitante": "Tiago", "fecha": "2025-11-02", "hora": "22:30" }
+      { "id": "J6-esteve-franco", "local": "Esteve", "visitante": "Franco", "fecha": "2025-10-27", "hora": "20:00" },
+      { "id": "J6-gimeno-jordi", "local": "Gimeno", "visitante": "Jordi", "fecha": "2025-10-28", "hora": "20:30" },
+      { "id": "J6-elian-joel", "local": "Elian", "visitante": "Joel", "fecha": "2025-10-29", "hora": "21:00" },
+      { "id": "J6-leandro-adriel", "local": "Leandro", "visitante": "Adriel", "fecha": "2025-10-30", "hora": "21:30" },
+      { "id": "J6-tes-eudald", "local": "Tes", "visitante": "Eudald", "fecha": "2025-10-31", "hora": "22:00" },
+      { "id": "J6-josep-vandal", "local": "Josep", "visitante": "Vandal", "fecha": "2025-11-02", "hora": "22:30" }
     ]
   },
   {
     "numero": 7,
     "partidos": [
-      { "id": "J7-tes-josep", "local": "Tes", "visitante": "Josep", "fecha": "2025-11-03", "hora": "20:45" },
-      { "id": "J7-esteve-vandal", "local": "Esteve", "visitante": "Vandal", "fecha": "2025-11-04", "hora": "21:15" },
-      { "id": "J7-leandro-eudald", "local": "Leandro", "visitante": "Eudald", "fecha": "2025-11-05", "hora": "21:45" },
-      { "id": "J7-gimeno-franco", "local": "Gimeno", "visitante": "Franco", "fecha": "2025-11-06", "hora": "22:15" },
-      { "id": "J7-elian-jordi", "local": "Elian", "visitante": "Jordi", "fecha": "2025-11-07", "hora": "22:45" },
-      { "id": "J7-adriel-tiago", "local": "Adriel", "visitante": "Tiago", "fecha": "2025-11-09", "hora": "23:15" }
+      { "id": "J7-franco-gimeno", "local": "Franco", "visitante": "Gimeno", "fecha": "2025-11-03", "hora": "20:45" },
+      { "id": "J7-jordi-elian", "local": "Jordi", "visitante": "Elian", "fecha": "2025-11-04", "hora": "21:15" },
+      { "id": "J7-joel-leandro", "local": "Joel", "visitante": "Leandro", "fecha": "2025-11-05", "hora": "21:45" },
+      { "id": "J7-adriel-esteve", "local": "Adriel", "visitante": "Esteve", "fecha": "2025-11-06", "hora": "22:15" },
+      { "id": "J7-eudald-vandal", "local": "Eudald", "visitante": "Vandal", "fecha": "2025-11-07", "hora": "22:45" },
+      { "id": "J7-tes-josep", "local": "Tes", "visitante": "Josep", "fecha": "2025-11-09", "hora": "23:15" }
     ]
   },
   {
     "numero": 8,
     "partidos": [
-      { "id": "J8-josep-vandal", "local": "Josep", "visitante": "Vandal", "fecha": "2025-11-10", "hora": "20:00" },
-      { "id": "J8-tes-eudald", "local": "Tes", "visitante": "Eudald", "fecha": "2025-11-11", "hora": "20:30" },
-      { "id": "J8-esteve-franco", "local": "Esteve", "visitante": "Franco", "fecha": "2025-11-12", "hora": "21:00" },
-      { "id": "J8-leandro-jordi", "local": "Leandro", "visitante": "Jordi", "fecha": "2025-11-13", "hora": "21:30" },
-      { "id": "J8-gimeno-adriel", "local": "Gimeno", "visitante": "Adriel", "fecha": "2025-11-14", "hora": "22:00" },
-      { "id": "J8-elian-tiago", "local": "Elian", "visitante": "Tiago", "fecha": "2025-11-16", "hora": "22:30" }
+      { "id": "J8-gimeno-joel", "local": "Gimeno", "visitante": "Joel", "fecha": "2025-11-10", "hora": "20:00" },
+      { "id": "J8-elian-adriel", "local": "Elian", "visitante": "Adriel", "fecha": "2025-11-11", "hora": "20:30" },
+      { "id": "J8-jordi-tes", "local": "Jordi", "visitante": "Tes", "fecha": "2025-11-12", "hora": "21:00" },
+      { "id": "J8-franco-vandal", "local": "Franco", "visitante": "Vandal", "fecha": "2025-11-13", "hora": "21:30" },
+      { "id": "J8-leandro-josep", "local": "Leandro", "visitante": "Josep", "fecha": "2025-11-14", "hora": "22:00" },
+      { "id": "J8-esteve-eudald", "local": "Esteve", "visitante": "Eudald", "fecha": "2025-11-16", "hora": "22:30" }
     ]
   },
   {
     "numero": 9,
     "partidos": [
-      { "id": "J9-vandal-eudald", "local": "Vandal", "visitante": "Eudald", "fecha": "2025-11-17", "hora": "20:45" },
-      { "id": "J9-josep-franco", "local": "Josep", "visitante": "Franco", "fecha": "2025-11-18", "hora": "21:15" },
-      { "id": "J9-tes-jordi", "local": "Tes", "visitante": "Jordi", "fecha": "2025-11-19", "hora": "21:45" },
-      { "id": "J9-esteve-adriel", "local": "Esteve", "visitante": "Adriel", "fecha": "2025-11-20", "hora": "22:15" },
-      { "id": "J9-leandro-elian", "local": "Leandro", "visitante": "Elian", "fecha": "2025-11-21", "hora": "22:45" },
-      { "id": "J9-gimeno-tiago", "local": "Gimeno", "visitante": "Tiago", "fecha": "2025-11-23", "hora": "23:15" }
+      { "id": "J9-joel-adriel", "local": "Joel", "visitante": "Adriel", "fecha": "2025-11-17", "hora": "20:45" },
+      { "id": "J9-gimeno-tes", "local": "Gimeno", "visitante": "Tes", "fecha": "2025-11-18", "hora": "21:15" },
+      { "id": "J9-elian-vandal", "local": "Elian", "visitante": "Vandal", "fecha": "2025-11-19", "hora": "21:45" },
+      { "id": "J9-jordi-josep", "local": "Jordi", "visitante": "Josep", "fecha": "2025-11-20", "hora": "22:15" },
+      { "id": "J9-franco-eudald", "local": "Franco", "visitante": "Eudald", "fecha": "2025-11-21", "hora": "22:45" },
+      { "id": "J9-leandro-esteve", "local": "Leandro", "visitante": "Esteve", "fecha": "2025-11-23", "hora": "23:15" }
     ]
   },
   {
     "numero": 10,
     "partidos": [
-      { "id": "J10-eudald-franco", "local": "Eudald", "visitante": "Franco", "fecha": "2025-11-24", "hora": "20:00" },
-      { "id": "J10-vandal-jordi", "local": "Vandal", "visitante": "Jordi", "fecha": "2025-11-25", "hora": "20:30" },
-      { "id": "J10-josep-adriel", "local": "Josep", "visitante": "Adriel", "fecha": "2025-11-26", "hora": "21:00" },
-      { "id": "J10-tes-elian", "local": "Tes", "visitante": "Elian", "fecha": "2025-11-27", "hora": "21:30" },
-      { "id": "J10-esteve-gimeno", "local": "Esteve", "visitante": "Gimeno", "fecha": "2025-11-28", "hora": "22:00" },
-      { "id": "J10-leandro-tiago", "local": "Leandro", "visitante": "Tiago", "fecha": "2025-11-30", "hora": "22:30" }
+      { "id": "J10-adriel-tes", "local": "Adriel", "visitante": "Tes", "fecha": "2025-11-24", "hora": "20:00" },
+      { "id": "J10-joel-vandal", "local": "Joel", "visitante": "Vandal", "fecha": "2025-11-25", "hora": "20:30" },
+      { "id": "J10-gimeno-josep", "local": "Gimeno", "visitante": "Josep", "fecha": "2025-11-26", "hora": "21:00" },
+      { "id": "J10-elian-eudald", "local": "Elian", "visitante": "Eudald", "fecha": "2025-11-27", "hora": "21:30" },
+      { "id": "J10-jordi-esteve", "local": "Jordi", "visitante": "Esteve", "fecha": "2025-11-28", "hora": "22:00" },
+      { "id": "J10-franco-leandro", "local": "Franco", "visitante": "Leandro", "fecha": "2025-11-30", "hora": "22:30" }
     ]
   },
   {
     "numero": 11,
     "partidos": [
-      { "id": "J11-franco-jordi", "local": "Franco", "visitante": "Jordi", "fecha": "2025-12-01", "hora": "20:45" },
-      { "id": "J11-eudald-adriel", "local": "Eudald", "visitante": "Adriel", "fecha": "2025-12-02", "hora": "21:15" },
-      { "id": "J11-vandal-elian", "local": "Vandal", "visitante": "Elian", "fecha": "2025-12-03", "hora": "21:45" },
-      { "id": "J11-josep-gimeno", "local": "Josep", "visitante": "Gimeno", "fecha": "2025-12-04", "hora": "22:15" },
-      { "id": "J11-tes-leandro", "local": "Tes", "visitante": "Leandro", "fecha": "2025-12-05", "hora": "22:45" },
-      { "id": "J11-esteve-tiago", "local": "Esteve", "visitante": "Tiago", "fecha": "2025-12-07", "hora": "23:15" }
+      { "id": "J11-tes-vandal", "local": "Tes", "visitante": "Vandal", "fecha": "2025-12-01", "hora": "20:45" },
+      { "id": "J11-adriel-josep", "local": "Adriel", "visitante": "Josep", "fecha": "2025-12-02", "hora": "21:15" },
+      { "id": "J11-joel-eudald", "local": "Joel", "visitante": "Eudald", "fecha": "2025-12-03", "hora": "21:45" },
+      { "id": "J11-gimeno-esteve", "local": "Gimeno", "visitante": "Esteve", "fecha": "2025-12-04", "hora": "22:15" },
+      { "id": "J11-elian-leandro", "local": "Elian", "visitante": "Leandro", "fecha": "2025-12-05", "hora": "22:45" },
+      { "id": "J11-jordi-franco", "local": "Jordi", "visitante": "Franco", "fecha": "2025-12-07", "hora": "23:15" }
+    ]
+  },
+  {
+    "numero": 12,
+    "partidos": [
+      { "id": "J12-vandal-josep", "local": "Vandal", "visitante": "Josep", "fecha": "2025-12-08", "hora": "20:00" },
+      { "id": "J12-tes-eudald", "local": "Tes", "visitante": "Eudald", "fecha": "2025-12-09", "hora": "20:30" },
+      { "id": "J12-adriel-esteve", "local": "Adriel", "visitante": "Esteve", "fecha": "2025-12-10", "hora": "21:00" },
+      { "id": "J12-joel-leandro", "local": "Joel", "visitante": "Leandro", "fecha": "2025-12-11", "hora": "21:30" },
+      { "id": "J12-gimeno-franco", "local": "Gimeno", "visitante": "Franco", "fecha": "2025-12-12", "hora": "22:00" },
+      { "id": "J12-elian-jordi", "local": "Elian", "visitante": "Jordi", "fecha": "2025-12-14", "hora": "22:30" }
+    ]
+  },
+  {
+    "numero": 13,
+    "partidos": [
+      { "id": "J13-josep-eudald", "local": "Josep", "visitante": "Eudald", "fecha": "2025-12-15", "hora": "20:45" },
+      { "id": "J13-vandal-esteve", "local": "Vandal", "visitante": "Esteve", "fecha": "2025-12-16", "hora": "21:15" },
+      { "id": "J13-tes-leandro", "local": "Tes", "visitante": "Leandro", "fecha": "2025-12-17", "hora": "21:45" },
+      { "id": "J13-adriel-franco", "local": "Adriel", "visitante": "Franco", "fecha": "2025-12-18", "hora": "22:15" },
+      { "id": "J13-joel-jordi", "local": "Joel", "visitante": "Jordi", "fecha": "2025-12-19", "hora": "22:45" },
+      { "id": "J13-gimeno-elian", "local": "Gimeno", "visitante": "Elian", "fecha": "2025-12-21", "hora": "23:15" }
     ]
   }
 ]
