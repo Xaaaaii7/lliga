@@ -1,27 +1,27 @@
 {
   "J1-P1": {
-    "Eudald": {},
-    "Joel": {}
+    "Gimeno": {},
+    "Jordi": {}
   },
   "J1-P2": {
-    "Josep": {},
-    "Franco": {}
+    "Tes": {},
+    "Josep": {}
   },
   "J1-P3": {
-    "Gimeno": {},
-    "Leandro": {}
+    "Vandal": {},
+    "Eudald": {}
   },
   "J1-P4": {
-    "Tes": {},
-    "Tiago": {}
+    "Esteve": {},
+    "Joel": {}
   },
   "J1-P5": {
-    "Vandal": {},
-    "Adriel": {}
+    "Adriel": {},
+    "Franco": {}
   },
   "J1-P6": {
-    "Elian": {},
-    "Esteve": {}
+    "Tiago": {},
+    "Leandro": {}
   },
   "J2-P1": {
     "Jordi": {},
@@ -52,7 +52,7 @@
     "Franco": {}
   },
   "J3-P2": {
-    "Invitado": {},
+    "Joel": {},
     "Leandro": {}
   },
   "J3-P3": {
@@ -80,7 +80,7 @@
     "Tiago": {}
   },
   "J4-P3": {
-    "Invitado": {},
+    "Joel": {},
     "Adriel": {}
   },
   "J4-P4": {
@@ -108,7 +108,7 @@
     "Esteve": {}
   },
   "J5-P4": {
-    "Invitado": {},
+    "Joel": {},
     "Elian": {}
   },
   "J5-P5": {
@@ -136,7 +136,7 @@
     "Vandal": {}
   },
   "J6-P5": {
-    "Invitado": {},
+    "Joel": {},
     "Tes": {}
   },
   "J6-P6": {
@@ -164,7 +164,7 @@
     "Gimeno": {}
   },
   "J7-P6": {
-    "Invitado": {},
+    "Joel": {},
     "Josep": {}
   },
   "J8-P1": {
@@ -213,7 +213,7 @@
   },
   "J9-P6": {
     "Franco": {},
-    "Invitado": {}
+    "Joel": {}
   },
   "J10-P1": {
     "Jordi": {},
@@ -240,28 +240,28 @@
     "Elian": {}
   },
   "J11-P1": {
-    "Jordi": {},
-    "Gimeno": {}
+    "Eudald": {},
+    "Joel": {}
   },
   "J11-P2": {
-    "Tes": {},
-    "Josep": {}
-  },
-  "J11-P3": {
-    "Vandal": {},
-    "Eudald": {}
-  },
-  "J11-P4": {
-    "Esteve": {},
-    "Invitado": {}
-  },
-  "J11-P5": {
-    "Adriel": {},
+    "Josep": {},
     "Franco": {}
   },
-  "J11-P6": {
-    "Tiago": {},
+  "J11-P3": {
+    "Gimeno": {},
     "Leandro": {}
+  },
+  "J11-P4": {
+    "Tes": {},
+    "Tiago": {}
+  },
+  "J11-P5": {
+    "Vandal": {},
+    "Adriel": {}
+  },
+  "J11-P6": {
+    "Elian": {},
+    "Esteve": {}
   },
   "J12-P1": {
     "Jordi": {},
@@ -273,7 +273,7 @@
   },
   "J12-P3": {
     "Vandal": {},
-    "Invitado": {}
+    "Joel": {}
   },
   "J12-P4": {
     "Elian": {},
@@ -293,7 +293,7 @@
   },
   "J13-P2": {
     "Gimeno": {},
-    "Invitado": {}
+    "Joel": {}
   },
   "J13-P3": {
     "Tes": {},
