@@ -56,28 +56,30 @@
   };
 
   // 3) Recorre partidos y acumula SOLO si hay marcador numérico
-  for (const j of jornadas) {
-    for (const p of (j?.partidos || [])) {
-      if (!p?.local || !p?.visitante) continue;
-      const L = teamObj(p.local);
-      const V = teamObj(p.visitante);
+for (const j of jornadas) {
+  for (const p of (j?.partidos || [])) {
+    if (!p?.local || !p?.visitante) continue;
+    const L = teamObj(p.local);
+    const V = teamObj(p.visitante);
 
-      const gl = Number.isFinite(+p.goles_local) ? +p.goles_local : null;
-      const gv = Number.isFinite(+p.goles_visitante) ? +p.goles_visitante : null;
-      if (gl === null || gv === null) continue; // pendiente
+    // ✅ solo cuenta si son números (null/undefined = pendiente)
+    const isNum = v => typeof v === 'number' && Number.isFinite(v);
+    const gl = isNum(p.goles_local) ? p.goles_local : null;
+    const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
+    if (gl === null || gv === null) continue;
 
-      L.pj++; V.pj++;
-      L.gf += gl; L.gc += gv;
-      V.gf += gv; V.gc += gl;
+    L.pj++; V.pj++;
+    L.gf += gl; L.gc += gv;
+    V.gf += gv; V.gc += gl;
 
-      if (gl > gv) { L.g++; L.pts += 3; V.p++; }
-      else if (gl < gv) { V.g++; V.pts += 3; L.p++; }
-      else { L.e++; V.e++; L.pts++; V.pts++; }
+    if (gl > gv) { L.g++; L.pts += 3; V.p++; }
+    else if (gl < gv) { V.g++; V.pts += 3; L.p++; }
+    else { L.e++; V.e++; L.pts++; V.pts++; }
 
-      addH2H(p.local, p.visitante, gl, gv);
-      addH2H(p.visitante, p.local, gv, gl);
-    }
+    addH2H(p.local, p.visitante, gl, gv);
+    addH2H(p.visitante, p.local, gv, gl);
   }
+}
 
   const equipos = Array.from(teams.values());
   if (!equipos.length) return showMsg('No hay equipos.');
