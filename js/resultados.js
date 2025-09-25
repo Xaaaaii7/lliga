@@ -25,7 +25,7 @@
   root.innerHTML = jornadas.map(j=>{
    const partidos = (j.partidos||[]).map(p=>{
   const marcador = (p.goles_local ?? '-') + ' - ' + (p.goles_visitante ?? '-');
-  const pid = p.id || `${j.numero}-${p.local}-${p.visitante}`;
+   const pid = p.id || `J${j.numero}-P${idx+1}`;
 
   const fechaHora = (p.fecha && p.hora)
     ? `<div class="fecha-hora">${fmtDate(p.fecha)} · ${p.hora}</div>`
