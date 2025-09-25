@@ -5,16 +5,22 @@
   const teams = new Map(); // norm -> {nombre,pj,gf,gc}
   const getTeam = name => { const k = norm(name); if (!teams.has(k)) teams.set(k, { nombre:name, pj:0, gf:0, gc:0 }); return teams.get(k); };
 
-  if (Array.isArray(jornadas)) {
-    for (const j of jornadas) for (const p of (j.partidos||[])) {
-      if (!p.local || !p.visitante) continue;
-      const L = getTeam(p.local), V = getTeam(p.visitante);
-      const gl = Number.isFinite(+p.goles_local) ? +p.goles_local : null;
-      const gv = Number.isFinite(+p.goles_visitante) ? +p.goles_visitante : null;
-      if (gl === null || gv === null) continue;
-      L.pj++; V.pj++; L.gf += gl; L.gc += gv; V.gf += gv; V.gc += gl;
-    }
+if (Array.isArray(jornadas)) {
+  for (const j of jornadas) for (const p of (j.partidos||[])) {
+    if (!p.local || !p.visitante) continue;
+    const L = getTeam(p.local), V = getTeam(p.visitante);
+
+    // ✅ igual que arriba
+    const isNum = v => typeof v === 'number' && Number.isFinite(v);
+    const gl = isNum(p.goles_local) ? p.goles_local : null;
+    const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
+    if (gl === null || gv === null) continue;
+
+    L.pj++; V.pj++;
+    L.gf += gl; L.gc += gv;
+    V.gf += gv; V.gc += gl;
   }
+}
 
   const dg = t => t.gf - t.gc;
   const equiposArr = Array.from(teams.values());
