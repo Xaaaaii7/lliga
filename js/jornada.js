@@ -1,9 +1,10 @@
 (async () => {
-  const j = await loadJSON('data/jornada.json');
+  const jornadas = await loadJSON('data/jornada.json');
   const root = document.getElementById('jornada');
 
-  // Gol de la jornada
-  const golHTML = `
+  if (!Array.isArray(jornadas)) return;
+
+  root.innerHTML = jornadas.map(j => `
     <section>
       <h2>Gol de la jornada ${j.jornada}</h2>
       ${
@@ -11,7 +12,6 @@
           ? `<iframe class="video" src="https://www.youtube.com/embed/${j.gol_youtube}" allowfullscreen></iframe>`
           : '<p>Próximamente…</p>'
       }
-    </section>`;
-
-  root.innerHTML = golHTML;
+    </section>
+  `).join('');
 })();
