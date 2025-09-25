@@ -6,7 +6,7 @@
 
   root.innerHTML = jornadas.map(j => `
     <section>
-      <h2>Gol de la jornada ${j.jornada}</h2>
+      <h2>Goles de la jornada ${j.jornada}</h2>
       ${
         j.gol_youtube
           ? `<iframe class="video" src="https://www.youtube.com/embed/${j.gol_youtube}" allowfullscreen></iframe>`
