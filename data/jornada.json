@@ -1,19 +1,7 @@
-{
-  "jornada": 1,
-  "esquema": "4-4-2",
-  "alineacion": [
-    { "nombre": "Portero", "posicion": "POR", "fila": 5, "col": 3 },
-    { "nombre": "Lateral Izq", "posicion": "DEF", "fila": 4, "col": 1 },
-    { "nombre": "Central 1", "posicion": "DEF", "fila": 4, "col": 2 },
-    { "nombre": "Central 2", "posicion": "DEF", "fila": 4, "col": 3 },
-    { "nombre": "Lateral Der", "posicion": "DEF", "fila": 4, "col": 4 },
-    { "nombre": "Medio Izq", "posicion": "MED", "fila": 3, "col": 1 },
-    { "nombre": "Medio Centro 1", "posicion": "MED", "fila": 3, "col": 2 },
-    { "nombre": "Medio Centro 2", "posicion": "MED", "fila": 3, "col": 3 },
-    { "nombre": "Medio Der", "posicion": "MED", "fila": 3, "col": 4 },
-    { "nombre": "Delantero 1", "posicion": "DEL", "fila": 2, "col": 2 },
-    { "nombre": "Delantero 2", "posicion": "DEL", "fila": 2, "col": 3 }
-  ],
-  "gol_youtube": "dQw4w9WgXcQ",
-  "mej_jugador": { "nombre": "Jugador MVP", "equipo": "Equipo A", "motivo": "Gran actuación" }
-}
+[
+  {
+    "jornada": 1,
+    "gol_youtube": "abcd1234"
+  }
+]
+
