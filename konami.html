@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — IDs Konami</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .tools {display:flex; gap:8px; margin:12px 0; flex-wrap:wrap}
+    .tools button {padding:8px 12px; border-radius:8px; border:1px solid #345}
+    .ids-table {width:100%; border-collapse:collapse}
+    .ids-table th, .ids-table td {border-bottom:1px solid #2b3a4a; padding:8px}
+    .ids-table input {width:100%; padding:6px 8px; border-radius:6px; border:1px solid #345; background:#0b1620; color:#eee}
+    .muted {color:#9fb3c8}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>IDs de Usuario — Konami</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container">
+  <div class="tools">
+    <button id="add-row">Añadir fila</button>
+    <button id="download-json">Descargar cambios (JSON)</button>
+    <span class="muted">Consejo: importa este JSON al repo en <code>data/konami_ids.json</code>.</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="ids-table">
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>Jugador</th>
+          <th>ID Konami</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="ids-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer class="site-footer">© Torneo entre amigos</footer>
+<script src="js/common.js"></script>
+<script src="js/konami.js"></script>
+</body>
+</html>
