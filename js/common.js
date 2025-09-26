@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['resultados.html','Resultados'],
       ['jugadores.html','Jugadores'],
       ['jornada.html','Jornada'],
-      ['reglas.html','Reglas']  // 👈 añadido
+      ['reglas.html','Reglas'],
+      ['konami.html','Usuarios']// 👈 añadido
     ];
     nav.innerHTML = links.map(([href,label]) =>
       `<a href="${href}" data-href="${href}">${label}</a>`).join('');
