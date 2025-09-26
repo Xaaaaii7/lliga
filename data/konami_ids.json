@@ -1,0 +1,17 @@
+{
+  "jugadores": [
+    { "equipo": "Jordi",   "nombre": "Jordi",   "konami_id": null },
+    { "equipo": "Eudald",  "nombre": "Eudald",  "konami_id": "ASEV-564-046-026" },
+    { "equipo": "Josep",   "nombre": "Josep",   "konami_id": null },
+    { "equipo": "Gimeno",  "nombre": "Gimeno",  "konami_id": null },
+    { "equipo": "Tes",     "nombre": "Tes",     "konami_id": "ASDH-675-627-595" },
+    { "equipo": "Vandal",  "nombre": "Vandal",  "konami_id": null },
+    { "equipo": "Elian",   "nombre": "Elian",   "konami_id": null },
+    { "equipo": "Esteve",  "nombre": "Esteve",  "konami_id": null },
+    { "equipo": "Adriel",  "nombre": "Adriel",  "konami_id": null },
+    { "equipo": "Tiago",   "nombre": "Tiago",   "konami_id": null },
+    { "equipo": "Leandro", "nombre": "Leandro", "konami_id": null },
+    { "equipo": "Franco",  "nombre": "Franco",  "konami_id": null },
+    { "equipo": "Invitado","nombre": "Invitado","konami_id": null }
+  ]
+}
