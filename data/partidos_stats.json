@@ -16,8 +16,35 @@
     "Joel": {}
   },
   "J1-P5": {
-    "Adriel": {},
-    "Franco": {}
+    "Adriel": {
+"posesion": 44,
+    "tiros": 5,
+    "tiros_a_puerta": 2,
+    "goles": 1,
+    "faltas": 4,
+    "fueras_de_juego": 1,
+    "corners": 0,
+    "tiros_libres": 5,
+    "pases": 104,
+    "pases_completados": 75,
+    "centros": 1,
+    "pases_interceptados": 24,
+    "entradas": 5,
+    "paradas": 4},
+    "Franco": {"posesion": 56,
+    "tiros": 10,
+    "tiros_a_puerta": 6,
+    "goles": 3,
+    "faltas": 5,
+    "fueras_de_juego": 0,
+    "corners": 2,
+    "tiros_libres": 3,
+    "pases": 136,
+    "pases_completados": 108,
+    "centros": 4,
+    "pases_interceptados": 19,
+    "entradas": 4,
+    "paradas": 1}
   },
   "J1-P6": {
     "Tiago": {},
