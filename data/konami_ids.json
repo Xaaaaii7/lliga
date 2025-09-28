@@ -2,7 +2,7 @@
   "jugadores": [
     { "equipo": "Chelsea",   "nombre": "Jordi",   "konami_id": "ASKM-605-682-286" },
     { "equipo": "Villareal",  "nombre": "Eudald",  "konami_id": "ASEV-564-046-026" },
-    { "equipo": "Napoli",   "nombre": "Josep",   "konami_id": null },
+    { "equipo": "Napoli",   "nombre": "Josep",   "konami_id": "ASGF-396-501-895" },
     { "equipo": "Inter de Milan",  "nombre": "Gimeno",  "konami_id": null },
     { "equipo": "Dormunt",     "nombre": "Tes",     "konami_id": "ASDH-675-627-595" },
     { "equipo": "Tottenham",  "nombre": "Vandal",  "konami_id": null },
