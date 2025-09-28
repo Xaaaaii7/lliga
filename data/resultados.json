@@ -32,7 +32,7 @@
       },
       {
         "id": "J1-P4",
-        "local": "Esteve",
+        "local": "Elian",
         "visitante": "Joel",
         "fecha": "2025-10-04",
         "hora": "22:00",
@@ -91,7 +91,7 @@
       },
       {
         "id": "J2-P4",
-        "local": "Esteve",
+        "local": "Adriel",
         "visitante": "Eudald",
         "fecha": "2025-09-22",
         "hora": "20:00",
@@ -142,7 +142,7 @@
       {
         "id": "J3-P3",
         "local": "Eudald",
-        "visitante": "Adriel",
+        "visitante": "Josep",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -150,8 +150,8 @@
       },
       {
         "id": "J3-P4",
-        "local": "Josep",
-        "visitante": "Esteve",
+        "local": "Adriel",
+        "visitante": "Tiago",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -260,7 +260,7 @@
       {
         "id": "J5-P3",
         "local": "Franco",
-        "visitante": "Esteve",
+        "visitante": "Vandal",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -310,7 +310,7 @@
       {
         "id": "J6-P2",
         "local": "Tiago",
-        "visitante": "Esteve",
+        "visitante": "Gimeno",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -360,7 +360,7 @@
       {
         "id": "J7-P1",
         "local": "Jordi",
-        "visitante": "Esteve",
+        "visitante": "Eudald",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
