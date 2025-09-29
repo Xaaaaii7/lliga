@@ -614,7 +614,7 @@
       {
         "id": "J11-P3",
         "local": "Gimeno",
-        "visitante": "",
+        "visitante": "Leandro",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -648,19 +648,7 @@
         "goles_visitante": null
       }
     ]
-  },
-  {
-    "numero": 13,
-    "partidos": [
-      {
-        "id": "J13-P2",
-        "local": "Gimeno",
-        "visitante": "Joel",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      }
+  }
     ]
   }
 ]
