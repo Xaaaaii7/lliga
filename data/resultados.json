@@ -648,5 +648,28 @@
         "goles_visitante": null
       }
     ]
+  },
+    {
+    "numero": 12,
+    "partidos": [
+      {
+        "id": "J12-P1",
+        "local": "Gimeno",
+        "visitante": "Joel",
+        "fecha": "2025-09-22",
+        "hora": "20:00",
+        "goles_local": null,
+        "goles_visitante": null
+      },
+      {
+        "id": "J12-P2",
+        "local": "Elian",
+        "visitante": "Leandro",
+        "fecha": "2025-09-22",
+        "hora": "20:00",
+        "goles_local": null,
+        "goles_visitante": null
+      }
+    ]
   }
 ]
