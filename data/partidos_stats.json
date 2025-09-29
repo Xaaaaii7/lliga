@@ -51,291 +51,243 @@
     "Leandro": {}
   },
   "J2-P1": {
-    "Jordi": {},
+    "Gimeno": {},
     "Tes": {}
   },
   "J2-P2": {
     "Vandal": {},
-    "Gimeno": {}
+    "Jordi": {}
   },
   "J2-P3": {
     "Elian": {},
     "Josep": {}
   },
   "J2-P4": {
-    "Esteve": {},
+    "Adriel": {},
     "Eudald": {}
   },
   "J2-P5": {
     "Tiago": {},
-    "Josep": {}
+    "Joel": {}
   },
   "J2-P6": {
     "Leandro": {},
     "Franco": {}
   },
   "J3-P1": {
-    "Jordi": {},
-    "Franco": {}
+    "Gimeno": {},
+    "Eudald": {}
   },
   "J3-P2": {
-    "Joel": {},
-    "Leandro": {}
+    "Josep": {},
+    "Joel": {}
   },
   "J3-P3": {
-    "Eudald": {},
-    "Adriel": {}
+    "Jordi": {},
+    "Franco": {}
   },
   "J3-P4": {
-    "Josep": {},
-    "Esteve": {}
+    "Tes": {},
+    "Leandro": {}
   },
   "J3-P5": {
-    "Gimeno": {},
-    "Elian": {}
+    "Vandal": {},
+    "Tiago": {}
   },
   "J3-P6": {
-    "Tes": {},
-    "Vandal": {}
+    "Elian": {},
+    "Adriel": {}
   },
   "J4-P1": {
-    "Jordi": {},
-    "Leandro": {}
+    "Gimeno": {},
+    "Joel": {}
   },
   "J4-P2": {
-    "Franco": {},
-    "Tiago": {}
+    "Eudald": {},
+    "Franco": {}
   },
   "J4-P3": {
-    "Joel": {},
-    "Adriel": {}
+    "Josep": {},
+    "Leandro": {}
   },
   "J4-P4": {
-    "Eudald": {},
-    "Elian": {}
+    "Jordi": {},
+    "Tiago": {}
   },
   "J4-P5": {
-    "Josep": {},
-    "Vandal": {}
+    "Tes": {},
+    "Adriel": {}
   },
   "J4-P6": {
-    "Gimeno": {},
-    "Tes": {}
+    "Vandal": {},
+    "Elian": {}
   },
   "J5-P1": {
-    "Jordi": {},
-    "Tiago": {}
+    "Gimeno": {},
+    "Franco": {}
   },
   "J5-P2": {
-    "Leandro": {},
-    "Adriel": {}
+    "Joel": {},
+    "Leandro": {}
   },
   "J5-P3": {
-    "Franco": {},
-    "Esteve": {}
+    "Eudald": {},
+    "Tiago": {}
   },
   "J5-P4": {
-    "Joel": {},
-    "Elian": {}
+    "Josep": {},
+    "Adriel": {}
   },
   "J5-P5": {
-    "Eudald": {},
-    "Tes": {}
+    "Jordi": {},
+    "Elian": {}
   },
   "J5-P6": {
-    "Josep": {},
-    "Gimeno": {}
+    "Tes": {},
+    "Vandal": {}
   },
   "J6-P1": {
-    "Jordi": {},
-    "Adriel": {}
+    "Gimeno": {},
+    "Leandro": {}
   },
   "J6-P2": {
-    "Tiago": {},
-    "Esteve": {}
+    "Franco": {},
+    "Tiago": {}
   },
   "J6-P3": {
-    "Leandro": {},
-    "Elian": {}
+    "Joel": {},
+    "Adriel": {}
   },
   "J6-P4": {
-    "Franco": {},
-    "Vandal": {}
+    "Eudald": {},
+    "Elian": {}
   },
   "J6-P5": {
-    "Joel": {},
-    "Tes": {}
+    "Josep": {},
+    "Vandal": {}
   },
   "J6-P6": {
-    "Eudald": {},
-    "Josep": {}
+    "Jordi": {},
+    "Tes": {}
   },
   "J7-P1": {
-    "Jordi": {},
-    "Esteve": {}
+    "Gimeno": {},
+    "Tiago": {}
   },
   "J7-P2": {
-    "Adriel": {},
-    "Elian": {}
+    "Leandro": {},
+    "Adriel": {}
   },
   "J7-P3": {
-    "Tiago": {},
-    "Vandal": {}
+    "Franco": {},
+    "Elian": {}
   },
   "J7-P4": {
-    "Leandro": {},
-    "Tes": {}
+    "Joel": {},
+    "Vandal": {}
   },
   "J7-P5": {
-    "Franco": {},
-    "Gimeno": {}
+    "Eudald": {},
+    "Tes": {}
   },
   "J7-P6": {
-    "Joel": {},
-    "Josep": {}
+    "Josep": {},
+    "Jordi": {}
   },
   "J8-P1": {
-    "Jordi": {},
-    "Elian": {}
+    "Gimeno": {},
+    "Adriel": {}
   },
   "J8-P2": {
-    "Esteve": {},
-    "Vandal": {}
-  },
-  "J8-P3": {
-    "Adriel": {},
-    "Tes": {}
-  },
-  "J8-P4": {
     "Tiago": {},
-    "Gimeno": {}
-  },
-  "J8-P5": {
-    "Leandro": {},
-    "Josep": {}
-  },
-  "J8-P6": {
-    "Franco": {},
-    "Eudald": {}
-  },
-  "J9-P1": {
-    "Jordi": {},
-    "Vandal": {}
-  },
-  "J9-P2": {
-    "Elian": {},
-    "Tes": {}
-  },
-  "J9-P3": {
-    "Esteve": {},
-    "Gimeno": {}
-  },
-  "J9-P4": {
-    "Adriel": {},
-    "Josep": {}
-  },
-  "J9-P5": {
-    "Tiago": {},
-    "Eudald": {}
-  },
-  "J9-P6": {
-    "Franco": {},
-    "Joel": {}
-  },
-  "J10-P1": {
-    "Jordi": {},
-    "Joel": {}
-  },
-  "J10-P2": {
-    "Eudald": {},
-    "Leandro": {}
-  },
-  "J10-P3": {
-    "Josep": {},
-    "Tiago": {}
-  },
-  "J10-P4": {
-    "Gimeno": {},
-    "Adriel": {}
-  },
-  "J10-P5": {
-    "Tes": {},
-    "Esteve": {}
-  },
-  "J10-P6": {
-    "Vandal": {},
     "Elian": {}
   },
-  "J11-P1": {
+  "J8-P3": {
+    "Leandro": {},
+    "Vandal": {}
+  },
+  "J8-P4": {
+    "Franco": {},
+    "Tes": {}
+  },
+  "J8-P5": {
+    "Joel": {},
+    "Jordi": {}
+  },
+  "J8-P6": {
     "Eudald": {},
-    "Joel": {}
-  },
-  "J11-P2": {
-    "Josep": {},
-    "Franco": {}
-  },
-  "J11-P3": {
-    "Gimeno": {},
-    "Leandro": {}
-  },
-  "J11-P4": {
-    "Tes": {},
-    "Tiago": {}
-  },
-  "J11-P5": {
-    "Vandal": {},
-    "Adriel": {}
-  },
-  "J11-P6": {
-    "Elian": {},
-    "Esteve": {}
-  },
-  "J12-P1": {
-    "Jordi": {},
     "Josep": {}
   },
-  "J12-P2": {
+  "J9-P1": {
     "Gimeno": {},
+    "Elian": {}
+  },
+  "J9-P2": {
+    "Adriel": {},
+    "Vandal": {}
+  },
+  "J9-P3": {
+    "Tiago": {},
+    "Tes": {}
+  },
+  "J9-P4": {
+    "Leandro": {},
+    "Jordi": {}
+  },
+  "J9-P5": {
+    "Franco": {},
+    "Josep": {}
+  },
+  "J9-P6": {
+    "Joel": {},
     "Eudald": {}
   },
-  "J12-P3": {
-    "Vandal": {},
+  "J10-P1": {
+    "Gimeno": {},
+    "Vandal": {}
+  },
+  "J10-P2": {
+    "Elian": {},
+    "Tes": {}
+  },
+  "J10-P3": {
+    "Adriel": {},
+    "Jordi": {}
+  },
+  "J10-P4": {
+    "Tiago": {},
+    "Josep": {}
+  },
+  "J10-P5": {
+    "Leandro": {},
+    "Eudald": {}
+  },
+  "J10-P6": {
+    "Franco": {},
     "Joel": {}
   },
-  "J12-P4": {
-    "Elian": {},
-    "Franco": {}
+  "J11-P1": {
+    "Gimeno": {},
+    "Josep": {}
   },
-  "J12-P5": {
-    "Esteve": {},
-    "Leandro": {}
-  },
-  "J12-P6": {
-    "Adriel": {},
-    "Tiago": {}
-  },
-  "J13-P1": {
+  "J11-P2": {
     "Jordi": {},
     "Eudald": {}
   },
-  "J13-P2": {
-    "Gimeno": {},
+  "J11-P3": {
+    "Tes": {},
     "Joel": {}
   },
-  "J13-P3": {
-    "Tes": {},
+  "J11-P4": {
+    "Vandal": {},
     "Franco": {}
   },
-  "J13-P4": {
-    "Vandal": {},
+  "J11-P5": {
+    "Elian": {},
     "Leandro": {}
   },
-  "J13-P5": {
-    "Elian": {},
+  "J11-P6": {
+    "Adriel": {},
     "Tiago": {}
-  },
-  "J13-P6": {
-    "Esteve": {},
-    "Adriel": {}
   }
 }
