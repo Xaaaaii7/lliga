@@ -613,8 +613,8 @@
       },
       {
         "id": "J11-P3",
-        "local": "Gimeno",
-        "visitante": "Leandro",
+        "local": "",
+        "visitante": "",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -640,8 +640,8 @@
       },
       {
         "id": "J11-P6",
-        "local": "Elian",
-        "visitante": "Jordi",
+        "local": "",
+        "visitante": "",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -671,36 +671,9 @@
         "goles_visitante": null
       },
       {
-        "id": "J12-P3",
-        "local": "Vandal",
-        "visitante": "Joel",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      },
-      {
         "id": "J12-P4",
         "local": "Elian",
         "visitante": "Franco",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      },
-      {
-        "id": "J12-P5",
-        "local": "Tes",
-        "visitante": "Leandro",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      },
-      {
-        "id": "J12-P6",
-        "local": "Adriel",
-        "visitante": "Tiago",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -712,27 +685,9 @@
     "numero": 13,
     "partidos": [
       {
-        "id": "J13-P1",
-        "local": "Jordi",
-        "visitante": "Eudald",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      },
-      {
         "id": "J13-P2",
         "local": "Gimeno",
         "visitante": "Joel",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      },
-      {
-        "id": "J13-P3",
-        "local": "Tes",
-        "visitante": "Franco",
         "fecha": "2025-09-22",
         "hora": "20:00",
         "goles_local": null,
@@ -756,15 +711,6 @@
         "goles_local": null,
         "goles_visitante": null
       },
-      {
-        "id": "J13-P6",
-        "local": "Josep",
-        "visitante": "Adriel",
-        "fecha": "2025-09-22",
-        "hora": "20:00",
-        "goles_local": null,
-        "goles_visitante": null
-      }
     ]
   }
 ]
