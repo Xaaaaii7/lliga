@@ -58,77 +58,92 @@
   document.getElementById('tabla-zamora').innerHTML   = zamoraEq.map(rowZamora).join('');
 
   // ---------- Rankings por EQUIPO desde partidos_stats.json ----------
-  const statsIndex = await loadJSON('data/partidos_stats.json').catch(()=>null);
-  if (!statsIndex) return;
+const statsIndex = await loadJSON('data/partidos_stats.json').catch(()=>null);
+if (!statsIndex) return;
 
-  const agg = new Map();
-  const teamAgg = (name) => {
-    if (!agg.has(name)) agg.set(name, {
-      nombre:name, pj:0, posSum:0,posCount:0,
-      faltas:0, entradas:0, pases:0, completados:0,
-      tiros:0, taPuerta:0, goles:0
-    });
-    return agg.get(name);
-  };
-  const parsePct = v => (typeof v === 'string' && v.includes('%')) ? parseFloat(v) : (Number.isFinite(+v)?+v:null);
-  const addNum = (o,k,v)=>{ o[k] += (Number.isFinite(+v)?+v:0); };
+const agg = new Map();
+const teamAgg = (name) => {
+  if (!agg.has(name)) agg.set(name, {
+    nombre:name, pj:0, posSum:0,posCount:0,
+    faltas:0, entradas:0, pases:0, completados:0,
+    tiros:0, taPuerta:0, goles:0
+  });
+  return agg.get(name);
+};
 
-  for (const matchId of Object.keys(statsIndex)) {
-    const porEquipo = statsIndex[matchId] || {};
-    for (const eqName of Object.keys(porEquipo)) {
-      const te = porEquipo[eqName] || {};
-      const a = teamAgg(eqName);
-      const hasAny = ['posesion','faltas','entradas','pases','pases_completados','tiros','tiros_a_puerta','goles']
-        .some(k => te[k] !== undefined);
-      if (hasAny) a.pj++;
-
-      const pos = parsePct(te.posesion);
-      if (pos !== null) { a.posSum += pos; a.posCount++; }
-
-      addNum(a,'faltas', te.faltas);
-      addNum(a,'entradas', te.entradas);
-      addNum(a,'pases', te.pases);
-      addNum(a,'completados', te.pases_completados);
-      addNum(a,'tiros', te.tiros);
-      addNum(a,'taPuerta', te.tiros_a_puerta);
-      addNum(a,'goles', te.goles);
-    }
+// ✅ Normaliza posesión a 0..1
+const parsePct01 = v => {
+  if (v == null) return null;
+  if (typeof v === 'string') {
+    const n = parseFloat(v.replace(',', '.').replace('%','').trim());
+    if (!Number.isFinite(n)) return null;
+    return n > 1 ? n/100 : n;
   }
+  const n = +v;
+  if (!Number.isFinite(n)) return null;
+  return n > 1 ? n/100 : n;
+};
 
-  const arr = Array.from(agg.values());
+const addNum = (o,k,v)=>{ o[k] += (Number.isFinite(+v)?+v:0); };
 
-  // Métricas
-  const posMed = t => t.posCount>0 ? (t.posSum/t.posCount) : NaN;
-  const fair   = t => ((t.entradas||0)+1)/((t.faltas||0)+1);
-  const pass   = t => t.pases>0 ? (t.completados/t.pases) : NaN;
-  const precision = t => t.tiros>0 ? (t.taPuerta||0)/t.tiros : NaN;
-  const conversion = t => (t.taPuerta>0) ? (t.goles||0)/t.taPuerta : NaN;
-  const combined = t => {
-    const p = precision(t), c = conversion(t);
-    return (!isNaN(p) && !isNaN(c)) ? (p+c)/2 : NaN;
-  };
-  const fmtPct = v => isNaN(v)?'—':(v*100).toFixed(1)+'%';
+for (const matchId of Object.keys(statsIndex)) {
+  const porEquipo = statsIndex[matchId] || {};
+  for (const eqName of Object.keys(porEquipo)) {
+    const te = porEquipo[eqName] || {};
+    const a = teamAgg(eqName);
 
-  // Rankings
-  const posesionTop = arr.filter(t=>!isNaN(posMed(t))).sort((a,b)=> posMed(b)-posMed(a));
-  const fairTop = arr.slice().sort((a,b)=> fair(b)-fair(a));
-  const passTop = arr.filter(t=>!isNaN(pass(t))).sort((a,b)=> pass(b)-pass(a));
-  const shotTop = arr.filter(t=>!isNaN(combined(t))).sort((a,b)=> combined(b)-combined(a));
+    const hasAny = ['posesion','faltas','entradas','pases','pases_completados','tiros','tiros_a_puerta','goles']
+      .some(k => te[k] !== undefined);
+    if (hasAny) a.pj++;
 
-  // Render filas
-  const rPos = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${fmtPct(posMed(t))}</td></tr>`;
-  const rFair= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><td>${fair(t).toFixed(2)}</td></tr>`;
-  const rPass= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td></tr>`;
-  const rShot= (t,i)=> `
-    <tr>
-      <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
-      <td>${t.tiros}</td><td>${t.taPuerta}</td><td>${t.goles}</td>
-      <td>${fmtPct(precision(t))}</td><td>${fmtPct(conversion(t))}</td><td>${fmtPct(combined(t))}</td>
-    </tr>`;
+    const pos = parsePct01(te.posesion);
+    if (pos !== null) { a.posSum += pos; a.posCount++; }
 
-  const set = (id, rows)=>{ const el=document.getElementById(id); if(el) el.innerHTML=rows.join(''); };
-  set('tabla-posesion-eq', posesionTop.map(rPos));
-  set('tabla-fairplay-eq', fairTop.map(rFair));
-  set('tabla-pass-eq', passTop.map(rPass));
-  set('tabla-shot-eq', shotTop.map(rShot));
+    addNum(a,'faltas', te.faltas);
+    addNum(a,'entradas', te.entradas);
+    addNum(a,'pases', te.pases);
+    addNum(a,'completados', te.pases_completados);
+    addNum(a,'tiros', te.tiros);
+    addNum(a,'taPuerta', te.tiros_a_puerta);
+    addNum(a,'goles', te.goles);
+  }
+}
+
+const arr = Array.from(agg.values());
+
+// Métricas
+const posMed = t => t.posCount>0 ? (t.posSum/t.posCount) : NaN;
+const fair   = t => ((t.entradas||0)+1)/((t.faltas||0)+1);
+const pass   = t => t.pases>0 ? (t.completados/t.pases) : NaN;
+const precision  = t => t.tiros>0 ? (t.taPuerta||0)/t.tiros : NaN;
+const conversion = t => (t.taPuerta>0) ? (t.goles||0)/t.taPuerta : NaN;
+const combined   = t => {
+  const p = precision(t), c = conversion(t);
+  return (!isNaN(p) && !isNaN(c)) ? (p+c)/2 : NaN;
+};
+const fmtPct = v => isNaN(v)?'—':(v*100).toFixed(1)+'%';
+
+// Rankings
+const posesionTop = arr.filter(t=>!isNaN(posMed(t))).sort((a,b)=> posMed(b)-posMed(a));
+const fairTop = arr.slice().sort((a,b)=> fair(b)-fair(a));
+const passTop = arr.filter(t=>!isNaN(pass(t))).sort((a,b)=> pass(b)-pass(a));
+const shotTop = arr.filter(t=>!isNaN(combined(t))).sort((a,b)=> combined(b)-combined(a));
+
+// Render filas
+const rPos = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${fmtPct(posMed(t))}</td></tr>`;
+const rFair= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><td>${fair(t).toFixed(2)}</td></tr>`;
+const rPass= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td></tr>`;
+const rShot= (t,i)=> `
+  <tr>
+    <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
+    <td>${t.tiros}</td><td>${t.taPuerta}</td><td>${t.goles}</td>
+    <td>${fmtPct(precision(t))}</td><td>${fmtPct(conversion(t))}</td><td>${fmtPct(combined(t))}</td>
+  </tr>`;
+
+const set = (id, rows)=>{ const el=document.getElementById(id); if(el) el.innerHTML=rows.join(''); };
+set('tabla-posesion-eq', posesionTop.map(rPos));
+set('tabla-fairplay-eq', fairTop.map(rFair));
+set('tabla-pass-eq', passTop.map(rPass));
+set('tabla-shot-eq', shotTop.map(rShot));
+
 })();
