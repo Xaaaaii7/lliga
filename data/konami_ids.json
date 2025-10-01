@@ -9,7 +9,7 @@
     { "equipo": "Aston Vila",   "nombre": "Elian",   "konami_id": "ASEQ-685-271-662" },
     { "equipo": "Esteve",  "nombre": "Esteve",  "konami_id": null },
     { "equipo": "Milan",  "nombre": "Adriel",  "konami_id": "ASLS-396-793-326" },
-    { "equipo": "A. Madrid",   "nombre": "Tiago",   "konami_id": null },
+    { "equipo": "A. Madrid",   "nombre": "Tiago",   "konami_id": "ASQL-236-534-446"},
     { "equipo": "Juventus", "nombre": "Leandro", "konami_id": null },
     { "equipo": "M. United",  "nombre": "Franco",  "konami_id": null },
     { "equipo": "Newcastle","nombre": "Joel","konami_id": null }
