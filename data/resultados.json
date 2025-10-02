@@ -8,8 +8,8 @@
         "visitante": "Jordi",
         "fecha": "2025-09-29",
         "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null,
+        "goles_local": 0,
+        "goles_visitante": 2,
         "stream": "https://twitch.tv/enxaiet"
       },
       {
