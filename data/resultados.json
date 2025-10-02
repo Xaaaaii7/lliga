@@ -19,7 +19,8 @@
         "fecha": "2025-10-01",
         "hora": "22:00",
         "goles_local": null,
-        "goles_visitante": null
+        "goles_visitante": null,
+        "stream":"https://twitch.tv/JimmyJoe0"
       },
       {
         "id": "J1-P3",
