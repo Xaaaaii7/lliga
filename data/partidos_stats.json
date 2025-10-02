@@ -1,7 +1,7 @@
 {
   "J1-P1": {
-    "Gimeno": {},
-    "Jordi": {}
+    "Gimeno": {"posesion": 50, "tiros": 5, "tiros_a_puerta": 2, "goles": 0, "faltas": 4, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 129, "pases_completados": 98, "centros": 5, "pases_interceptados": 18, "entradas": 7, "paradas": 1},
+    "Jordi": {"posesion": 50, "tiros": 6, "tiros_a_puerta": 4, "goles": 2, "faltas": 0, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 4, "pases": 125, "pases_completados": 97, "centros": 5, "pases_interceptados": 27, "entradas": 6, "paradas": 1}
   },
   "J1-P2": {
     "Tes": {},
