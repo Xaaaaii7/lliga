@@ -8,11 +8,12 @@
 "destacado": true
 },
 {
-  "id": 2,
-  "titulo": "El Nápoles ridiculiza al Dortmund",
-  "resumen": "Tes dominó en posesión, pero Josep lo destrozó con un 4-0 y tres goles en los últimos diez minutos. El Nápoles se rió el último.",
-  "img": "img/napoles-dortmund.png",
-  "fecha": "2025-10-02",
-  "destacado": false
+"id": 2,
+"titulo": "El Nápoles ridiculiza al Dortmund",
+"resumen": "Tes dominó en posesión, pero Josep lo destrozó con un 4-0 y tres goles en los últimos diez minutos. El Nápoles se rió el último.",
+"cuerpo": "Tes pasó la semana calentando el partido: burlas al Nápoles, confusión con la Lazio y rumores baratos. Mucho humo. En el césped, el Dortmund quiso mandar con la pelota y posesiones de museo, pero el fútbol cobra en caja: el Nápoles de Josep esperó, mordió y pegó cuando dolía.  \n\nEl golpe de gracia llegó en el tramo final: tres zarpazos en diez minutos que dejaron al Dortmund desfondado y a su manager buscando excusas. El 4–0 no fue un accidente: fue una sentencia. Mientras Tes coleccionaba pases inútiles, el Nápoles coleccionaba goles.  \n\nLa lección es clara: quien habla de más acaba tragándose las palabras. El Nápoles no se confunde con nadie; se reconoce fácil —es el que te pasa por encima y luego te despide con una sonrisa.  \n\n*Por Jimmy Joe – Voll Damm Returns*",
+"img": "img/napoles-dortmund.png",
+"fecha": "2025-10-02",
+"destacado": false
 }
 ]
