@@ -6,5 +6,13 @@
 "img": "img/logo.png",
 "fecha": "2025-09-25",
 "destacado": true
+},
+{
+  "id": 2,
+  "titulo": "El Nápoles ridiculiza al Dortmund",
+  "resumen": "Tes dominó en posesión, pero Josep lo destrozó con un 4-0 y tres goles en los últimos diez minutos. El Nápoles se rió el último.",
+  "img": "img/napoles-dortmund.png",
+  "fecha": "2025-10-02",
+  "destacado": false
 }
 ]
