@@ -18,8 +18,8 @@
         "visitante": "Josep",
         "fecha": "2025-10-01",
         "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null,
+        "goles_local": 0,
+        "goles_visitante": 4,
         "stream":"https://twitch.tv/JimmyJoe0"
       },
       {
