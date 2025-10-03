@@ -74,73 +74,62 @@
     if (hero) hero.style.display = 'none';
   }
 
-  // ---------- HISTÓRICO (siempre se pinta) ----------
-  try {
-    const grid = document.getElementById('news-grid');
-    if (!grid) throw new Error('news-grid no encontrado');
+  // ---------- HISTÓRICO (listado) ----------
+try {
+  const grid = document.getElementById('news-grid');
+  if (!grid) throw new Error('news-grid no encontrado');
 
-    if (!data.length) {
-      grid.innerHTML = `<p>No hay noticias por ahora.</p>`;
-    } else {
-      grid.innerHTML = data.map(n=>`
-        <article class="news-card">
-          <a class="news-open" data-id="${n.id}" href="javascript:void(0)" aria-label="Abrir noticia" style="display:block">
-            <img src="${n.img || 'https://picsum.photos/800/450?blur=2'}" alt="${n.titulo || ''}">
-            <div class="content">
-              <h3>${n.titulo || ''}</h3>
-              <p>${n.resumen || ''}</p>
-              <p><small>${fmtDate(n.fecha) || ''}</small></p>
-            </div>
-          </a>
-        </article>
-      `).join('');
+  if (!data.length) {
+    grid.innerHTML = `<p>No hay noticias por ahora.</p>`;
+  } else {
+    grid.innerHTML = data.map(n=>`
+      <article class="news-card">
+        <a class="news-open" data-id="${n.id}" href="javascript:void(0)" aria-label="Abrir noticia" style="display:block">
+          <img src="${n.img || 'https://picsum.photos/800/450?blur=2'}" alt="${n.titulo || ''}">
+          <div class="content">
+            <h3 class="news-title">${n.titulo || ''}</h3>
+            ${n.resumen ? `<p class="news-resumen"><em>${n.resumen}</em></p>` : ''}
+            <p class="news-fecha"><small>${fmtDate(n.fecha) || ''}</small></p>
+          </div>
+        </a>
+      </article>
+    `).join('');
 
-      grid.querySelectorAll('.news-open').forEach(el=>{
-        el.addEventListener('click', ()=>{
-          const nota = data.find(n=> String(n.id) === String(el.dataset.id));
-          openNewsModal(nota);
-        });
+    grid.querySelectorAll('.news-open').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const nota = data.find(n=> String(n.id) === String(el.dataset.id));
+        openNewsModal(nota);
       });
-    }
-  } catch (e) {
-    console.error('Error pintando histórico:', e);
+    });
   }
+} catch (e) {
+  console.error('Error pintando histórico:', e);
+}
 
-  // ---------- MODAL NOTICIA ----------
-  const backdrop = document.getElementById('news-backdrop');
-  const closeBtn = document.getElementById('news-close');
-  const titleEl  = document.getElementById('news-title');
-  const metaEl   = document.getElementById('news-meta');
-  const bodyEl   = document.getElementById('news-content');
+// ---------- MODAL NOTICIA ----------
+function openNewsModal(n){
+  if (!n) return;
+  titleEl.textContent = n.titulo || '';
+  metaEl.textContent  = fmtDate(n.fecha) || '';
 
-  const open = ()=> { if (backdrop) backdrop.hidden = false; };
-  const close = ()=> { if (backdrop) { backdrop.hidden = true; titleEl.textContent=''; metaEl.textContent=''; bodyEl.innerHTML=''; } };
+  const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
+  const galeria = imgs.length ? `
+    <div class="hero-carousel" style="margin:10px 0">
+      <div class="hero-track" id="galeria-track">
+        ${imgs.map(src=>`<div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
+      </div>
+    </div>` : '';
 
-  // asegura cerrado
-  close();
-  closeBtn?.addEventListener('click', close);
-  backdrop?.addEventListener('click', (e)=> { if (e.target === backdrop) close(); });
-  document.addEventListener('keydown', (e)=> { if (e.key === 'Escape' && backdrop && !backdrop.hidden) close(); });
+  // 👉 En el popup mostramos SOLO el cuerpo completo (y si no hay, el resumen)
+  const cuerpoHTML = n.cuerpo || (n.resumen ? `<p>${n.resumen}</p>` : '');
 
-  function openNewsModal(n){
-    if (!n) return;
-    titleEl.textContent = n.titulo || '';
-    metaEl.textContent  = fmtDate(n.fecha) || '';
+  bodyEl.innerHTML = cuerpoHTML + galeria;
 
-    const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
-    const galeria = imgs.length ? `
-      <div class="hero-carousel" style="margin:10px 0">
-        <div class="hero-track" id="galeria-track">${imgs.map(src=>`
-          <div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
-        </div>
-      </div>` : '';
-
-    bodyEl.innerHTML = (n.contenido ? n.contenido : `<p>${n.resumen || ''}</p>`) + galeria;
-
-    const gt = document.getElementById('galeria-track');
-    if (gt && imgs.length>1){
-      let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
-    }
-    open();
+  const gt = document.getElementById('galeria-track');
+  if (gt && imgs.length>1){
+    let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
   }
+  open();
+}
+
 })();
