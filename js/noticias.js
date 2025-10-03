@@ -130,29 +130,33 @@
   }
 
   // ====== MODAL NOTICIA ======
-  function openNewsModal(n){
-    if (!n) return;
-    if (titleEl) titleEl.textContent = n.titulo || '';
-    if (metaEl)  metaEl.textContent  = fmtDate(n.fecha) || '';
+ function openNewsModal(n){
+  if (!n) return;
 
-    const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
-    const galeria = imgs.length ? `
-      <div class="hero-carousel" style="margin:10px 0">
-        <div class="hero-track" id="galeria-track">
-          ${imgs.map(src=>`<div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
-        </div>
-      </div>` : '';
+  // Título y fecha (fuera del body)
+  if (titleEl) titleEl.textContent = n.titulo || '';
+  if (metaEl)  metaEl.textContent  = fmtDate(n.fecha) || '';
 
-    // En el popup: Resumen (cursiva) + Cuerpo completo + galería
-    const resumenHTML = n.resumen ? `<p style="font-style:italic;margin:0 0 8px">${n.resumen}</p>` : '';
-    const cuerpoHTML  = n.cuerpo || '';
+  // Imágenes: usamos la primera como “hero”
+  const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
+  const hero = imgs.length ? `
+    <figure class="news-hero">
+      <img src="${imgs[0]}" alt="${n.titulo || ''}">
+    </figure>
+  ` : '';
 
-    if (bodyEl) bodyEl.innerHTML = resumenHTML + cuerpoHTML + galeria;
+  // Resumen (cursiva) + cuerpo completo
+  const resumenHTML = n.resumen ? `<p class="news-summary"><em>${n.resumen}</em></p>` : '';
+  const cuerpoHTML  = n.cuerpo || '';
 
-    const gt = document.getElementById('galeria-track');
-    if (gt && imgs.length>1){
-      let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
-    }
-    openModal();
-  }
+  // Contenido del popup (resumen → imagen → cuerpo)
+  if (bodyEl) bodyEl.innerHTML = `
+    ${resumenHTML}
+    ${hero}
+    <div class="news-article">${cuerpoHTML}</div>
+  `;
+
+  openModal();
+}
+
 })();
