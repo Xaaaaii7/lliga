@@ -12,7 +12,30 @@
   data.forEach(n => n.fechaObj = new Date(n.fecha));
   data.sort((a,b)=> b.fechaObj - a.fechaObj);
 
-  // ---------- HERO CARRUSEL (destacadas) ----------
+  // ====== MODAL (refs + helpers) ======
+  const backdrop = document.getElementById('news-backdrop');
+  const closeBtn = document.getElementById('news-close');
+  const titleEl  = document.getElementById('news-title');
+  const metaEl   = document.getElementById('news-meta');
+  const bodyEl   = document.getElementById('news-content');
+
+  const openModal = ()=> { if (backdrop) { backdrop.hidden = false; document.body.style.overflow = 'hidden'; } };
+  const closeModal = ()=> {
+    if (!backdrop) return;
+    backdrop.hidden = true;
+    document.body.style.overflow = '';
+    if (titleEl) titleEl.textContent = '';
+    if (metaEl)  metaEl.textContent  = '';
+    if (bodyEl)  bodyEl.innerHTML    = '';
+  };
+
+  // asegura cerrado y listeners
+  closeModal();
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', (e)=> { if (e.target === backdrop) closeModal(); });
+  document.addEventListener('keydown', (e)=> { if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal(); });
+
+  // ====== HERO CARRUSEL (destacadas) ======
   try {
     const destacadas = data.filter(n=>n.destacado);
     const hero = document.querySelector('.hero-carousel');
@@ -74,62 +97,62 @@
     if (hero) hero.style.display = 'none';
   }
 
-  // ---------- HISTÓRICO (listado) ----------
-try {
-  const grid = document.getElementById('news-grid');
-  if (!grid) throw new Error('news-grid no encontrado');
+  // ====== HISTÓRICO (listado) ======
+  try {
+    const grid = document.getElementById('news-grid');
+    if (!grid) throw new Error('news-grid no encontrado');
 
-  if (!data.length) {
-    grid.innerHTML = `<p>No hay noticias por ahora.</p>`;
-  } else {
-    grid.innerHTML = data.map(n=>`
-      <article class="news-card">
-        <a class="news-open" data-id="${n.id}" href="javascript:void(0)" aria-label="Abrir noticia" style="display:block">
-          <img src="${n.img || 'https://picsum.photos/800/450?blur=2'}" alt="${n.titulo || ''}">
-          <div class="content">
-            <h3 class="news-title">${n.titulo || ''}</h3>
-            ${n.resumen ? `<p class="news-resumen"><em>${n.resumen}</em></p>` : ''}
-            <p class="news-fecha"><small>${fmtDate(n.fecha) || ''}</small></p>
-          </div>
-        </a>
-      </article>
-    `).join('');
+    if (!data.length) {
+      grid.innerHTML = `<p>No hay noticias por ahora.</p>`;
+    } else {
+      grid.innerHTML = data.map(n=>`
+        <article class="news-card">
+          <a class="news-open" data-id="${n.id}" href="javascript:void(0)" aria-label="Abrir noticia" style="display:block">
+            <img src="${n.img || 'https://picsum.photos/800/450?blur=2'}" alt="${n.titulo || ''}">
+            <div class="content">
+              <h3 class="news-title">${n.titulo || ''}</h3>
+              ${n.resumen ? `<p class="news-resumen"><em>${n.resumen}</em></p>` : ''}
+              <p class="news-fecha"><small>${fmtDate(n.fecha) || ''}</small></p>
+            </div>
+          </a>
+        </article>
+      `).join('');
 
-    grid.querySelectorAll('.news-open').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const nota = data.find(n=> String(n.id) === String(el.dataset.id));
-        openNewsModal(nota);
+      grid.querySelectorAll('.news-open').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          const nota = data.find(n=> String(n.id) === String(el.dataset.id));
+          openNewsModal(nota);
+        });
       });
-    });
+    }
+  } catch (e) {
+    console.error('Error pintando histórico:', e);
   }
-} catch (e) {
-  console.error('Error pintando histórico:', e);
-}
 
-// ---------- MODAL NOTICIA ----------
-function openNewsModal(n){
-  if (!n) return;
-  titleEl.textContent = n.titulo || '';
-  metaEl.textContent  = fmtDate(n.fecha) || '';
+  // ====== MODAL NOTICIA ======
+  function openNewsModal(n){
+    if (!n) return;
+    if (titleEl) titleEl.textContent = n.titulo || '';
+    if (metaEl)  metaEl.textContent  = fmtDate(n.fecha) || '';
 
-  const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
-  const galeria = imgs.length ? `
-    <div class="hero-carousel" style="margin:10px 0">
-      <div class="hero-track" id="galeria-track">
-        ${imgs.map(src=>`<div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
-      </div>
-    </div>` : '';
+    const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
+    const galeria = imgs.length ? `
+      <div class="hero-carousel" style="margin:10px 0">
+        <div class="hero-track" id="galeria-track">
+          ${imgs.map(src=>`<div class="hero-slide" style="height:260px"><img src="${src}" alt=""></div>`).join('')}
+        </div>
+      </div>` : '';
 
-  // 👉 En el popup mostramos SOLO el cuerpo completo (y si no hay, el resumen)
-  const cuerpoHTML = n.cuerpo || (n.resumen ? `<p>${n.resumen}</p>` : '');
+    // En el popup: Resumen (cursiva) + Cuerpo completo + galería
+    const resumenHTML = n.resumen ? `<p style="font-style:italic;margin:0 0 8px">${n.resumen}</p>` : '';
+    const cuerpoHTML  = n.cuerpo || '';
 
-  bodyEl.innerHTML = cuerpoHTML + galeria;
+    if (bodyEl) bodyEl.innerHTML = resumenHTML + cuerpoHTML + galeria;
 
-  const gt = document.getElementById('galeria-track');
-  if (gt && imgs.length>1){
-    let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
+    const gt = document.getElementById('galeria-track');
+    if (gt && imgs.length>1){
+      let i=0; setInterval(()=>{ i=(i+1)%imgs.length; gt.style.transform=`translateX(-${i*100}%)`; }, 4000);
+    }
+    openModal();
   }
-  open();
-}
-
 })();
