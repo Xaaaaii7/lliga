@@ -285,3 +285,20 @@ tbody tr:hover{background:#101521}
 .poll-note { color: #9fb3c8; font-size: .9rem; margin-top: 6px; }
 .jornada-bloque + .jornada-bloque { margin-top: 28px; }
 
+/* Clasificación: colores por tramo */
+.table-wrap table tr.tier-top    { background: rgba(0, 200, 0, 0.10); }
+.table-wrap table tr.tier-mid    { background: rgba(255, 200, 0, 0.12); }
+.table-wrap table tr.tier-bottom { background: rgba(220, 0, 0, 0.12); }
+
+/* Línea lateral para reforzar */
+.table-wrap table tr.tier-top    td:first-child { border-left: 4px solid #1ec943; }
+.table-wrap table tr.tier-mid    td:first-child { border-left: 4px solid #f2b705; }
+.table-wrap table tr.tier-bottom td:first-child { border-left: 4px solid #e23b3b; }
+
+/* Escudo dentro de la celda del equipo */
+.team-cell { display:flex; align-items:center; gap:8px; }
+.team-badge {
+  width: 28px; height: 28px;        /* se adapta al alto de fila */
+  object-fit: contain; border-radius: 6px;
+  background: #0c1622;              /* por si hay PNG con transparencia */
+}
