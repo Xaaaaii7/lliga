@@ -104,7 +104,7 @@
   const tierClass = (i, len) => (
     i < 3 ? 'tier-top' : (i < 6 ? 'tier-mid' : (i >= len-3 ? 'tier-bottom' : ''))
   );
-  const logoPath = (name) => `img/escudos/${slug(name)}.png`;
+  const logoPath = (name) => `img/${slug(name)}.png`;
 
   tbody.innerHTML = equipos.map((e,i)=>`
     <tr class="${tierClass(i, equipos.length)}">
