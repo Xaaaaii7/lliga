@@ -1,7 +1,11 @@
 [
   {
     "jornada": 1,
-    "gol_youtube": "dQw4w9WgXcQ"
+    "gol_youtube": "dQw4w9WgXcQ",
+    "poll": {
+      "type": "strawpoll",
+      "embed_url": "https://strawpoll.com/embed/B2ZB9olwEgJ" 
+    }
   }
 ]
 
