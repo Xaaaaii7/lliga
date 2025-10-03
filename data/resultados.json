@@ -38,7 +38,8 @@
         "fecha": "2025-10-04",
         "hora": "22:00",
         "goles_local": 3,
-        "goles_visitante": 3
+        "goles_visitante": 3,
+        "stream": "https://twitch.tv/eliansk"
       },
       {
         "id": "J1-P5",
