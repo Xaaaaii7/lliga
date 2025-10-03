@@ -298,7 +298,10 @@ tbody tr:hover{background:#101521}
 /* Escudo dentro de la celda del equipo */
 .team-cell { display:flex; align-items:center; gap:8px; }
 .team-badge {
-  width: 28px; height: 28px;        /* se adapta al alto de fila */
-  object-fit: contain; border-radius: 6px;
-  background: #0c1622;              /* por si hay PNG con transparencia */
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;       /* 👈 fondo blanco en lugar del oscuro */
+  padding: 2px;           /* 👈 margen interno para respirar */
 }
