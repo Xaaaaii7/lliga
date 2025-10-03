@@ -10,44 +10,42 @@
   const jornadas = await loadJSON('data/resultados.json').catch(() => null);
   if (!Array.isArray(jornadas)) return showMsg('No se pudieron cargar los resultados.');
 
-  // Normalizador
+  // Normalizador base
   const norm = s => String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9\s-]/g,'').trim();
 
-  // 1) Detecta TODOS los equipos que aparecen en TODO el calendario (aunque no tengan goles aún)
+  // Para nombre de archivo: espacios -> guiones
+  const slug = s => norm(s).replace(/\s+/g,'-');
+
+  // 1) Detecta TODOS los equipos presentes en todo el calendario
   const allTeams = new Set();
-  for (const j of jornadas) {
-    for (const p of (j?.partidos || [])) {
-      if (p?.local) allTeams.add(p.local);
-      if (p?.visitante) allTeams.add(p.visitante);
-    }
+  for (const j of jornadas) for (const p of (j?.partidos || [])) {
+    if (p?.local) allTeams.add(p.local);
+    if (p?.visitante) allTeams.add(p.visitante);
   }
 
-  // (Opcional) si tienes data/jugadores.json con equipos, los añadimos también
+  // (Opcional) añadir los de jugadores.json
   try {
     const jug = await loadJSON('data/jugadores.json');
     const lista = jug?.equipos || [];
     for (const e of lista) if (e?.nombre) allTeams.add(e.nombre);
-  } catch { /* ignorar si no existe */ }
+  } catch {}
 
-  // 2) Stats por equipo + índice de H2H
+  // 2) Stats por equipo + índice H2H
   const teams = new Map(); // key norm -> stats
-  const byNormToName = new Map();
-
   const teamObj = (name) => {
     const k = norm(name);
     if (!teams.has(k)) {
       teams.set(k, { nombre: name, pj:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 });
-      byNormToName.set(k, name);
     }
     return teams.get(k);
   };
 
-  // Inicializa TODOS (incluye al que descansa)
+  // Inicializa TODOS
   for (const name of allTeams) teamObj(name);
 
-  // H2H: h2h[a][b] = {gf,gc} (a contra b)
+  // H2H: h2h[a][b] = {gf,gc}
   const h2h = {};
   const addH2H = (A,B,gfA,gfB) => {
     const a = norm(A), b = norm(B);
@@ -55,15 +53,14 @@
     h2h[a][b].gf += gfA; h2h[a][b].gc += gfB;
   };
 
-  // 3) Recorre partidos y acumula SOLO si hay marcador numérico
-for (const j of jornadas) {
-  for (const p of (j?.partidos || [])) {
+  // 3) Recorrer y acumular solo si hay marcador numérico
+  const isNum = v => typeof v === 'number' && Number.isFinite(v);
+
+  for (const j of jornadas) for (const p of (j?.partidos || [])) {
     if (!p?.local || !p?.visitante) continue;
     const L = teamObj(p.local);
     const V = teamObj(p.visitante);
 
-    // ✅ solo cuenta si son números (null/undefined = pendiente)
-    const isNum = v => typeof v === 'number' && Number.isFinite(v);
     const gl = isNum(p.goles_local) ? p.goles_local : null;
     const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
     if (gl === null || gv === null) continue;
@@ -79,14 +76,13 @@ for (const j of jornadas) {
     addH2H(p.local, p.visitante, gl, gv);
     addH2H(p.visitante, p.local, gv, gl);
   }
-}
 
   const equipos = Array.from(teams.values());
   if (!equipos.length) return showMsg('No hay equipos.');
 
   const dg = e => e.gf - e.gc;
 
-  // 4) Orden: Pts → H2H (dif goles entre ambos) → DG → GF → alfabético
+  // 4) Orden: Pts → H2H (dif) → DG → GF → alfabético
   equipos.sort((A,B) => {
     if (B.pts !== A.pts) return B.pts - A.pts;
 
@@ -100,17 +96,23 @@ for (const j of jornadas) {
 
     const dA = dg(A), dB = dg(B);
     if (dA !== dB) return dB - dA;
-
     if (B.gf !== A.gf) return B.gf - A.gf;
-
     return A.nombre.localeCompare(B.nombre, 'es', { sensitivity:'base' });
   });
 
-  // 5) Render
+  // 5) Render con colores + escudo
+  const tierClass = (i, len) => (
+    i < 3 ? 'tier-top' : (i < 6 ? 'tier-mid' : (i >= len-3 ? 'tier-bottom' : ''))
+  );
+  const logoPath = (name) => `img/escudos/${slug(name)}.png`;
+
   tbody.innerHTML = equipos.map((e,i)=>`
-    <tr>
+    <tr class="${tierClass(i, equipos.length)}">
       <td>${i+1}</td>
-      <td>${e.nombre}</td>
+      <td class="team-cell">
+        <img class="team-badge" src="${logoPath(e.nombre)}" alt="Escudo ${e.nombre}" onerror="this.style.visibility='hidden'">
+        <span>${e.nombre}</span>
+      </td>
       <td>${e.pj}</td>
       <td>${e.g}</td>
       <td>${e.e}</td>
