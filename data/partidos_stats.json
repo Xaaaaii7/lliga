@@ -8,8 +8,8 @@
     "Josep": {"posesion": 52, "tiros": 7, "tiros_a_puerta": 5, "goles": 4, "faltas": 2, "fueras_de_juego": 1, "corners": 0, "tiros_libres": 2, "pases": 129, "pases_completados": 106, "centros": 4, "pases_interceptados": 14, "entradas": 3, "paradas": 0}
   },
   "J1-P3": {
-    "Vandal": {},
-    "Eudald": {}
+    "Vandal":{"posesion": 49, "tiros": 2, "tiros_a_puerta": 1, "goles": 0, "faltas": 1, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 106, "pases_completados": 71, "centros": 3, "pases_interceptados": 24, "entradas": 6, "paradas": 5},
+    "Eudald": {"posesion": 51, "tiros": 11, "tiros_a_puerta": 7, "goles": 3, "faltas": 0, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 1, "pases": 139, "pases_completados": 107, "centros": 3, "pases_interceptados": 30, "entradas": 7, "paradas": 2}
   },
   "J1-P4": {
     "Elian":{"posesion": 47, "tiros": 14, "tiros_a_puerta": 11, "goles": 3, "faltas": 2, "fueras_de_juego": 0, "corners": 3, "tiros_libres": 2, "pases": 127, "pases_completados": 106, "centros": 0, "pases_interceptados": 17, "entradas": 6, "paradas": 1},
