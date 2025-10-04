@@ -29,7 +29,8 @@
         "fecha": "2025-10-02",
         "hora": "22:00",
         "goles_local": null,
-        "goles_visitante": null
+        "goles_visitante": null,
+        "stream" : "https://www.twitch.tv/marcricard94"
       },
       {
         "id": "J1-P4",
