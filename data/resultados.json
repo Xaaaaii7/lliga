@@ -28,8 +28,8 @@
         "visitante": "Eudald",
         "fecha": "2025-10-02",
         "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null,
+        "goles_local": 0,
+        "goles_visitante": 3,
         "stream" : "https://www.twitch.tv/marcricard94"
       },
       {
