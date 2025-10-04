@@ -60,6 +60,15 @@
         "goles_local": 3,
         "goles_visitante": 2,
         "stream" : "https://twitch.tv/tiagosanfik"
+      },
+      {
+        "id": "J1-P7",
+        "local": "Berni",
+        "visitante": "Pablo",
+        "fecha": "2025-10-08",
+        "hora": "22:00",
+        "goles_local": null,
+        "goles_visitante": null
       }
     ]
   },
