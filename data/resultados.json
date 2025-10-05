@@ -69,6 +69,15 @@
         "hora": "22:00",
         "goles_local": null,
         "goles_visitante": null
+      },
+      {
+        "id": "J1-P8",
+        "local": "Eloi",
+        "visitante": "Pesico",
+        "fecha": "2025-10-08",
+        "hora": "22:00",
+        "goles_local": null,
+        "goles_visitante": null
       }
     ]
   },
