@@ -140,7 +140,7 @@
 
   // Render filas (mantenemos mismas columnas en tu HTML para fair play)
   const rPos = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${fmtPct(posMed(t))}</td></tr>`;
-  const rFair= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><td>${fair(t).toFixed(2)}</td></tr>`;
+  const rFair= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><th>Rojas</th><td>${fair(t).toFixed(2)}</td></tr>`;
   const rPass= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td></tr>`;
   const rShot= (t,i)=> `
     <tr>
