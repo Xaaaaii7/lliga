@@ -85,7 +85,7 @@
     "numero": 2,
     "partidos": [
       { "id": "J2-P1", "local": "Gimeno", "visitante": "Berni", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J2-P2", "local": "Pesico", "visitante": "Vandal", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J2-P2", "local": "Pesico", "visitante": "Pablo", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P3", "local": "Tiago", "visitante": "Eloi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P4", "local": "Elian", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P5", "local": "Vandal", "visitante": "Joel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
