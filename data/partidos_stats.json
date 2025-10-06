@@ -52,6 +52,14 @@
     "Tiago": {"posesion": 40, "tiros": 8, "tiros_a_puerta": 5, "goles": 3, "faltas": 2, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 114, "pases_completados": 88, "centros": 2, "pases_interceptados": 26, "entradas": 12, "paradas": 1,"rojas":0},
     "Leandro": {"posesion": 60, "tiros": 5, "tiros_a_puerta": 3, "goles": 2, "faltas": 1, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 2, "pases": 145, "pases_completados": 116, "centros": 3, "pases_interceptados": 23, "entradas": 9, "paradas": 2,"rojas":0}
   },
+  "J1-P7": {
+    "Berni": {},
+    "Pablo": {}
+  },
+  "J1-P8": {
+    "Eloi": {},
+    "Pesico": {}
+  },
   "J2-P1": {
     "Gimeno": {},
     "Tes": {}
