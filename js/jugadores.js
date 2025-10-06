@@ -68,7 +68,9 @@
       faltas:0, entradas:0, pases:0, completados:0,
       tiros:0, taPuerta:0, goles:0,
       rojas:0,
-      golesEncajados:0, tirosRival:0 // 👈 defensivo (solo en memoria)
+      // 👇 añadimos campos para cálculo defensivo
+      golesEncajados:0,
+      tirosRival:0
     });
     return agg.get(name);
   };
@@ -90,20 +92,19 @@
 
   for (const matchId of Object.keys(statsIndex)) {
     const porEquipo = statsIndex[matchId] || {};
-    const equiposEnPartido = Object.keys(porEquipo);
+    const equiposPartido = Object.keys(porEquipo);
 
-    for (const eqName of equiposEnPartido) {
+    for (const eqName of equiposPartido) {
       const te = porEquipo[eqName] || {};
       const a = teamAgg(eqName);
 
-      // ¿Hay datos?
       const hasAny = ['posesion','faltas','entradas','pases','pases_completados','tiros','tiros_a_puerta','goles','expulsiones','rojas','tarjetas_rojas']
         .some(k => te[k] !== undefined);
       if (hasAny) a.pj++;
 
-      // Propios
       const pos = parsePct01(te.posesion);
       if (pos !== null) { a.posSum += pos; a.posCount++; }
+
       addNum(a,'faltas', te.faltas);
       addNum(a,'entradas', te.entradas);
       addNum(a,'pases', te.pases);
@@ -113,12 +114,12 @@
       addNum(a,'goles', te.goles);
       addNum(a,'rojas', te.expulsiones ?? te.rojas ?? te.tarjetas_rojas);
 
-      // 👇 Defensivo: mirar rival (NO se modifica ningún JSON)
-      const rivalName = equiposEnPartido.find(n => n !== eqName);
+      // 👇 DEFENSIVO: sumamos datos del rival
+      const rivalName = equiposPartido.find(n => n !== eqName);
       if (rivalName) {
-        const rv = porEquipo[rivalName] || {};
-        a.golesEncajados += Number(rv.goles) || 0;
-        a.tirosRival     += Number(rv.tiros_a_puerta) || 0;
+        const rivalStats = porEquipo[rivalName] || {};
+        addNum(a,'golesEncajados', rivalStats.goles);
+        addNum(a,'tirosRival', rivalStats.tiros_a_puerta);
       }
     }
   }
@@ -127,11 +128,8 @@
 
   // Métricas
   const posMed = t => t.posCount>0 ? (t.posSum/t.posCount) : NaN;
-
-  // Fair play con penalización por rojas
   const ROJA_PESO = 5;
   const fair   = t => ((t.entradas||0)+1) / ((t.faltas||0) + ROJA_PESO*(t.rojas||0) + 1);
-
   const pass   = t => t.pases>0 ? (t.completados/t.pases) : NaN;
   const precision  = t => t.tiros>0 ? (t.taPuerta||0)/t.tiros : NaN;
   const conversion = t => (t.taPuerta>0) ? (t.goles||0)/t.taPuerta : NaN;
@@ -139,7 +137,8 @@
     const p = precision(t), c = conversion(t);
     return (!isNaN(p) && !isNaN(c)) ? (p+c)/2 : NaN;
   };
-  const efectRival = t => t.tirosRival > 0 ? t.golesEncajados / t.tirosRival : NaN; // 👈 NUEVO
+  const efectRival = t => t.tirosRival>0 ? t.golesEncajados/t.tirosRival : NaN;
+
   const fmtPct = v => isNaN(v)?'—':(v*100).toFixed(1)+'%';
 
   // Rankings
@@ -147,32 +146,29 @@
   const fairTop = arr.slice().sort((a,b)=> fair(b)-fair(a));
   const passTop = arr.filter(t=>!isNaN(pass(t))).sort((a,b)=> pass(b)-pass(a));
   const shotTop = arr.filter(t=>!isNaN(combined(t))).sort((a,b)=> combined(b)-combined(a));
+  const efectTop = arr.filter(t=>!isNaN(efectRival(t))).sort((a,b)=> efectRival(a)-efectRival(b));
 
   // Render filas
   const rPos = (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${fmtPct(posMed(t))}</td></tr>`;
+  const rFair= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.entradas}</td><td>${t.faltas}</td><td>${t.rojas}</td><td>${fair(t).toFixed(2)}</td></tr>`;
+  const rPass= (t,i)=> `<tr><td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td><td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td></tr>`;
+  const rShot= (t,i)=> `
+    <tr>
+      <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
+      <td>${t.tiros}</td><td>${t.taPuerta}</td><td>${t.goles}</td>
+      <td>${fmtPct(precision(t))}</td><td>${fmtPct(conversion(t))}</td><td>${fmtPct(combined(t))}</td>
+    </tr>`;
+  const rEfect = (t,i)=> `
+    <tr>
+      <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
+      <td>${t.golesEncajados}</td><td>${t.tirosRival}</td><td>${fmtPct(efectRival(t))}</td>
+    </tr>`;
 
-  // (corregido: no usar <th> dentro del <tbody>)
-  const rFair= (t,i)=> `<tr>
-    <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
-    <td>${t.entradas}</td><td>${t.faltas}</td><td>${t.rojas}</td>
-    <td>${fair(t).toFixed(2)}</td>
-  </tr>`;
-
-  const rPass= (t,i)=> `<tr>
-    <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
-    <td>${t.pases}</td><td>${t.completados}</td><td>${fmtPct(pass(t))}</td>
-  </tr>`;
-
-  const rShot= (t,i)=> `<tr>
-    <td>${i+1}</td><td>${t.nombre}</td><td>${t.pj}</td>
-    <td>${t.tiros}</td><td>${t.taPuerta}</td><td>${t.goles}</td>
-    <td>${fmtPct(precision(t))}</td><td>${fmtPct(conversion(t))}</td><td>${fmtPct(combined(t))}</td>
-    <td>${t.golesEncajados}</td><td>${t.tirosRival}</td><td>${fmtPct(efectRival(t))}</td>
-  </tr>`;
-
+  // Pintado
   const set = (id, rows)=>{ const el=document.getElementById(id); if(el) el.innerHTML=rows.join(''); };
   set('tabla-posesion-eq', posesionTop.map(rPos));
   set('tabla-fairplay-eq', fairTop.map(rFair));
   set('tabla-pass-eq', passTop.map(rPass));
   set('tabla-shot-eq', shotTop.map(rShot));
+  set('tabla-efect-rival', efectTop.map(rEfect)); // 👈 nueva tabla
 })();
