@@ -132,7 +132,7 @@
   const fair   = t => ((t.entradas||0)+1) / ((t.faltas||0) + ROJA_PESO*(t.rojas||0) + 1);
   const pass   = t => t.pases>0 ? (t.completados/t.pases) : NaN;
   const precision  = t => t.tiros>0 ? (t.taPuerta||0)/t.tiros : NaN;
-  const conversion = t => (t.taPuerta>0) ? (t.goles||0)/t.taPuerta : NaN;
+  const conversion = t => (t.tiros>0) ? (t.goles||0)/t.tiros : NaN;
   const combined   = t => {
     const p = precision(t), c = conversion(t);
     return (!isNaN(p) && !isNaN(c)) ? (p+c)/2 : NaN;
