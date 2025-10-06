@@ -196,6 +196,7 @@
       { "id": "J10-P6", "local": "Franco", "visitante": "Josep", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J10-P7", "local": "Jordi", "visitante": "Elian", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J10-P8", "local": "Tes", "visitante": "Vandal", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
+      ]
   },
   {
     "numero": 11,
