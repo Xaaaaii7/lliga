@@ -92,7 +92,7 @@
       { "id": "J2-P5", "local": "Vandal", "visitante": "Joel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P6", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P7", "local": "Tes", "visitante": "Eudald", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J2-P8", "local": "Jordi", "visitante": "Josep", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
+      { "id": "J2-P8", "local": "Jordi", "visitante": "Josep", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null,"stream": "https://twitch.tv/enxaiet" }
     ]
   },
   {
