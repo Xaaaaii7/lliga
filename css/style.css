@@ -216,11 +216,12 @@ tbody tr:hover{background:#101521}
 /* Imagen y proporción */
 .news-card img {
   width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;   /* 👈 todas la misma proporción */
+  object-fit: cover;      /* 👈 rellena y recorta */
+  object-position: center;/* 👈 centra el recorte */
   display: block;
+  background: #0d1a26;
 }
-
 /* Título grande y resumen en cursiva */
 .news-title {
   margin: 8px 0 4px;
@@ -252,13 +253,15 @@ tbody tr:hover{background:#101521}
 .news-hero {
   margin: 0 0 16px;
 }
+/* Imagen principal en el modal */
 .news-hero img {
   width: 100%;
-  max-height: 360px;
-  object-fit: cover;
-  border-radius: 10px;
+  max-height: 80vh;      /* ocupa casi toda la pantalla, adaptable */
+  object-fit: contain;   /* 👈 muestra la imagen completa */
+  object-position: center;
   display: block;
-  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  background: #0d1a26;   /* fondo oscuro para márgenes */
+  border-radius: 10px;
 }
 
 .news-article {
