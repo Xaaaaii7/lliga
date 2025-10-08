@@ -15,5 +15,14 @@
 "img": "img/napoles-dortmund.png",
 "fecha": "2025-10-02",
 "destacado": true
+},
+{
+  "id": 3,
+  "titulo": "La maldición de los equipos italianos",
+  "resumen": "Primera jornada negra para los italianos: cuatro derrotas, goles en el descuento y solo Josep mantiene el honor azzurro.",
+  "cuerpo": "A falta de un partido para cerrar la primera jornada, ya empiezan a dibujarse las primeras tendencias de la liga… y los equipos italianos parecen haber arrancado con el pie izquierdo. Leandro, Pablo, Adriel y Gimeno cayeron en sus respectivos encuentros, dejando una mayoría de “azzurri” varados en la parte baja de la clasificación.\n\nLa jornada arrancó con dos choques intensos: **Franco vs Adriel** y **Gimeno vs Jordi**. Los británicos salieron con cuchillo entre los dientes —o mejor dicho, con botas de clavos afilados— imponiéndose 3-1 y 0-2 respectivamente. Inglaterra sumaba así sus primeros 6 puntos, como si Wembley se hubiera trasladado a la liga de amigos.\n\nLo más curioso vino después. Leandro firmó una gran primera parte ante Tiago, controlando fases clave del juego… pero en la segunda mitad, el rival se transformó en una locomotora y le arrebató la victoria en el último suspiro.\n\nY por si fuera poco, anoche Pablo rozó el empate heroico, igualando a falta de 10 minutos. Pero la maldición tenía la última palabra: en el minuto 92, Berni y sus franceses golpearon con un 3-2 definitivo que dejó a los italianos otra vez lamentándose en la trattoria.\n\nAun así, no todo es oscuro en este “mare nero”. **Josep**, con su clara victoria ante Dormunt, se encaramó al liderato provisional. Y todavía queda un duelo entre Eloi y Pesico para cerrar la jornada: al menos uno de los italianos podrá sumar puntos y demostrar que no todos los barcos se hunden en la tormenta.\n\n*Por Jimmy Joe – Voll Damm Returns*",
+  "img": "img/maldicion-italiana.png",
+  "fecha": "2025-10-08",
+  "destacado": true
 }
 ]
