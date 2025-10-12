@@ -87,8 +87,8 @@
         "visitante": "Isaac",
         "fecha": "2025-10-08",
         "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null
+        "goles_local": 0,
+        "goles_visitante": 0
       }
     ]
   },
