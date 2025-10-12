@@ -61,8 +61,8 @@
     "Pesico": {"posesion": 40, "tiros": 4, "tiros_a_puerta": 2, "goles": 0, "faltas": 6, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 3, "pases": 83, "pases_completados": 63, "centros": 1, "pases_interceptados": 10, "entradas": 3, "paradas": 3, "rojas": 1}
   },
   "J1-P9": {
-    "Jose": {},
-    "Isaac": {}
+    "Jose": {"posesion": 42, "tiros": 3, "tiros_a_puerta": 2, "goles": 0, "faltas": 3, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 2, "pases": 93, "pases_completados": 62, "centros": 1, "pases_interceptados": 14, "entradas": 13, "paradas": 3, "rojas": 0},
+    "Isaac": {"posesion": 58, "tiros": 6, "tiros_a_puerta": 3, "goles": 0, "faltas": 2, "fueras_de_juego": 2, "corners": 2, "tiros_libres": 3, "pases": 138, "pases_completados": 114, "centros": 2, "pases_interceptados": 22, "entradas": 2, "paradas": 1, "rojas": 0}
   },
   "J2-P1": {
     "Gimeno": {},
