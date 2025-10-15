@@ -85,8 +85,8 @@
     "Jose": {"posesion": 47, "tiros": 1, "tiros_a_puerta": 0, "goles": 0, "faltas": 3, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 2, "pases": 127, "pases_completados": 92, "centros": 0, "pases_interceptados": 21, "entradas": 5, "paradas": 4}
   },
   "J2-P6": {
-    "Isaac": {},
-    "Josep": {}
+    "Isaac": {"posesion": 43, "tiros": 2, "tiros_a_puerta": 2, "goles": 2, "faltas": 3, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 1, "pases": 100, "pases_completados": 73, "centros": 3, "pases_interceptados": 20, "entradas": 4, "paradas": 4},
+    "Josep": {"posesion": 57, "tiros": 8, "tiros_a_puerta": 5, "goles": 1, "faltas": 1, "fueras_de_juego": 1, "corners": 2, "tiros_libres": 2, "pases": 111, "pases_completados": 85, "centros": 7, "pases_interceptados": 20, "entradas": 4, "paradas": 0}
   },
   "J2-P7": {
     "Pesico": {"posesion": 42, "tiros": 6, "tiros_a_puerta": 0, "goles": 0, "faltas": 1, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 82, "pases_completados": 63, "centros": 3, "pases_interceptados": 22, "entradas": 2, "paradas": 5, "rojas":0},
