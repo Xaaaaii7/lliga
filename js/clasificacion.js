@@ -102,7 +102,7 @@
 
   // 5) Render con colores + escudo
   const tierClass = (i, len) => (
-    i < 4 ? 'tier-top' : (i < 7 ? 'tier-mid' : (i >= len-3 ? 'tier-bottom' : ''))
+    i < 6 ? 'tier-top' : (i < 10 ? 'tier-mid' : (i >= len-4 ? 'tier-bottom' : ''))
   );
   const logoPath = (name) => `img/${slug(name)}.png`;
 
