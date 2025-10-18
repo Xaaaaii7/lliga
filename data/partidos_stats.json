@@ -69,8 +69,8 @@
     "Adriel": {}
   },
   "J2-P2": {
-    "Elian": {},
-    "Tiago": {}
+    "Elian": {"posesion": 47, "tiros": 5, "tiros_a_puerta": 4, "goles": 1, "faltas": 0, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 2, "pases": 133, "pases_completados": 100, "centros": 1, "pases_interceptados": 24, "entradas": 5, "paradas": 3, "rojas":0},
+    "Tiago": {"posesion": 53, "tiros": 7, "tiros_a_puerta": 5, "goles": 2, "faltas": 2, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 172, "pases_completados": 148, "centros": 0, "pases_interceptados": 25, "entradas": 4, "paradas": 2, "rojas":0}
   },
   "J2-P3": {
     "Vandal": {},
