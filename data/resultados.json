@@ -90,15 +90,6 @@
         "goles_local": 0,
         "goles_visitante": 0,
         "stream":"https://twitch.tv/chal79"
-      },
-      {
-        "id": "J1-P10",
-        "local": "Raka",
-        "visitante": "Marc",
-        "fecha": "2025-10-08",
-        "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null
       }
     ]
   },
