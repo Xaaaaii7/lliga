@@ -99,13 +99,22 @@
         "hora": "22:00",
         "goles_local": null,
         "goles_visitante": null
+      },
+      {
+        "id": "J1-P9",
+        "local": "Candidat1",
+        "visitante": "Candidat2",
+        "fecha": "2025-10-08",
+        "hora": "22:00",
+        "goles_local": null,
+        "goles_visitante": null
       }
     ]
   },
 {
     "numero": 2,
     "partidos": [
-      { "id": "J2-P1", "local": "Gimeno", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J2-P1", "local": "Gimeno", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P2", "local": "Elian", "visitante": "Tiago", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 1, "goles_visitante": 2, "stream": "https://twitch.tv/eliansk"},
       { "id": "J2-P3", "local": "Vandal", "visitante": "Berni", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P4", "local": "Tes", "visitante": "Eloi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
@@ -114,7 +123,8 @@
       { "id": "J2-P7", "local": "Pesico", "visitante": "Eudald", "fecha": "2025-10-12", "hora": "20:00", "goles_local": 0, "goles_visitante": 2 },
       { "id": "J2-P8", "local": "Pablo", "visitante": "Joel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 1,        "stream":"https://twitch.tv/rodrery"},
       { "id": "J2-P9", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J2-P10", "local": "Adriel", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
+      { "id": "J2-P10", "local": "Candidat1", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J2-P11", "local": "Candidat2", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
   },
   {
