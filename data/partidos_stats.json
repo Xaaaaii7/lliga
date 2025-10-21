@@ -77,8 +77,8 @@
     "Tiago": {"posesion": 53, "tiros": 7, "tiros_a_puerta": 5, "goles": 2, "faltas": 2, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 172, "pases_completados": 148, "centros": 0, "pases_interceptados": 25, "entradas": 4, "paradas": 2, "rojas":0}
   },
   "J2-P3": {
-    "Vandal": {},
-    "Berni": {}
+    "Vandal": {"posesion": 49, "tiros": 4, "tiros_a_puerta": 3, "goles": 0, "faltas": 2, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 96, "pases_completados": 77, "centros": 4, "pases_interceptados": 14, "entradas": 1, "paradas": 7, "rojas":0},
+    "Berni": {"posesion": 51, "tiros": 12, "tiros_a_puerta": 5, "goles": 2, "faltas": 0, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 2, "pases": 116, "pases_completados": 90, "centros": 10, "pases_interceptados": 16, "entradas": 8, "paradas": 3, "rojas":0}
   },
   "J2-P4": {
     "Tes": {},
