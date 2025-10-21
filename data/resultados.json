@@ -370,33 +370,33 @@
   {
     "numero": 18,
     "partidos": [
-      { "id": "J18-P1",  "local": "Gimeno",  "visitante": "Adriel" },
-      { "id": "J18-P2",  "local": "Tiago",   "visitante": "Elian" },
-      { "id": "J18-P3",  "local": "Berni",   "visitante": "Vandal" },
-      { "id": "J18-P4",  "local": "Eloi",    "visitante": "Tes" },
-      { "id": "J18-P5",  "local": "Jose",    "visitante": "Jordi" },
-      { "id": "J18-P6",  "local": "Raka",    "visitante": "Josep" },
-      { "id": "J18-P7",  "local": "Enric",   "visitante": "Eudald" },
-      { "id": "J18-P8",  "local": "Erik",    "visitante": "Joel" },
-      { "id": "J18-P9",  "local": "Ricard",  "visitante": "Franco" },
-      { "id": "J18-P10", "local": "Isaac",   "visitante": "Leandro" },
-      { "id": "J18-P11", "local": "Pesico",  "visitante": "Pablo" }
+      { "id": "J18-P1",  "local": "Gimeno",  "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P2",  "local": "Tiago",   "visitante": "Elian", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P3",  "local": "Berni",   "visitante": "Vandal", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P4",  "local": "Eloi",    "visitante": "Tes", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P5",  "local": "Jose",    "visitante": "Jordi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P6",  "local": "Raka",    "visitante": "Josep", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P7",  "local": "Enric",   "visitante": "Eudald", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P8",  "local": "Erik",    "visitante": "Joel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P9",  "local": "Ricard",  "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P10", "local": "Isaac",   "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J18-P11", "local": "Pesico",  "visitante": "Pablo", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
   },
   {
     "numero": 19,
     "partidos": [
-      { "id": "J19-P1",  "local": "Gimeno",  "visitante": "Elian" },
-      { "id": "J19-P2",  "local": "Adriel",  "visitante": "Vandal" },
-      { "id": "J19-P3",  "local": "Tiago",   "visitante": "Tes" },
-      { "id": "J19-P4",  "local": "Berni",   "visitante": "Jordi" },
-      { "id": "J19-P5",  "local": "Eloi",    "visitante": "Josep" },
-      { "id": "J19-P6",  "local": "Jose",    "visitante": "Eudald" },
-      { "id": "J19-P7",  "local": "Raka",    "visitante": "Joel" },
-      { "id": "J19-P8",  "local": "Enric",   "visitante": "Franco" },
-      { "id": "J19-P9",  "local": "Erik",    "visitante": "Leandro" },
-      { "id": "J19-P10", "local": "Ricard",  "visitante": "Pablo" },
-      { "id": "J19-P11", "local": "Isaac",   "visitante": "Pesico" }
+      { "id": "J19-P1",  "local": "Gimeno",  "visitante": "Elian", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P2",  "local": "Adriel",  "visitante": "Vandal", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P3",  "local": "Tiago",   "visitante": "Tes", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P4",  "local": "Berni",   "visitante": "Jordi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P5",  "local": "Eloi",    "visitante": "Josep", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P6",  "local": "Jose",    "visitante": "Eudald", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P7",  "local": "Raka",    "visitante": "Joel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P8",  "local": "Enric",   "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P9",  "local": "Erik",    "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P10", "local": "Ricard",  "visitante": "Pablo", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J19-P11", "local": "Isaac",   "visitante": "Pesico", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
-  },
+  }
 ]
