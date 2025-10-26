@@ -122,7 +122,7 @@
       { "id": "J2-P6", "local": "Isaac", "visitante": "Josep", "fecha": "2025-10-15", "hora": "22:15", "goles_local": 2, "goles_visitante": 1 },
       { "id": "J2-P7", "local": "Pesico", "visitante": "Eudald", "fecha": "2025-10-12", "hora": "20:00", "goles_local": 0, "goles_visitante": 2 },
       { "id": "J2-P8", "local": "Pablo", "visitante": "Joel", "fecha": "2025-10-19", "hora": "20:00", "goles_local": 0, "goles_visitante": 1,        "stream":"https://twitch.tv/rodrery"},
-      { "id": "J2-P9", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J2-P9", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 4 },
       { "id": "J2-P10", "local": "Enric", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J2-P11", "local": "Erik", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
