@@ -109,8 +109,8 @@
     "Franco": {"posesion": 51, "tiros": 6, "tiros_a_puerta": 4, "goles": 4, "faltas": 1, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 52, "pases_completados": 43, "centros": 1, "pases_interceptados": 12, "entradas": 2, "paradas": 1,"rojas": 0}
   },
   "J2-P10": {
-    "Enric": {},
-    "Raka": {}
+    "Enric": {"posesion": 43, "tiros": 6, "tiros_a_puerta": 4, "goles": 3, "faltas": 2, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 1, "pases": 105, "pases_completados": 84, "centros": 2, "pases_interceptados": 16, "entradas": 5, "paradas": 2,"rojas":0},
+    "Raka": {"posesion": 57, "tiros": 10, "tiros_a_puerta": 5, "goles": 3, "faltas": 1, "fueras_de_juego": 1, "corners": 1, "tiros_libres": 1, "pases": 121, "pases_completados": 92, "centros": 10, "pases_interceptados": 19, "entradas": 2, "paradas": 0, "rojas":0}
   },
   "J2-P11": {
     "Erik": {},
@@ -145,8 +145,8 @@
     "Adriel": {}
   },
   "J3-P8": {
-    "Elian": {},
-    "Adriel": {}
+    "Tiago": {"posesion": 50, "tiros": 15, "tiros_a_puerta": 9, "goles": 2, "faltas": 0, "fueras_de_juego": 1, "corners": 1, "tiros_libres": 1, "pases": 141, "pases_completados": 115, "centros": 3, "pases_interceptados": 31, "entradas": 4, "paradas": 0, "rojas":0},
+    "Ricard": {"posesion": 50, "tiros": 3, "tiros_a_puerta": 1, "goles": 1, "faltas": 1, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 154, "pases_completados": 117, "centros": 1, "pases_interceptados": 20, "entradas": 5, "paradas": 7, "rojas":0}
   },
   "J3-P9": {
     "Berni": {"posesion": 50, "tiros": 11, "tiros_a_puerta": 6, "goles": 1, "faltas": 0, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 2, "pases": 119, "pases_completados": 97, "centros": 4, "pases_interceptados": 15, "entradas": 10, "paradas": 0, "rojas":0},
