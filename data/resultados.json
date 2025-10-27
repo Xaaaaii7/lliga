@@ -124,7 +124,7 @@
       { "id": "J2-P7", "local": "Pesico", "visitante": "Eudald", "fecha": "2025-10-12", "hora": "20:00", "goles_local": 0, "goles_visitante": 2 },
       { "id": "J2-P8", "local": "Pablo", "visitante": "Joel", "fecha": "2025-10-19", "hora": "20:00", "goles_local": 0, "goles_visitante": 1,        "stream":"https://twitch.tv/rodrery"},
       { "id": "J2-P9", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 4 },
-      { "id": "J2-P10", "local": "Enric", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J2-P10", "local": "Enric", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 3, "goles_visitante": 3, "stream": "https://twitch.tv/rakaeagle"},
       { "id": "J2-P11", "local": "Erik", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
   },
@@ -138,7 +138,7 @@
       { "id": "J3-P5",  "local": "Vandal",  "visitante": "Pablo",   "fecha": "2025-10-29", "hora": "22:00", "goles_local": 1, "goles_visitante": 3, "stream":"https://twitch.tv/rodrery" },
       { "id": "J3-P6",  "local": "Elian",   "visitante": "Pesico",  "fecha": "2025-10-26", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J3-P7",  "local": "Adriel",  "visitante": "Isaac",   "fecha": "2025-10-28", "hora": "22:15", "goles_local": null, "goles_visitante": null },
-      { "id": "J3-P8",  "local": "Tiago",   "visitante": "Ricard",  "fecha": "2025-10-30", "hora": "20:30", "goles_local": null, "goles_visitante": null },
+      { "id": "J3-P8",  "local": "Tiago",   "visitante": "Ricard",  "fecha": "2025-10-30", "hora": "20:30", "goles_local": 2, "goles_visitante": 1,"stream":"https://twitch.tv/eliansk" },
       { "id": "J3-P9",  "local": "Berni",   "visitante": "Erik",    "fecha": "2025-10-27", "hora": "22:15", "goles_local": 1, "goles_visitante": 0, "stream":"https://twitch.tv/deilik_buksson" },
       { "id": "J3-P10", "local": "Eloi",    "visitante": "Enric",   "fecha": "2025-10-29", "hora": "22:15", "goles_local": null, "goles_visitante": null },
       { "id": "J3-P11", "local": "Jose",    "visitante": "Raka",    "fecha": "2025-10-27", "hora": "20:30", "goles_local": 3, "goles_visitante": 1, "stream":"https://twitch.tv/rakaeagle" }
