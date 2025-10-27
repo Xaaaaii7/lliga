@@ -106,8 +106,9 @@
         "visitante": "Erik",
         "fecha": "2025-10-08",
         "hora": "22:00",
-        "goles_local": null,
-        "goles_visitante": null
+        "goles_local": 2,
+        "goles_visitante": 1,
+        "stream":"https://www.twitch.tv/tropokol"
       }
     ]
   },
