@@ -157,10 +157,6 @@
     "Adriel": {}
   },
   "J3-P11": {
-    "Elian": {},
-    "Adriel": {}
-  },
-  "J3-P12": {
     "Jose": {"posesion": 43, "tiros": 6, "tiros_a_puerta": 5, "goles": 3, "faltas": 0, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 2, "pases": 116, "pases_completados": 93, "centros": 2, "pases_interceptados": 14, "entradas": 6, "paradas": 2, "rojas":0},
     "Raka": {"posesion": 57, "tiros": 8, "tiros_a_puerta": 4, "goles": 1, "faltas": 2, "fueras_de_juego": 1, "corners": 0, "tiros_libres": 0, "pases": 117, "pases_completados": 89, "centros": 9, "pases_interceptados": 20, "entradas": 5, "paradas": 2, "rojas":0}
   },
