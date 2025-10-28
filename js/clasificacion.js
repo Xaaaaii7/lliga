@@ -100,7 +100,8 @@
   // ======== Render ========
   const render = (equipos, jNum) => {
     label.textContent = `Jornada ${jNum}`;
-    const tierClass = (i,len) => (i<3?'tier-top':(i<len-3?'': 'tier-bottom'));
+    const tierClass = (i, len) => (
+    i < 8 ? 'tier-top' : (i < 12 ? 'tier-mid' : (i >= len-4 ? 'tier-bottom' : '')));
     const logoPath = (name) => `img/${slug(name)}.png`;
     tbody.innerHTML = equipos.map((e,i)=>`
       <tr class="${tierClass(i,equipos.length)}">
