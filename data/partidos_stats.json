@@ -137,8 +137,8 @@
     "Pablo": {"posesion": 53, "tiros": 12, "tiros_a_puerta": 9, "goles": 3, "faltas": 2, "fueras_de_juego": 0, "corners": 3, "tiros_libres": 0, "pases": 110, "pases_completados": 81, "centros": 4, "pases_interceptados": 18, "entradas": 9, "paradas": 2, "rojas":0}
   },
   "J3-P6": {
-    "Elian": {},
-    "Pesico": {}
+    "Elian": {"posesion": 52, "tiros": 18, "tiros_a_puerta": 13, "goles": 10, "faltas": 0, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 128, "pases_completados": 108, "centros": 0, "pases_interceptados": 23, "entradas": 4, "paradas": 3, "rojas":0},
+    "Pesico": {"posesion": 48, "tiros": 7, "tiros_a_puerta": 1, "goles": 0, "faltas": 0, "fueras_de_juego": 0, "corners": 3, "tiros_libres": 0, "pases": 117, "pases_completados": 87, "centros": 4, "pases_interceptados": 14, "entradas": 6, "paradas": 2, "rojas":0}
   },
   "J3-P7": {
     "Adriel": {},
