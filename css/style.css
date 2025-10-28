@@ -308,3 +308,20 @@ tbody tr:hover{background:#101521}
   background: #fff;       /* 👈 fondo blanco en lugar del oscuro */
   padding: 2px;           /* 👈 margen interno para respirar */
 }
+.jornada-nav {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.nav-btn {
+  background:#132235;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  padding:4px 10px;
+  border-radius:6px;
+}
+.nav-btn:disabled { opacity:0.4; cursor:default; }
