@@ -212,7 +212,6 @@
     "Tes": {},
     "Vandal": {}
   },
-  {
   "J5-P8":{
     "Elian":{"posesion": 47, "tiros": 16, "tiros_a_puerta": 10, "goles": 3, "faltas": 1, "fueras_de_juego": 1, "corners": 2, "tiros_libres": 1, "pases": 112, "pases_completados": 90, "centros": 1, "pases_interceptados": 19, "entradas": 3, "paradas": 3,"rojas":0},
     "Enric": {"posesion": 53, "tiros": 4, "tiros_a_puerta": 3, "goles": 1, "faltas": 2, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 1, "pases": 113, "pases_completados": 87, "centros": 2, "pases_interceptados": 16, "entradas": 3, "paradas": 5, "rojas":0}
