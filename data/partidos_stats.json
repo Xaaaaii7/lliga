@@ -117,8 +117,8 @@
     "Ricard": {}
   },
   "J3-P1": {
-    "Gimeno": {},
-    "Eudald": {}
+    "Gimeno": {"posesion": 52, "tiros": 10, "tiros_a_puerta": 5, "goles": 3, "faltas": 2, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 0, "pases": 111, "pases_completados": 73, "centros": 5, "pases_interceptados": 33, "entradas": 9, "paradas": 2, "rojas": 0},
+    "Eudald": {"posesion": 48, "tiros": 4, "tiros_a_puerta": 1, "goles": 0, "faltas": 0, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 1, "pases": 137, "pases_completados": 96, "centros": 2, "pases_interceptados": 31, "entradas": 5, "paradas": 2, "rojas": 0}
   },
   "J3-P2": {
     "Josep": {"posesion": 61, "tiros": 5, "tiros_a_puerta": 3, "goles": 1, "faltas": 0, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 5, "pases": 147, "pases_completados": 119, "centros": 3, "pases_interceptados": 10, "entradas": 12, "paradas": 1, "rojas": 0},
