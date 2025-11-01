@@ -131,7 +131,7 @@
   {
     "numero": 3,
     "partidos": [
-      { "id": "J3-P1",  "local": "Gimeno",  "visitante": "Eudald",  "fecha": "2025-10-29", "hora": "20:30", "goles_local": null, "goles_visitante": null },
+      { "id": "J3-P1",  "local": "Gimeno",  "visitante": "Eudald",  "fecha": "2025-10-29", "hora": "20:30", "goles_local": 3, "goles_visitante": 0, "stream": "https://twitch.tv/merdallafc" },
       { "id": "J3-P2",  "local": "Josep",   "visitante": "Joel",    "fecha": "2025-10-28", "hora": "22:00", "goles_local": 1, "goles_visitante": 1, "stream": "https://twitch.tv/patxtuber" },
       { "id": "J3-P3",  "local": "Jordi",   "visitante": "Franco",  "fecha": "2025-10-27", "hora": "22:00", "goles_local": 2, "goles_visitante": 0, "stream": "https://twitch.tv/enxaiet"},
       { "id": "J3-P4",  "local": "Tes",     "visitante": "Leandro", "fecha": "2025-10-26", "hora": "20:30", "goles_local": null, "goles_visitante": null, "stream":"https://twitch.tv/JimmyJoe0" },
