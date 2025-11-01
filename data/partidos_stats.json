@@ -217,8 +217,8 @@
     "Enric": {"posesion": 53, "tiros": 4, "tiros_a_puerta": 3, "goles": 1, "faltas": 2, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 1, "pases": 113, "pases_completados": 87, "centros": 2, "pases_interceptados": 16, "entradas": 3, "paradas": 5, "rojas":0}
   },  
   "J5-P10": {
-    "Jose": {},
-    "Tiago": {}
+    "Tiago": {"posesion": 55, "tiros": 11, "tiros_a_puerta": 5, "goles": 2, "faltas": 2, "fueras_de_juego": 0, "corners": 3, "tiros_libres": 2, "pases": 151, "pases_completados": 119, "centros": 2, "pases_interceptados": 23, "entradas": 9, "paradas": 3, "rojas": 0},
+    "Jose": {"posesion": 45, "tiros": 7, "tiros_a_puerta": 6, "goles": 2, "faltas": 2, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 1, "pases": 118, "pases_completados": 92, "centros": 0, "pases_interceptados": 23, "entradas": 8, "paradas": 4, "rojas": 0}
   },
   "J6-P1": {
     "Gimeno": {},
