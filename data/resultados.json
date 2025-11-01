@@ -172,7 +172,7 @@
       { "id": "J5-P7",  "local": "Vandal",  "visitante": "Erik",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J5-P8",  "local": "Elian",   "visitante": "Enric",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 3, "goles_visitante": 1 },
       { "id": "J5-P9",  "local": "Adriel",  "visitante": "Raka",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J5-P10", "local": "Tiago",   "visitante": "Jose",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J5-P10", "local": "Tiago",   "visitante": "Jose",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": 2, "goles_visitante": 2 },
       { "id": "J5-P11", "local": "Berni",   "visitante": "Eloi",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
   },
