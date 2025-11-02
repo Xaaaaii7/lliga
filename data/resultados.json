@@ -147,17 +147,17 @@
   {
     "numero": 4,
     "partidos": [
-      { "id": "J4-P1",  "local": "Gimeno",  "visitante": "Joel",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P2",  "local": "Eudald",  "visitante": "Franco",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P3",  "local": "Josep",   "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P4",  "local": "Jordi",   "visitante": "Pablo",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 2, "goles_visitante": 0, "stream": "https://twitch.tv/enxaiet" },
-      { "id": "J4-P5",  "local": "Tes",     "visitante": "Pesico",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P6",  "local": "Vandal",  "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P7",  "local": "Elian",   "visitante": "Ricard",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": 6, "goles_visitante": 0, "stream": "https://www.twitch.tv/gorritobmx"},
-      { "id": "J4-P8",  "local": "Adriel",  "visitante": "Erik",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P9",  "local": "Tiago",   "visitante": "Enric",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 5, "goles_visitante": 0 },
-      { "id": "J4-P10", "local": "Berni",   "visitante": "Raka",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P11", "local": "Eloi",    "visitante": "Jose",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
+      { "id": "J4-P1",  "local": "Gimeno",  "visitante": "Joel",    "fecha": "2025-11-04", "hora": "22:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P2",  "local": "Eudald",  "visitante": "Franco",  "fecha": "2025-11-03", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P3",  "local": "Josep",   "visitante": "Leandro", "fecha": "2025-11-05", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P4",  "local": "Jordi",   "visitante": "Pablo",   "fecha": "2025-11-02", "hora": "20:00", "goles_local": 2, "goles_visitante": 0, "stream": "https://twitch.tv/enxaiet" },
+      { "id": "J4-P5",  "local": "Tes",     "visitante": "Pesico",  "fecha": "2025-11-04", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P6",  "local": "Vandal",  "visitante": "Isaac",   "fecha": "2025-11-06", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P7",  "local": "Elian",   "visitante": "Ricard",  "fecha": "2025-11-01", "hora": "20:00", "goles_local": 6, "goles_visitante": 0, "stream": "https://www.twitch.tv/gorritobmx"},
+      { "id": "J4-P8",  "local": "Adriel",  "visitante": "Erik",    "fecha": "2025-11-05", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P9",  "local": "Tiago",   "visitante": "Enric",   "fecha": "2025-10-31", "hora": "20:00", "goles_local": 5, "goles_visitante": 0 },
+      { "id": "J4-P10", "local": "Berni",   "visitante": "Raka",    "fecha": "2025-11-06", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P11", "local": "Eloi",    "visitante": "Jose",    "fecha": "2025-11-02", "hora": "20:00", "goles_local": null, "goles_visitante": null }
     ]
   },
   {
