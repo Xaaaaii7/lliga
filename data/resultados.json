@@ -125,7 +125,7 @@
       { "id": "J2-P8", "local": "Pablo", "visitante": "Joel", "fecha": "2025-10-19", "hora": "20:00", "goles_local": 0, "goles_visitante": 1,        "stream":"https://twitch.tv/rodrery"},
       { "id": "J2-P9", "local": "Leandro", "visitante": "Franco", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 4 },
       { "id": "J2-P10", "local": "Enric", "visitante": "Raka", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 3, "goles_visitante": 3, "stream": "https://twitch.tv/rakaeagle"},
-      { "id": "J2-P11", "local": "Erik", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null }
+      { "id": "J2-P11", "local": "Erik", "visitante": "Ricard", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 2, "goles_visitante": 2 }
     ]
   },
   {
@@ -152,7 +152,7 @@
       { "id": "J4-P3",  "local": "Josep",   "visitante": "Leandro", "fecha": "2025-11-05", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J4-P4",  "local": "Jordi",   "visitante": "Pablo",   "fecha": "2025-11-02", "hora": "20:00", "goles_local": 2, "goles_visitante": 0, "stream": "https://twitch.tv/enxaiet" },
       { "id": "J4-P5",  "local": "Tes",     "visitante": "Pesico",  "fecha": "2025-11-04", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J4-P6",  "local": "Vandal",  "visitante": "Isaac",   "fecha": "2025-11-06", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P6",  "local": "Vandal",  "visitante": "Isaac",   "fecha": "2025-11-06", "hora": "20:00", "goles_local": 1, "goles_visitante": 7 },
       { "id": "J4-P7",  "local": "Elian",   "visitante": "Ricard",  "fecha": "2025-11-01", "hora": "20:00", "goles_local": 6, "goles_visitante": 0, "stream": "https://www.twitch.tv/gorritobmx"},
       { "id": "J4-P8",  "local": "Adriel",  "visitante": "Erik",    "fecha": "2025-11-05", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J4-P9",  "local": "Tiago",   "visitante": "Enric",   "fecha": "2025-10-31", "hora": "20:00", "goles_local": 5, "goles_visitante": 0 },
