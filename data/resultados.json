@@ -156,7 +156,7 @@
       { "id": "J4-P7",  "local": "Elian",   "visitante": "Ricard",  "fecha": "2025-11-01", "hora": "20:00", "goles_local": 6, "goles_visitante": 0, "stream": "https://www.twitch.tv/gorritobmx"},
       { "id": "J4-P8",  "local": "Adriel",  "visitante": "Erik",    "fecha": "2025-11-05", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J4-P9",  "local": "Tiago",   "visitante": "Enric",   "fecha": "2025-10-31", "hora": "20:00", "goles_local": 5, "goles_visitante": 0 },
-      { "id": "J4-P10", "local": "Berni",   "visitante": "Raka",    "fecha": "2025-11-06", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J4-P10", "local": "Berni",   "visitante": "Raka",    "fecha": "2025-11-06", "hora": "20:00", "goles_local": 2, "goles_visitante": 0 },
       { "id": "J4-P11", "local": "Eloi",    "visitante": "Jose",    "fecha": "2025-11-02", "hora": "20:00", "goles_local": 1, "goles_visitante": 3, "stream": "https://www.twitch.tv/josee_prz" }
     ]
   },
