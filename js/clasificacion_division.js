@@ -128,9 +128,26 @@
   // ===== Render
   const render = (equipos, jNum) => {
     if (labelDiv) labelDiv.textContent = `${nombreDivision} — Jornada ${jNum}`;
-    const tierClass = (i, len) => (
-      i < 8 ? 'tier-top' : (i < 12 ? 'tier-mid' : (i >= len-4 ? 'tier-bottom' : ''))
-    );
+// tras cargar `division`
+const tiers = division?.tiers || null;
+
+const tierClass = (i, len) => {
+  if (tiers) {
+    const topN = Math.max(0, Math.min(len, +tiers.top || 0));
+    const midN = Math.max(0, Math.min(len - topN, +tiers.mid || 0));
+    const botN = Math.max(0, Math.min(len - topN - midN, +tiers.bottom || 0));
+
+    if (i < topN) return 'tier-top';
+    if (i < topN + midN) return 'tier-mid';
+    if (i >= len - botN) return 'tier-bottom';
+    return '';
+  }
+  // fallback (tu lógica antigua)
+  if (i < 8) return 'tier-top';
+  if (i < 12) return 'tier-mid';
+  if (i >= len - 4) return 'tier-bottom';
+  return '';
+};
     const logoPath = (name) => `img/${slug(name)}.png`;
 
     tbody.innerHTML = equipos.map((e,i)=>`
