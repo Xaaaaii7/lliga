@@ -1,6 +1,6 @@
 (async () => {
-  // ✅ Pega aquí la URL publicada como TSV desde Google Sheets
-  const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv';
+  // ✅ Pon aquí la URL TSV publicada desde Google Sheets
+  const SHEET_TSV_URL = '<<PON_AQUI_TU_URL_TSV>>';
 
   const msg = (t) => document.getElementById('pichichi-msg').textContent = t || '';
   const tbody = document.getElementById('tabla-pichichi-jug');
@@ -8,6 +8,17 @@
   const minPJInput = document.getElementById('min-pj');
 
   if (!tbody) return;
+
+  // Normalizador para filename → img/<equipo>.png
+  const norm = s => String(s||'')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'')
+    .trim()
+    .replace(/\s+/g,'-');
+
+  const logoPath = eq => `img/${norm(eq)}.png`;
 
   // --- Parser TSV ---
   function parseTSV(text) {
@@ -63,7 +74,15 @@
       <tr>
         <td>${i+1}</td>
         <td>${r.jugador}</td>
-        <td>${r.equipo}</td>
+
+        <!-- ✅ Escudo + nombre equipo -->
+        <td class="team-cell">
+          <img class="team-badge" src="${logoPath(r.equipo)}"
+               alt="Escudo ${r.equipo}"
+               onerror="this.style.visibility='hidden'">
+          <span>${r.equipo}</span>
+        </td>
+
         <td>${r.pj}</td>
         <td>${r.goles}</td>
         <td>${gpp(r.goles, r.pj).toFixed(2)}</td>
