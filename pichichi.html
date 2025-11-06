@@ -15,12 +15,21 @@
 
 <main class="container">
   <section class="table-wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+
+    <!-- ✅ PANEL SUPERIOR -->
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+
+      <!-- Filtro Max PJ -->
       <div>
         <label for="max-pj"><small>Max PJ:</small></label>
-        <input id="max-pj" type="number" value="0" min="0" style="width:72px"/>
+        <input id="max-pj" type="number" value="99" min="0" style="width:72px"/>
       </div>
+
+      <!-- Info columnas del TSV -->
+      <div id="sheet-info" style="font-size:0.9em;color:#9fb3c8"></div>
     </div>
+
+    <!-- ✅ TABLA -->
     <table>
       <thead>
         <tr>
@@ -29,6 +38,8 @@
       </thead>
       <tbody id="tabla-pichichi-jug"></tbody>
     </table>
+
+    <!-- ✅ Mensajes -->
     <p id="pichichi-msg" style="text-align:center;color:#9fb3c8;margin-top:8px"></p>
   </section>
 </main>
