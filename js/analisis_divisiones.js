@@ -89,8 +89,7 @@
     if (brecha < -0.8 && PJ1 >= 2) return "Primera";
 
     // Segunda clara
-    if (ppm2 !== null && ppm2 <= 0.5 && PJ2 >= 2) return "Segunda";
-    if (brecha > 1.0 && PJ2 >= 3) return "Segunda";
+    if (ppm2 !== null && ppm2 <= 1.0 && PJ2 >= 2) return "Segunda";
 
     // Apto Primera (destaca en Segunda, podría subir)
     if (ppm2 !== null && ppm2 >= 1.5 && PJ2 >= 2) return "Apto Primera";
