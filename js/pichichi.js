@@ -1,11 +1,11 @@
 (async () => {
   // ✅ Pon aquí la URL TSV publicada desde Google Sheets
-  const SHEET_TSV_URL = '<<PON_AQUI_TU_URL_TSV>>';
+  const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv';
 
   const msg = (t) => document.getElementById('pichichi-msg').textContent = t || '';
   const tbody = document.getElementById('tabla-pichichi-jug');
   const infoEl = document.getElementById('sheet-info');
-  const minPJInput = document.getElementById('min-pj');
+  const maxPJ = Math.max(0, parseInt(minPJInput.value || '0', 10));
 
   if (!tbody) return;
 
@@ -52,7 +52,7 @@
       pj:      toNum(r["Partidos"]),
       goles:   toNum(r["Goles"])
     }))
-    .filter(r => r.jugador && r.equipo && r.pj >= minPJ);
+    .filter(r => r.jugador && r.equipo && r.pj <= maxPJ);
 
     // Orden: goles → g/pj → pj → nombre
     data.sort((a,b)=>{
