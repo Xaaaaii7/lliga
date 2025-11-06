@@ -3,62 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Torneo — Ajuste de División</title>
+  <title>Torneo — Encaje por División</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .badge { padding:2px 8px; border-radius:12px; font-size:.85rem; }
-    .b-ok { background:#163d2b; color:#b8f1cf; }
-    .b-warn { background:#42340f; color:#ffe4a3; }
-    .b-risk { background:#4a1a1a; color:#ffc1c1; }
-    .muted { color:#9fb3c8; }
-    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
-    .controls > * { margin:0; }
-    .tight th, .tight td { white-space:nowrap; }
+    .badge { padding:2px 6px; border-radius:6px; font-weight:600; font-size:0.85rem }
+    .b-primera { background:#d1fae5; color:#065f46; }
+    .b-segunda { background:#fee2e2; color:#7f1d1d; }
+    .b-apto1   { background:#e0e7ff; color:#1e3a8a; }
+    .b-apto2   { background:#fde68a; color:#7c2d12; }
+    .b-dudoso  { background:#e5e7eb; color:#111827; }
+    .note { color:#9fb3c8; font-size:0.9rem; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0 12px }
+    .controls > * { display:flex; gap:6px; align-items:center }
+    .pill { padding:2px 8px; border-radius:999px; background:#0c1622; color:#9fb3c8; }
+    .pill strong { color:#e5edf5; }
   </style>
 </head>
-
-<!-- data-primera y data-segunda apuntan a los JSON de listas -->
-<body data-primera="data/division-primera.json" data-segunda="data/division-segunda.json">
+<body>
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Ajuste de División</h1>
+  <h1>Encaje por División</h1>
   <nav id="main-nav"></nav>
 </header>
 
 <main class="container">
   <section class="table-wrap">
     <div class="controls">
-      <label><small>k (shrinkage):</small> <input id="k-shrink" type="number" value="3" min="0" step="1" style="width:64px"></label>
-      <label><small>Partidos p/confianza (denominador):</small> <input id="conf-den" type="number" value="6" min="1" step="1" style="width:64px"></label>
-      <label><small>Ordenar por:</small>
-        <select id="orden">
-          <option value="score">Etiqueta/Score</option>
-          <option value="brecha">Brecha (D2*−D1*)</option>
-          <option value="d1">PPM_D1*</option>
-          <option value="d2">PPM_D2*</option>
-          <option value="nombre">Nombre</option>
-        </select>
-      </label>
-      <span id="resumen" class="muted"></span>
+      <div class="pill">Reglas duras: <strong>ON</strong></div>
+      <div>
+        <label for="min-pj-total"><small>Min PJ totales:</small></label>
+        <input id="min-pj-total" type="number" value="0" min="0" style="width:72px" />
+      </div>
+      <div class="note">Brecha = PPM D1 − PPM D2 · Confianza = min(1, PJ_tot/6)</div>
     </div>
 
-    <table class="tight">
+    <table>
       <thead>
         <tr>
-          <th>#</th><th>Jugador</th>
-          <th>PJ D1</th><th>PPM D1*</th><th>GDpm D1</th>
-          <th>PJ D2</th><th>PPM D2*</th><th>GDpm D2</th>
+          <th>#</th>
+          <th>Jugador</th>
+          <th>PJ D1</th><th>PPM D1</th><th>GDpm D1</th>
+          <th>PJ D2</th><th>PPM D2</th><th>GDpm D2</th>
           <th>Brecha</th><th>Conf.</th><th>Etiqueta</th>
         </tr>
       </thead>
-      <tbody id="tabla-fit"></tbody>
+      <tbody id="tabla-encaje"></tbody>
     </table>
-    <p id="fit-msg" class="muted" style="text-align:center;margin-top:8px"></p>
+    <p id="encaje-msg" class="note" style="margin-top:8px"></p>
   </section>
 </main>
 
 <footer class="site-footer">© Torneo entre amigos</footer>
 <script src="js/common.js"></script>
-<script src="js/division_fit.js"></script>
+<script src="js/encaje_divisiones.js"></script>
 </body>
 </html>
