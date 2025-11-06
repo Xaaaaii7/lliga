@@ -85,14 +85,13 @@
     if ((PJ1 + PJ2) <= 1) return "Dudoso";
 
     // Primera clara
-    if (ppm1 !== null && ppm1 >= 2.0 && PJ1 >= 2) return "Primera";
-    if (brecha < -0.8 && PJ1 >= 2) return "Primera";
+    if (ppm1 !== null && ppm1 >= 2.0 && ppm2 >= 3.0 && PJ1 >= 2) return "Primera";
 
     // Segunda clara
     if (ppm2 !== null && ppm2 <= 1.0 && PJ2 >= 2) return "Segunda";
 
     // Apto Primera (destaca en Segunda, podría subir)
-    if (ppm2 !== null && ppm2 >= 1.5 && PJ2 >= 2) return "Apto Primera";
+    if (ppm2 !== null && ppm2 >= 1.5 && ppm1 >= 1.0 && PJ2 >= 2) return "Apto Primera";
 
     // Apto Segunda (sufre en Primera, podría bajar)
     if (ppm1 !== null && ppm1 <= 0.9 && PJ1 >= 2) return "Apto Segunda";
