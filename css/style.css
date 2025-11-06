@@ -325,3 +325,38 @@ tbody tr:hover{background:#101521}
   border-radius:6px;
 }
 .nav-btn:disabled { opacity:0.4; cursor:default; }
+/* Colores por etiqueta (tabla) */
+tr.tag-primera   { background: rgba(0,200,83,0.08); }
+tr.tag-apto1     { background: rgba(0,150,136,0.08); }
+tr.tag-dudoso    { background: rgba(158,158,158,0.08); }
+tr.tag-apto2     { background: rgba(255,193,7,0.10); }
+tr.tag-segunda   { background: rgba(244,67,54,0.10); }
+
+/* Chips */
+.chip {
+  display:inline-block; padding:4px 8px; border-radius:999px;
+  font-size:0.85rem; line-height:1; background:#223; color:#cde;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.tag-primera .chip, .chip.tag-primera { background:#1b5e20; color:#e8f5e9; }
+.tag-apto1 .chip, .chip.tag-apto1     { background:#004d40; color:#e0f2f1; }
+.tag-dudoso .chip, .chip.tag-dudoso   { background:#424242; color:#eee; }
+.tag-apto2 .chip, .chip.tag-apto2     { background:#795548; color:#fff3e0; }
+.tag-segunda .chip, .chip.tag-segunda { background:#b71c1c; color:#ffebee; }
+.chip-pos { background:#1b5e20!important; color:#e8f5e9!important; }
+.chip-neg { background:#b71c1c!important; color:#ffebee!important; }
+
+/* Popup contenido bonito */
+.cards-2col { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin:10px 0 6px; }
+.card {
+  background:#0f1a26; border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px; padding:10px 12px;
+}
+.card h3 { margin:0 0 6px; font-size:1.05rem; color:#e6edf3; }
+ul.kv { list-style:none; padding:0; margin:0; }
+ul.kv li { display:flex; justify-content:space-between; padding:4px 0; color:#cfd8e3; }
+.summary-line { margin:10px 0; }
+.hint { font-size:0.9rem; color:#9fb3c8; }
+@media (max-width:700px){
+  .cards-2col { grid-template-columns: 1fr; }
+}
