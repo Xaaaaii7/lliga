@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['clasificacion.html','Clasificación'],
       ['resultados.html','Resultados'],
       ['jugadores.html','Jugadores'],
+      ['pichichi.html','Pichichi'],
       ['jornada.html','Jornada'],
       ['reglas.html','Reglas'],
       ['konami.html','Usuarios']// 👈 añadido
