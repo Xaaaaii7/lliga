@@ -1,5 +1,5 @@
 {
   "nombre": "Segunda División",
-  "equipos": ["Pesico","Vandal","Adriel","Tes","Ricard","Pablo","Erik","Enric","Raka","Leandro"],
+  "equipos": ["Pesico","Vandal","Adriel","Tes","Ricard","Pablo","Erik","Enric","Raka","Leandro","Franco"],
   "tiers": { "top": 2, "mid": 4, "bottom": 3 }
 }
