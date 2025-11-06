@@ -34,8 +34,10 @@
   try {
     division = await loadJSON(divisionPath);
   } catch { division = null; }
-  const lista = Array.isArray(division?.equipos) ? division.equipos : [];
-  const setDiv = new Set(lista.map(String));
+  // ✅ Normaliza nombres de división para que coincidan con los del calendario
+  const listaRaw = Array.isArray(division?.equipos) ? division.equipos : [];
+  const lista = listaRaw.map(n => String(n || '').trim());
+  const setDivNorm = new Set(lista.map(norm));
   const nombreDivision = division?.nombre || 'División';
 
   // Detecta última jornada jugada **dentro de la división** (al menos un partido con ambos equipos en la lista)
@@ -88,7 +90,7 @@
       for (const p of (j?.partidos || [])) {
         if (!p.local || !p.visitante) continue;
         // ❗ solo cuentan partidos donde ambos están en la división
-        if (!setDiv.has(String(p.local)) || !setDiv.has(String(p.visitante))) continue;
+        if (!setDivNorm.has(norm(p.local)) || !setDivNorm.has(norm(p.visitante))) continue;
 
         const L = teamObj(p.local);
         const V = teamObj(p.visitante);
