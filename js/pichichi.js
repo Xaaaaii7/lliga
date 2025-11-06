@@ -1,11 +1,13 @@
 (async () => {
-  // ✅ Pon aquí la URL TSV publicada desde Google Sheets
+  // ✅ URL TSV
   const SHEET_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv';
 
-  const msg = (t) => document.getElementById('pichichi-msg').textContent = t || '';
+  const msg   = (t) => document.getElementById('pichichi-msg').textContent = t || '';
   const tbody = document.getElementById('tabla-pichichi-jug');
   const infoEl = document.getElementById('sheet-info');
-  const maxPJ = Math.max(0, parseInt(maxPJInput.value || '0', 10));
+
+  // ✅ CAPTURAR EL INPUT CORRECTO
+  const maxPJInput = document.getElementById('max-pj');
 
   if (!tbody) return;
 
@@ -44,7 +46,7 @@
 
   // --- Render tabla ---
   function render(rows) {
-    const maxPJ = Math.max(0, parseInt(maxPJInput.value || '0', 10));
+    const maxPJ = Math.max(0, parseInt(maxPJInput.value || '9999', 10));
 
     const data = rows.map(r => ({
       jugador: r["Jugador"] || '',
@@ -75,7 +77,6 @@
         <td>${i+1}</td>
         <td>${r.jugador}</td>
 
-        <!-- ✅ Escudo + nombre equipo -->
         <td class="team-cell">
           <img class="team-badge" src="${logoPath(r.equipo)}"
                alt="Escudo ${r.equipo}"
@@ -100,7 +101,8 @@
     infoEl.textContent = `Columnas detectadas: ${headers.join(', ')}`;
     render(rows);
 
-    minPJInput.addEventListener('input', ()=> render(rows));
+    // ✅ Listener correcto
+    maxPJInput.addEventListener('input', ()=> render(rows));
   } catch (e) {
     console.error(e);
     msg('No se pudo cargar la hoja publicada. Revisa la URL TSV.');
