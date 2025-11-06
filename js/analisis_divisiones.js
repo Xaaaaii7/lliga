@@ -89,14 +89,14 @@
     if (brecha < -0.8 && PJ1 >= 2) return "Primera";
 
     // Segunda clara
-    if (ppm2 !== null && ppm2 <= 0.5 && PJ2 >= 3) return "Segunda";
+    if (ppm2 !== null && ppm2 <= 0.5 && PJ2 >= 2) return "Segunda";
     if (brecha > 1.0 && PJ2 >= 3) return "Segunda";
 
     // Apto Primera (destaca en Segunda, podría subir)
-    if (ppm2 !== null && ppm2 >= 1.6 && PJ2 >= 4) return "Apto Primera";
+    if (ppm2 !== null && ppm2 >= 1.5 && PJ2 >= 2) return "Apto Primera";
 
     // Apto Segunda (sufre en Primera, podría bajar)
-    if (ppm1 !== null && ppm1 <= 0.9 && PJ1 >= 3) return "Apto Segunda";
+    if (ppm1 !== null && ppm1 <= 0.9 && PJ1 >= 2) return "Apto Segunda";
 
     // Indefinido / señales mixtas
     return "Dudoso";
