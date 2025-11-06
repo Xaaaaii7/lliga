@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Ajuste de División</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .badge { padding:2px 8px; border-radius:12px; font-size:.85rem; }
+    .b-ok { background:#163d2b; color:#b8f1cf; }
+    .b-warn { background:#42340f; color:#ffe4a3; }
+    .b-risk { background:#4a1a1a; color:#ffc1c1; }
+    .muted { color:#9fb3c8; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+    .controls > * { margin:0; }
+    .tight th, .tight td { white-space:nowrap; }
+  </style>
+</head>
+
+<!-- data-primera y data-segunda apuntan a los JSON de listas -->
+<body data-primera="data/division-primera.json" data-segunda="data/division-segunda.json">
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Ajuste de División</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container">
+  <section class="table-wrap">
+    <div class="controls">
+      <label><small>k (shrinkage):</small> <input id="k-shrink" type="number" value="3" min="0" step="1" style="width:64px"></label>
+      <label><small>Partidos p/confianza (denominador):</small> <input id="conf-den" type="number" value="6" min="1" step="1" style="width:64px"></label>
+      <label><small>Ordenar por:</small>
+        <select id="orden">
+          <option value="score">Etiqueta/Score</option>
+          <option value="brecha">Brecha (D2*−D1*)</option>
+          <option value="d1">PPM_D1*</option>
+          <option value="d2">PPM_D2*</option>
+          <option value="nombre">Nombre</option>
+        </select>
+      </label>
+      <span id="resumen" class="muted"></span>
+    </div>
+
+    <table class="tight">
+      <thead>
+        <tr>
+          <th>#</th><th>Jugador</th>
+          <th>PJ D1</th><th>PPM D1*</th><th>GDpm D1</th>
+          <th>PJ D2</th><th>PPM D2*</th><th>GDpm D2</th>
+          <th>Brecha</th><th>Conf.</th><th>Etiqueta</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-fit"></tbody>
+    </table>
+    <p id="fit-msg" class="muted" style="text-align:center;margin-top:8px"></p>
+  </section>
+</main>
+
+<footer class="site-footer">© Torneo entre amigos</footer>
+<script src="js/common.js"></script>
+<script src="js/division_fit.js"></script>
+</body>
+</html>
