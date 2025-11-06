@@ -74,28 +74,31 @@
   const ppm = (pts,pj)=> pj>0? pts/pj : null;
   const gdpm = (gd,pj)=> pj>0? gd/pj : null;
 
-  // Etiquetado (tu lógica)
+  // === Etiquetado revisado (criterios suaves, sin regla estricta) ===
   function etiqueta(s){
-    const ppm1 = ppm(s.pts_vs_d1, s.pj_vs_d1);
-    const ppm2 = ppm(s.pts_vs_d2, s.pj_vs_d2);
+    const PJ1 = s.pj_vs_d1, PJ2 = s.pj_vs_d2;
+    const ppm1 = ppm(s.pts_vs_d1, PJ1);
+    const ppm2 = ppm(s.pts_vs_d2, PJ2);
+    const brecha = (ppm2??0) - (ppm1??0);
 
-    // Sin datos
-    if ((s.pj_vs_d1 + s.pj_vs_d2) === 0) return "Dudoso";
+    // Datos muy escasos
+    if ((PJ1 + PJ2) <= 1) return "Dudoso";
 
     // Primera clara
-    if (ppm1 !== null && ppm1 >= 2.0) return "Primera";
-    if (ppm2 !== null && ppm1 !== null && ppm1 >= ppm2 + 0.5) return "Primera";
+    if (ppm1 !== null && ppm1 >= 2.0 && PJ1 >= 2) return "Primera";
+    if (brecha < -0.8 && PJ1 >= 2) return "Primera";
 
     // Segunda clara
-    if (ppm2 !== null && ppm2 <= 0.5 && s.pj_vs_d2 >= 4) return "Segunda";
-    if (ppm2 !== null && ppm1 !== null && ppm1 <= ppm2 - 0.5) return "Segunda";
+    if (ppm2 !== null && ppm2 <= 0.5 && PJ2 >= 3) return "Segunda";
+    if (brecha > 1.0 && PJ2 >= 3) return "Segunda";
 
-    // Apto para primera (destaca vs Segunda)
-    if (s.pj_vs_d2 >= 4 && ppm2 !== null && ppm2 >= 1.6) return "Apto Primera";
+    // Apto Primera (destaca en Segunda, podría subir)
+    if (ppm2 !== null && ppm2 >= 1.6 && PJ2 >= 4) return "Apto Primera";
 
-    // Apto para segunda (sufre vs Primera)
-    if (s.pj_vs_d1 >= 4 && ppm1 !== null && ppm1 <= 0.9) return "Apto Segunda";
+    // Apto Segunda (sufre en Primera, podría bajar)
+    if (ppm1 !== null && ppm1 <= 0.9 && PJ1 >= 3) return "Apto Segunda";
 
+    // Indefinido / señales mixtas
     return "Dudoso";
   }
 
@@ -159,7 +162,6 @@
 
   // Popup bonito con chips + dos tarjetas
   const chip = (text, cls) => `<span class="chip ${cls||''}">${text}</span>`;
-  const pct = v => v==null ? "—" : (v*100).toFixed(0)+"%";
 
   document.querySelectorAll(".row-analisis").forEach(tr=>{
     tr.addEventListener('click', ()=>{
@@ -190,14 +192,10 @@
           </div>
         </div>
 
-        <div class="summary-line">
-          ${chip("Brecha: " + r.brecha.toFixed(2), (r.brecha>0.3?"chip-pos":(r.brecha<-0.3?"chip-neg":"")))}
-        </div>
-
-        <div class="hint">
-          <p><b>Cómo leerlo:</b> PPM y GD/Partido se calculan separando los rivales de Primera y de Segunda.
-          La etiqueta resume en qué división encaja mejor ahora mismo, y la <i>brecha</i> mide
-          cuánto mejor (o peor) rinde vs Segunda que vs Primera.</p>
+        <div class="hint" style="margin-top:8px">
+          <p><b>Cómo leerlo:</b> separamos el rendimiento contra rivales de Primera y Segunda.
+          La etiqueta resume en qué división encaja mejor según PPM y diferencia de goles por partido.
+          La “brecha” es PPM(Segunda) − PPM(Primera): positiva ⇒ rinde mejor en Segunda.</p>
         </div>
       `;
       open();
