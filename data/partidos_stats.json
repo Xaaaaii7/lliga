@@ -190,7 +190,7 @@
   },
   "J4-P9":{
     "Tiago":{"posesion": 52, "tiros": 22, "tiros_a_puerta": 13, "goles": 5, "faltas": 1, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 2, "pases": 142, "pases_completados": 117, "centros": 0, "pases_interceptados": 19, "entradas": 13, "paradas": 0, "rojas": 0},
-    "Enric":{"posesion": 48, "tiros": 2, "tiros_a_puerta": 0, "goles": 0, "faltas": 3, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 1, "pases": 106, "pases_completados": 78, "centros": 0, "pases_interceptados": 19, "entradas": 1, "paradas": 10, "rojas":0}
+    "Enric":{"posesion": 48, "tiros": 2, "tiros_a_puerta": 0, "goles": 0, "faltas": 3, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 1, "pases": 106, "pases_completados": 78, "centros": 0, "pases_interceptados": 19, "entradas": 1, "paradas": 10, "rojas":1}
   },
   "J4-P10": {
     "Berni": {"posesion": 53, "tiros": 8, "tiros_a_puerta": 5, "goles": 2, "faltas": 0, "fueras_de_juego": 0, "corners": 1, "tiros_libres": 0, "pases": 144, "pases_completados": 123, "centros": 15, "pases_interceptados": 17, "entradas": 2, "paradas": 2, "rojas": 0},
