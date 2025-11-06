@@ -5,7 +5,7 @@
   const msg = (t) => document.getElementById('pichichi-msg').textContent = t || '';
   const tbody = document.getElementById('tabla-pichichi-jug');
   const infoEl = document.getElementById('sheet-info');
-  const maxPJ = Math.max(0, parseInt(minPJInput.value || '0', 10));
+  const maxPJ = Math.max(0, parseInt(maxPJInput.value || '0', 10));
 
   if (!tbody) return;
 
@@ -44,7 +44,7 @@
 
   // --- Render tabla ---
   function render(rows) {
-    const minPJ = Math.max(0, parseInt(minPJInput.value || '0', 10));
+    const maxPJ = Math.max(0, parseInt(maxPJInput.value || '0', 10));
 
     const data = rows.map(r => ({
       jugador: r["Jugador"] || '',
