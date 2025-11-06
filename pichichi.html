@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Pichichi (Jugadores)</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Pichichi — Jugadores</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container">
+  <section class="table-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+      <div>
+        <small>Fuente: Google Sheets (TSV publicado)</small><br/>
+        <small id="sheet-info" style="color:#9fb3c8"></small>
+      </div>
+      <div>
+        <label for="min-pj"><small>Min PJ:</small></label>
+        <input id="min-pj" type="number" value="0" min="0" style="width:72px"/>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Jugador</th><th>Equipo</th><th>PJ</th><th>Goles</th><th>Goles/PJ</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-pichichi-jug"></tbody>
+    </table>
+    <p id="pichichi-msg" style="text-align:center;color:#9fb3c8;margin-top:8px"></p>
+  </section>
+</main>
+
+<footer class="site-footer">© Torneo entre amigos</footer>
+<script src="js/common.js"></script>
+<script src="js/pichichi.js"></script>
+</body>
+</html>
