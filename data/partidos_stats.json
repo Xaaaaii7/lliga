@@ -167,7 +167,6 @@
   "J4-P2": {
     "Eudald": {"posesion":43,"tiros":7,"tiros_a_puerta":7,"goles":6,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":1,"pases":114,"pases_completados":90,"centros":0,"pases_interceptados":18,"entradas":4,"paradas":3, "rojas": 0},
     "Franco": {"posesion":57,"tiros":6,"tiros_a_puerta":5,"goles":1,"faltas":1,"fueras_de_juego":0,"corners":3,"tiros_libres":0,"pases":144,"pases_completados":121,"centros":2,"pases_interceptados":20,"entradas":3,"paradas":1, "rojas": 0}
-}
   },
   "J4-P3": {
     "Josep": {"posesion":57,"tiros":11,"tiros_a_puerta":4,"goles":2,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":3,"pases":128,"pases_completados":110,"centros":0,"pases_interceptados":15,"entradas":5,"paradas":3, "rojas": 0},
