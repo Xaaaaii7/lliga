@@ -129,8 +129,8 @@
     "Franco": {"posesion": 49, "tiros": 1, "tiros_a_puerta": 1, "goles": 0, "faltas": 6, "fueras_de_juego": 1, "corners": 1, "tiros_libres": 2, "pases": 140, "pases_completados": 100, "centros": 3, "pases_interceptados": 22, "entradas": 8, "paradas": 6, "rojas": 1}
   },
   "J3-P4": {
-    "Tes": {},
-    "Leandro": {}
+    "Tes": {"Borussia Dortmund":{"goles":1,"posesion":55,"tiros":8,"tiros_a_puerta":5,"faltas":0,"fueras_de_juego":0,"corners":2,"tiros_libres":0,"pases":139,"pases_completados":124,"centros":1,"pases_interceptados":11,"entradas":2,"paradas":1, "rojas": 0},
+    "Leandro": {"goles":0,"posesion":45,"tiros":5,"tiros_a_puerta":1,"faltas":1,"fueras_de_juego":0,"corners":0,"tiros_libres":0,"pases":110,"pases_completados":93,"centros":4,"pases_interceptados":9,"entradas":6,"paradas": 6, "rojas": 0}
   },
   "J3-P5": {
     "Vandal":{"posesion": 47, "tiros": 5, "tiros_a_puerta": 3, "goles": 1, "faltas": 0, "fueras_de_juego": 0, "corners": 0, "tiros_libres": 2, "pases": 104, "pases_completados": 81, "centros": 0, "pases_interceptados": 19, "entradas": 6, "paradas": 3, "rojas":0},
