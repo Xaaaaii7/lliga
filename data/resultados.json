@@ -118,7 +118,7 @@
       { "id": "J2-P1", "local": "Gimeno", "visitante": "Adriel", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 1, "goles_visitante": 0, "stream":"https://www.twitch.tv/gorritobmx" },
       { "id": "J2-P2", "local": "Elian", "visitante": "Tiago", "fecha": "2025-10-19", "hora": "00:45", "goles_local": 1, "goles_visitante": 2, "stream": "https://twitch.tv/eliansk"},
       { "id": "J2-P3", "local": "Vandal", "visitante": "Berni", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 2, "stream" : "https://www.twitch.tv/marcricard94" },
-      { "id": "J2-P4", "local": "Tes", "visitante": "Eloi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 3, "stream":"https://twitch.tv/JimmyJoe0" },
+      { "id": "J2-P4", "local": "Tes", "visitante": "Eloi", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null, "stream":"https://twitch.tv/JimmyJoe0" },
       { "id": "J2-P5", "local": "Jordi", "visitante": "Jose", "fecha": "2025-10-15", "hora": "20:00", "goles_local": 2, "goles_visitante": 0,"stream": "https://twitch.tv/enxaiet"  },
       { "id": "J2-P6", "local": "Isaac", "visitante": "Josep", "fecha": "2025-10-15", "hora": "22:15", "goles_local": 2, "goles_visitante": 1 },
       { "id": "J2-P7", "local": "Pesico", "visitante": "Eudald", "fecha": "2025-10-12", "hora": "20:00", "goles_local": 0, "goles_visitante": 2 },
