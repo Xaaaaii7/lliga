@@ -221,8 +221,8 @@
     "Adriel": {}
   },
   "J5-P5": {
-    "Jordi": {},
-    "Elian": {}
+    "Jordi": {"goles":4,"posesion":50,"tiros":9,"tiros_a_puerta":7,"faltas":2,"fueras_de_juego":2,"corners":0,"tiros_libres":4,"pases":132,"pases_completados":85,"centros":5,"pases_interceptados":37,"entradas":11,"paradas":1, "rojas": 0},
+    "Isaac": {"goles":1,"posesion":50,"tiros":3,"tiros_a_puerta":2,"faltas":4,"fueras_de_juego":0,"corners":0,"tiros_libres":2,"pases":146,"pases_completados":103,"centros":1,"pases_interceptados":31,"entradas":7,"paradas":0, "rojas": 0}
   },
   "J5-P6": {
     "Tes": {},
