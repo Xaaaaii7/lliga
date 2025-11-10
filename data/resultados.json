@@ -167,7 +167,8 @@
       { "id": "J5-P2",  "local": "Joel",    "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J5-P3",  "local": "Eudald",  "visitante": "Pablo",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 4, "goles_visitante": 3, "stream":"https://twitch.tv/rodrery" },
       { "id": "J5-P4",  "local": "Josep",   "visitante": "Pesico",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J5-P5",  "local": "Jordi",   "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J5-P5",  "local": "Jordi",   "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 4, "goles_visitante": 1, "stream": "https://twitch
+tv/enxaiet" },
       { "id": "J5-P6",  "local": "Tes",     "visitante": "Ricard",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J5-P7",  "local": "Vandal",  "visitante": "Erik",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J5-P8",  "local": "Elian",   "visitante": "Enric",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 3, "goles_visitante": 1 },
