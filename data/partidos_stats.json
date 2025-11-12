@@ -205,8 +205,8 @@
     "Jose":{"posesion": 56, "tiros": 11, "tiros_a_puerta": 6, "goles": 3, "faltas": 1, "fueras_de_juego": 0, "corners": 2, "tiros_libres": 1, "pases": 150, "pases_completados": 126, "centros": 4, "pases_interceptados": 20, "entradas": 6, "paradas": 1, "rojas": 0}
   },
   "J5-P1": {
-    "Gimeno": {},
-    "Franco": {}
+    "Gimeno":{"goles":3,"posesion":44,"tiros":12,"tiros_a_puerta":8,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":0,"pases":82,"pases_completados":59,"centros":4,"pases_interceptados":20,"entradas":13,"paradas":1, "rojas": 0},
+    "Franco":{"goles":0,"posesion":56,"tiros":2,"tiros_a_puerta":0,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":0,"pases":138,"pases_completados":111,"centros":7,"pases_interceptados":19,"entradas":9,"paradas":5, "rojas": 0}
   },
   "J5-P2": {
     "Joel": {},
