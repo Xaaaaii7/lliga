@@ -16,7 +16,7 @@
     }
   },
   {
-    "jornada 3",
+    "jornada": 3,
     "gol_youtube": "8xcbhKOcx-A",
     "poll": {
       "type": "strawpoll",
