@@ -253,8 +253,8 @@
     "Leandro": {}
   },
   "J6-P2": {
-    "Franco": {},
-    "Tiago": {}
+    "Franco": {"goles":1,"posesion":48,"tiros":3,"tiros_a_puerta":2,"faltas":0,"fueras_de_juego":0,"corners":1,"tiros_libres":0,"pases":112,"pases_completados":81,"centros":2,"pases_interceptados":18,"entradas":8,"paradas":1, "rojas": 0},
+    "Pablo": {"goles":3,"posesion":52,"tiros":6,"tiros_a_puerta":4,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":0,"pases":132,"pases_completados":108,"centros":1,"pases_interceptados":24,"entradas":3,"paradas":1, "rojas": 0}
   },
   "J6-P3": {
     "Joel": {},
