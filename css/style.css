@@ -1033,3 +1033,60 @@ ul.kv li{
     justify-content:space-between;
   }
 }
+/* ==========================
+   HISTÓRICO DE POSICIONES
+   ========================== */
+
+.team-modal-poshistory{
+  margin-bottom:10px;
+}
+
+.team-pos-title{
+  margin:0 0 6px;
+  font-size:1rem;
+  font-weight:700;
+  color:#e5edff;
+}
+
+.team-pos-list{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.team-pos-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:.85rem;
+  padding:4px 0;
+}
+
+.team-pos-value{
+  min-width:60px;
+}
+
+.team-pos-points{
+  color:var(--muted);
+  min-width:60px;
+  text-align:right;
+}
+
+/* Flechitas de tendencia */
+.team-pos-trend{
+  margin-left:4px;
+  font-weight:700;
+}
+.team-pos-trend.pos-up{
+  color:#22c55e;  /* verde */
+}
+.team-pos-trend.pos-down{
+  color:#f97373;  /* rojo suave */
+}
+
+@media (max-width:640px){
+  .team-pos-row{
+    font-size:.8rem;
+  }
+}
