@@ -26,6 +26,7 @@
   const teamMetaEl        = document.getElementById('team-modal-meta');
   const teamMatchesEl     = document.getElementById('team-modal-matches');
   const teamBadgeImg      = document.getElementById('team-modal-badge');
+  const teamPosHistoryEl  = document.getElementById('team-modal-poshistory');
 
   const openTeamModal = () => {
     if (!teamBackdrop) return;
@@ -37,12 +38,12 @@
     if (!teamBackdrop) return;
     teamBackdrop.hidden = true;
     document.body.style.overflow = '';
-    if (teamTitleEl)   teamTitleEl.textContent   = '';
-    if (teamSummaryEl) teamSummaryEl.textContent = '';
-    if (teamMetaEl)    teamMetaEl.textContent    = '';
-    if (teamMatchesEl) teamMatchesEl.innerHTML   = '';
+    if (teamTitleEl)       teamTitleEl.textContent       = '';
+    if (teamSummaryEl)     teamSummaryEl.textContent     = '';
+    if (teamMetaEl)        teamMetaEl.textContent        = '';
+    if (teamMatchesEl)     teamMatchesEl.innerHTML       = '';
+    if (teamPosHistoryEl)  teamPosHistoryEl.innerHTML    = '';
     if (teamBadgeImg) {
-      // Importante: quitar src sin disparar onerror y resetear visibilidad
       teamBadgeImg.removeAttribute('src');
       teamBadgeImg.alt = '';
       teamBadgeImg.style.visibility = '';
@@ -163,10 +164,8 @@
             jornada: i+1,
             local: p.local,
             visitante: p.visitante,
-            // marcador real local-visitante
             gl,
             gv,
-            // desde el punto de vista del equipo
             gf,
             gc,
             isLocal,
@@ -175,17 +174,35 @@
         }
       }
     }
-    // En orden de jornada según el JSON
-    return matches;
+    return matches; // orden cronológico
+  };
+
+  // ======== Historial de posiciones en la clasificación ========
+  const obtenerPosicionesEquipo = (hasta, teamName) => {
+    const history = [];
+    for (let j = 1; j <= hasta; j++) {
+      const tabla = calcularClasificacion(j);
+      const idx = tabla.findIndex(e => e.nombre === teamName);
+      if (idx === -1) continue; // por si aún no ha aparecido
+      const pos = idx + 1;
+      const eq  = tabla[idx];
+      history.push({
+        jornada: j,
+        pos,
+        pts: eq.pts
+      });
+    }
+    return history;
   };
 
   const abrirHistorialEquipo = (equipos, hasta, teamName) => {
-    const eq = equipos.find(e => e.nombre === teamName);
-    const partidos = obtenerPartidosEquipo(hasta, teamName);
+    const eq        = equipos.find(e => e.nombre === teamName);
+    const partidos  = obtenerPartidosEquipo(hasta, teamName);
+    const posHistory= obtenerPosicionesEquipo(hasta, teamName);
 
-    if (!eq && partidos.length === 0) return; // nada que mostrar
+    if (!eq && partidos.length === 0 && posHistory.length === 0) return; // nada que mostrar
 
-    // Resetear visibilidad del escudo siempre que abrimos
+    // Escudo
     if (teamBadgeImg) {
       teamBadgeImg.style.visibility = '';
       teamBadgeImg.src = logoPath(teamName);
@@ -212,6 +229,42 @@
       teamMetaEl.textContent = `Resultados hasta la jornada ${hasta}`;
     }
 
+    // Histórico de posiciones
+    if (teamPosHistoryEl) {
+      if (!posHistory.length) {
+        teamPosHistoryEl.innerHTML = '';
+      } else {
+        teamPosHistoryEl.innerHTML = `
+          <h3 class="team-pos-title">Evolución en la clasificación</h3>
+          <div class="team-pos-list">
+            ${posHistory.map((h, idx) => {
+              const prev = idx > 0 ? posHistory[idx - 1].pos : null;
+              let trend = '';
+              if (prev !== null) {
+                if (h.pos < prev)      trend = '↑';
+                else if (h.pos > prev) trend = '↓';
+              }
+              const trendClass =
+                !trend ? '' :
+                (trend === '↑' ? 'pos-up' :
+                 (trend === '↓' ? 'pos-down' : ''));
+              return `
+                <div class="team-pos-row">
+                  <span class="chip chip-jornada">J${h.jornada}</span>
+                  <span class="team-pos-value">
+                    ${h.pos}º
+                    ${trend ? `<span class="team-pos-trend ${trendClass}">${trend}</span>` : ''}
+                  </span>
+                  <span class="team-pos-points">${h.pts} pts</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+    }
+
+    // Partidos
     if (teamMatchesEl) {
       if (!partidos.length) {
         teamMatchesEl.innerHTML = `<p class="hint">Este equipo todavía no ha disputado ningún partido con resultado cerrado hasta la jornada ${hasta}.</p>`;
