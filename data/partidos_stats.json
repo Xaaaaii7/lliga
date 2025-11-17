@@ -178,7 +178,7 @@
   },
   "J4-P5": {
     "Tes": {},
-    "Adriel": {}
+    "Pesico": {}
   },
   "J4-P6": {
     "Vandal":{"posesion": 42, "tiros": 2, "tiros_a_puerta": 1, "goles": 1, "faltas": 1, "fueras_de_juego": 1, "corners": 0, "tiros_libres": 0, "pases": 89, "pases_completados": 63, "centros": 3, "pases_interceptados": 18, "entradas": 3, "paradas": 4, "rojas": 0},
@@ -209,8 +209,8 @@
     "Franco":{"goles":0,"posesion":56,"tiros":2,"tiros_a_puerta":0,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":0,"pases":138,"pases_completados":111,"centros":7,"pases_interceptados":19,"entradas":9,"paradas":5, "rojas": 0}
   },
   "J5-P2": {
-    "Joel": {},
-    "Leandro": {}
+    "Joel": {"goles":2,"posesion":54,"tiros":8,"tiros_a_puerta":5,"faltas":1,"fueras_de_juego":1,"corners":0,"tiros_libres":1,"pases":99,"pases_completados":77,"centros":3,"pases_interceptados":15,"entradas":4,"paradas":4, "rojas": 0},
+    "Leandro": {"goles":2,"posesion":46,"tiros":7,"tiros_a_puerta":5,"faltas":1,"fueras_de_juego":0,"corners":0,"tiros_libres":1,"pases":113,"pases_completados":88,"centros":6,"pases_interceptados":16,"entradas":5,"paradas":1, "rojas":0}
   },
   "J5-P3": {
     "Eudald": {"goles":4,"posesion":47,"tiros":7,"tiros_a_puerta":6,"faltas":0,"fueras_de_juego":0,"corners":0,"tiros_libres":3,"pases":154,"pases_completados":124,"centros":2,"pases_interceptados":24,"entradas":7,"paradas":2, "rojas": 0},
@@ -218,7 +218,7 @@
   },
   "J5-P4": {
     "Josep": {},
-    "Adriel": {}
+    "Pesico": {}
   },
   "J5-P5": {
     "Jordi": {"goles":4,"posesion":50,"tiros":9,"tiros_a_puerta":7,"faltas":2,"fueras_de_juego":2,"corners":0,"tiros_libres":4,"pases":132,"pases_completados":85,"centros":5,"pases_interceptados":37,"entradas":11,"paradas":1, "rojas": 0},
