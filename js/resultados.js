@@ -116,7 +116,7 @@
     statsIndex = {};
   }
 
-  // Render de tabla de estadísticas + cabecera bonita (sin escudos)
+   // Render de tabla de estadísticas + cabecera bonita (sin escudos)
   const renderStats = (statsObj, meta) => {
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
@@ -135,6 +135,8 @@
     const metaLine = [fechaTexto, horaTexto, jTexto].filter(Boolean).join(' · ');
 
     let tableHtml = '';
+    let summaryHtml = '';
+
     if (!hasStats) {
       tableHtml = `<p class="hint">No hay estadísticas detalladas para este partido.</p>`;
     } else {
@@ -143,6 +145,48 @@
       const Adata = statsObj[A] || {};
       const Bdata = statsObj[B] || {};
 
+      const get = (data, k) => (data && Object.prototype.hasOwnProperty.call(data, k)) ? data[k] : null;
+
+      // ===== Tarjetas-resumen (moderno) =====
+      const ataqueKeys   = ['goles','tiros','tiros_a_puerta'];
+      const balonKeys    = ['posesion','pases','pases_completados','centros'];
+
+      const buildKvList = (keys) => keys
+        .filter(k => get(Adata,k) !== null || get(Bdata,k) !== null)
+        .map(k => `
+          <li>
+            <span>${k.replace(/_/g,' ')}</span>
+            <span>${get(Adata,k) ?? '—'} · ${get(Bdata,k) ?? '—'}</span>
+          </li>
+        `).join('');
+
+      const ataqueHtml = buildKvList(ataqueKeys);
+      const balonHtml  = buildKvList(balonKeys);
+
+      if (ataqueHtml || balonHtml) {
+        summaryHtml = `
+          <div class="stats-summary cards-2col">
+            ${ataqueHtml ? `
+              <div class="card">
+                <h3>Ataque</h3>
+                <ul class="kv">
+                  ${ataqueHtml}
+                </ul>
+              </div>
+            ` : ''}
+            ${balonHtml ? `
+              <div class="card">
+                <h3>Juego con balón</h3>
+                <ul class="kv">
+                  ${balonHtml}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // ===== Tabla completa =====
       const orden = [
         'goles','posesion','tiros','tiros_a_puerta','faltas',
         'fueras_de_juego','corners','tiros_libres','pases',
@@ -161,7 +205,7 @@
         `).join('');
 
       tableHtml = `
-        <table class="stats-table">
+        <table class="stats-table stats-table-modern">
           <thead>
             <tr>
               <th>Estadística</th>
@@ -183,6 +227,7 @@
         </div>
         ${metaLine ? `<p class="stats-meta">${metaLine}</p>` : ''}
       </div>
+      ${summaryHtml}
       ${tableHtml}
     `;
   };
