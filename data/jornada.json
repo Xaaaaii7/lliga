@@ -24,8 +24,19 @@
     "gol_youtube": "8xcbhKOcx-A",
     "poll": {
       "type": "strawpoll",
-      "embed_url": "https://strawpoll.com/embed/wby5QEajXyA"
+      "embed_url": "https://strawpoll.com/embed/wby5QEajXyA",
+      "winner": "Cole Palmer",
+      "winner_team": "Jordi"
      }
-   }
+   },
+  {
+    "jornada": 4,
+    "gol_youtube": "",
+    "poll": {
+      "type": "strawpoll",
+      "embed_url": "https://strawpoll.com/embed/asdadw"
+    }
+  }
+  }
 ]
 
