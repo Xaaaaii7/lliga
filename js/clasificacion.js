@@ -42,8 +42,10 @@
     if (teamMetaEl)    teamMetaEl.textContent    = '';
     if (teamMatchesEl) teamMatchesEl.innerHTML   = '';
     if (teamBadgeImg) {
-      teamBadgeImg.src = '';
+      // Importante: quitar src sin disparar onerror y resetear visibilidad
+      teamBadgeImg.removeAttribute('src');
       teamBadgeImg.alt = '';
+      teamBadgeImg.style.visibility = '';
     }
   };
 
@@ -151,8 +153,8 @@
 
         if (p.local === teamName || p.visitante === teamName) {
           const isLocal = p.local === teamName;
-          const gf = isLocal ? gl : gv;
-          const gc = isLocal ? gv : gl;
+          const gf = isLocal ? gl : gv;  // goles del equipo
+          const gc = isLocal ? gv : gl;  // goles del rival
           let result = 'E';
           if (gf > gc) result = 'V';
           else if (gf < gc) result = 'D';
@@ -161,6 +163,10 @@
             jornada: i+1,
             local: p.local,
             visitante: p.visitante,
+            // marcador real local-visitante
+            gl,
+            gv,
+            // desde el punto de vista del equipo
             gf,
             gc,
             isLocal,
@@ -169,7 +175,7 @@
         }
       }
     }
-    // ya están en orden por jornada (i+1)
+    // En orden de jornada según el JSON
     return matches;
   };
 
@@ -179,13 +185,18 @@
 
     if (!eq && partidos.length === 0) return; // nada que mostrar
 
-    // Título y escudo
-    if (teamTitleEl)   teamTitleEl.textContent   = teamName;
+    // Resetear visibilidad del escudo siempre que abrimos
     if (teamBadgeImg) {
+      teamBadgeImg.style.visibility = '';
       teamBadgeImg.src = logoPath(teamName);
       teamBadgeImg.alt = `Escudo ${teamName}`;
-      teamBadgeImg.onerror = () => { teamBadgeImg.style.visibility = 'hidden'; };
+      teamBadgeImg.onerror = () => {
+        teamBadgeImg.style.visibility = 'hidden';
+      };
     }
+
+    // Título
+    if (teamTitleEl)   teamTitleEl.textContent   = teamName;
 
     // Resumen tipo "PJ 8 · 5G 2E 1P · 15 GF · 7 GC · DG +8 · 17 pts"
     if (eq && teamSummaryEl) {
@@ -222,7 +233,7 @@
                 <span class="team-match-team ${m.isLocal ? 'highlight-team' : ''}">
                   ${m.local}
                 </span>
-                <span class="team-match-score">${m.gf} – ${m.gc}</span>
+                <span class="team-match-score">${m.gl} – ${m.gv}</span>
                 <span class="team-match-team ${!m.isLocal ? 'highlight-team' : ''}">
                   ${m.visitante}
                 </span>
