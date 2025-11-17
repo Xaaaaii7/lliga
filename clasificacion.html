@@ -8,23 +8,47 @@
 </head>
 <body class="page-clasificacion">
 <header class="site-header">
-<img src="img/logo.png" alt="Logo Torneo" class="logo" />
-<h1>Clasificación</h1>
-<nav id="main-nav"></nav>
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Clasificación</h1>
+  <nav id="main-nav"></nav>
 </header>
+
 <main class="container">
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
-<th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
-</tr>
-</thead>
-<tbody id="tabla-clasificacion"></tbody>
-</table>
-</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
+          <th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-clasificacion"></tbody>
+    </table>
+  </div>
 </main>
+
+<!-- Modal historial de equipo -->
+<div id="team-backdrop" class="modal-backdrop" hidden>
+  <div class="modal team-modal" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
+    <button class="modal-close" id="team-modal-close" aria-label="Cerrar">✕</button>
+
+    <header class="team-modal-header">
+      <div class="team-modal-main">
+        <img id="team-modal-badge" class="team-badge-large" src="" alt="" />
+        <div>
+          <h2 id="team-modal-title"></h2>
+          <p id="team-modal-summary" class="team-modal-summary"></p>
+        </div>
+      </div>
+      <p id="team-modal-meta" class="team-modal-meta"></p>
+    </header>
+
+    <div id="team-modal-matches" class="team-modal-matches">
+      <!-- aquí se inyecta la lista de partidos -->
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer">© Torneo entre amigos</footer>
 <script src="js/common.js"></script>
 <script src="js/clasificacion.js"></script>
