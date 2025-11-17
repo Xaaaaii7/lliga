@@ -6,7 +6,7 @@
       "type": "strawpoll",
       "embed_url": "https://strawpoll.com/embed/B2ZB9olwEgJ",
       "winner": "Ademola Lookman",
-      "winner_detail": "Golazo"
+      "winner_team": "Eloi"
     }
   },
   {
@@ -14,6 +14,8 @@
     "gol_youtube": "k7TPiwApAa0",
     "poll": {
       "type": "strawpoll",
+      "winner" : "Rodrigo Mora",
+      "winner-team": "Enric",
       "embed_url": "https://strawpoll.com/embed/w4nWWm255nA" 
     }
   },
