@@ -269,8 +269,8 @@
     "Ricard": {"goles":1,"posesion":42,"tiros":4,"tiros_a_puerta":4,"faltas":0,"fueras_de_juego":0,"corners":2,"tiros_libres":1,"pases":128,"pases_completados":101,"centros":0,"pases_interceptados":19,"entradas":3,"paradas":3, "rojas":0}
   },
   "J6-P6": {
-    "Jordi": {},
-    "Erik": {}
+    "Jordi": {"goles":2,"posesion":53,"tiros":7,"tiros_a_puerta":6,"faltas":6,"fueras_de_juego":0,"corners":0,"tiros_libres":1,"pases":104,"pases_completados":81,"centros":3,"pases_interceptados":18,"entradas":12,"paradas":4, "rojas": 0},
+    "Erik": {"goles":2,"posesion":47,"tiros":9,"tiros_a_puerta":5,"faltas":1,"fueras_de_juego":0,"corners":0,"tiros_libres":4,"pases":86,"pases_completados":64,"centros":1,"pases_interceptados":13,"entradas":16,"paradas":5, "rojas": 0}
   },
   "J6-P7": {
     "Tes": {"goles":3,"posesion":56,"tiros":7,"tiros_a_puerta":5,"faltas":3,"fueras_de_juego":1,"corners":0,"tiros_libres":1,"pases":129,"pases_completados":107,"centros":5,"pases_interceptados":15,"entradas":6,"paradas":3, "rojas": 0},
