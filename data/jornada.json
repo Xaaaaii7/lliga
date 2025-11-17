@@ -15,7 +15,7 @@
     "poll": {
       "type": "strawpoll",
       "winner" : "Rodrigo Mora",
-      "winner-team": "Enric",
+      "winner_team": "Enric",
       "embed_url": "https://strawpoll.com/embed/w4nWWm255nA" 
     }
   },
