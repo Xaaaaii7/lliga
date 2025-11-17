@@ -8,6 +8,16 @@
   const closeBtn  = document.getElementById('stats-close');
   const titleEl   = document.getElementById('stats-title');
 
+  // Helpers comunes
+  const isNum = v => typeof v === 'number' && Number.isFinite(v);
+  const norm = s => String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'')
+    .trim();
+  const slug = s => norm(s).replace(/\s+/g,'-');
+  const logoPath = name => `img/${slug(name)}.png`;
+
   // Helpers modal
   const openModal = () => {
     if (!backdrop) return;
@@ -42,8 +52,6 @@
   }
 
   jornadas = [...jornadas].sort((a,b)=>(a.numero || 0) - (b.numero || 0));
-
-  const isNum = v => typeof v === 'number' && Number.isFinite(v);
 
   // Buscar última jornada con al menos un resultado jugado
   let lastPlayed = 0;
@@ -108,7 +116,7 @@
     statsIndex = {};
   }
 
-  // Render de tabla de estadísticas + cabecera bonita
+  // Render de tabla de estadísticas + cabecera bonita (sin escudos)
   const renderStats = (statsObj, meta) => {
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
@@ -204,6 +212,25 @@
       const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
       const jugado = (gl !== null && gv !== null);
 
+      // Chip de resultado global del partido
+      let chipText = '';
+      let chipClass = '';
+      if (jugado) {
+        if (gl > gv) {
+          chipText = 'Victoria local';
+          chipClass = 'chip chip-pos';
+        } else if (gl < gv) {
+          chipText = 'Victoria visitante';
+          chipClass = 'chip chip-neg';
+        } else {
+          chipText = 'Empate';
+          chipClass = 'chip';
+        }
+      }
+      const chipHTML = chipText
+        ? `<span class="result-chip ${chipClass}">${chipText}</span>`
+        : '';
+
       const fechaHora = (p.fecha || j.fecha || p.hora)
         ? `<div class="fecha-hora">
              ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
@@ -228,15 +255,28 @@
                   ${hasStats ? '' : 'data-no-stats="1"'}
                   aria-label="Ver estadísticas del partido">
             <div class="result-teams">
-              <span class="team-name">${p.local}</span>
+              <div class="result-team-block">
+                <img class="result-badge" src="${logoPath(p.local)}"
+                     alt="Escudo ${p.local}"
+                     onerror="this.style.visibility='hidden'">
+                <span class="team-name">${p.local}</span>
+              </div>
               <span class="result-score">${marcador}</span>
-              <span class="team-name">${p.visitante}</span>
+              <div class="result-team-block">
+                <img class="result-badge" src="${logoPath(p.visitante)}"
+                     alt="Escudo ${p.visitante}"
+                     onerror="this.style.visibility='hidden'">
+                <span class="team-name">${p.visitante}</span>
+              </div>
             </div>
             ${fechaHora}
             <div class="result-status-line">
-              <span class="result-status ${jugado ? 'played' : 'pending'}">
-                ${jugado ? 'Finalizado' : 'Pendiente'}
-              </span>
+              <div class="result-status-left">
+                <span class="result-status ${jugado ? 'played' : 'pending'}">
+                  ${jugado ? 'Finalizado' : 'Pendiente'}
+                </span>
+                ${chipHTML}
+              </div>
               ${hasStats ? '<span class="result-link">Ver estadísticas ▸</span>' : ''}
             </div>
           </button>
