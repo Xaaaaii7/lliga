@@ -30,7 +30,7 @@
   navWrap.className = 'jornada-nav';
   navWrap.innerHTML = `
     <button id="prevJornada" class="nav-btn">◀</button>
-    <span id="jornadaLabel"></span>
+    <span id="jornadaLabel" class="jornada-label chip"></span>
     <button id="nextJornada" class="nav-btn">▶</button>
   `;
   tbody.parentElement.insertAdjacentElement('beforebegin', navWrap);
@@ -101,11 +101,17 @@
   const render = (equipos, jNum) => {
     label.textContent = `Jornada ${jNum}`;
     const tierClass = (i, len) => (
-    i < 8 ? 'tier-top' : (i < 12 ? 'tier-mid' : (i >= len-4 ? 'tier-bottom' : '')));
+      i < 8 ? 'tier-top' :
+      (i < 12 ? 'tier-mid' :
+      (i >= len-4 ? 'tier-bottom' : ''))
+    );
     const logoPath = (name) => `img/${slug(name)}.png`;
+
     tbody.innerHTML = equipos.map((e,i)=>`
       <tr class="${tierClass(i,equipos.length)}">
-        <td>${i+1}</td>
+        <td class="pos-cell">
+          <span class="pos-index">${i+1}</span>
+        </td>
         <td class="team-cell">
           <img class="team-badge" src="${logoPath(e.nombre)}" alt="Escudo ${e.nombre}" onerror="this.style.visibility='hidden'">
           <span>${e.nombre}</span>
@@ -136,3 +142,4 @@
   // mostrar por defecto última jornada jugada
   update();
 })();
+
