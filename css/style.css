@@ -875,3 +875,161 @@ ul.kv li{
        de momento solo dejamos el comentario para que lo tengas controlado. */
   }
 }
+/* ==========================
+   MODAL HISTORIAL DE EQUIPO
+   ========================== */
+
+/* Botón nombre de equipo en la tabla (parece texto, pero es clicable) */
+.team-name-btn{
+  background:none;
+  border:0;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+  padding:0;
+  text-align:left;
+}
+.team-name-btn:hover{
+  text-decoration:underline;
+  color:var(--accent);
+}
+
+/* Cabecera del modal de equipo */
+.team-modal-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.team-modal-main{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* Escudo grande en el modal */
+.team-badge-large{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  background:#fff;
+  padding:4px;
+  object-fit:contain;
+}
+
+/* Título y textos del modal */
+#team-modal-title{
+  margin:0 0 4px;
+  font-size:1.4rem;
+}
+.team-modal-summary{
+  margin:0;
+  font-size:.9rem;
+  color:#cbd5f5;
+}
+.team-modal-meta{
+  margin:0;
+  font-size:.85rem;
+  color:var(--muted);
+}
+
+/* Contenedor de la lista de partidos */
+.team-modal-matches{
+  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+/* Fila de partido */
+.team-match-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+/* Columna central: nombres + marcador */
+.team-match-center{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.team-match-team{
+  font-size:.9rem;
+}
+.highlight-team{
+  font-weight:700;
+}
+
+.team-match-score{
+  font-weight:700;
+  min-width:52px;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Chip jornada */
+.chip-jornada{
+  font-size:.75rem;
+}
+
+/* “Píldora” de resultado */
+.result-pill{
+  font-size:.75rem;
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:600;
+}
+
+/* Colores por resultado */
+.result-win{
+  border-color:rgba(34,197,94,0.7);
+  background:rgba(22,163,74,0.18);
+}
+.result-win .result-pill{
+  background:#16a34a;
+  color:#e9fdf1;
+}
+
+.result-draw{
+  border-color:rgba(156,163,175,0.7);
+  background:rgba(55,65,81,0.3);
+}
+.result-draw .result-pill{
+  background:#4b5563;
+  color:#f9fafb;
+}
+
+.result-loss{
+  border-color:rgba(239,68,68,0.7);
+  background:rgba(127,29,29,0.25);
+}
+.result-loss .result-pill{
+  background:#dc2626;
+  color:#fef2f2;
+}
+
+/* Responsive modal equipo */
+@media (max-width:640px){
+  .team-modal-header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .team-match-row{
+    grid-template-columns:1fr;
+    align-items:flex-start;
+  }
+  .team-match-center{
+    width:100%;
+    justify-content:space-between;
+  }
+}
