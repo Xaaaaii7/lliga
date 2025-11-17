@@ -8,6 +8,18 @@
     return;
   }
 
+  // Helpers para slugs, escudos y fotos
+  const norm = s => String(s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'')
+    .trim();
+
+  const slug = s => norm(s).replace(/\s+/g,'-');
+
+  const logoPath = eq => `img/${slug(eq)}.png`;
+  const playerPhotoPath = nombre => `img/jugadores/${slug(nombre)}.jpg`;
+
   // Ordenamos por número de jornada (por si el JSON no viene ordenado)
   const jornadas = jornadasRaw.slice().sort((a,b) => (a.jornada || 0) - (b.jornada || 0));
 
@@ -28,6 +40,60 @@
   const nextBtn = navWrap.querySelector('#nextJornada');
   const label   = navWrap.querySelector('#jornadaLabel');
 
+  // Hero de ganador (si existe)
+  function renderWinnerHero(j, num) {
+    const poll = j.poll || {};
+    const winnerName   = poll.winner;
+    if (!winnerName) return '';
+
+    const teamName     = poll.winner_team || poll.team || '';
+    const detail       = poll.winner_detail;
+
+    const fotoJugador  = playerPhotoPath(winnerName);
+    const escudoTeam   = teamName ? logoPath(teamName) : null;
+
+    return `
+      <div class="jornada-winner-hero">
+        <div class="jornada-winner-hero-card">
+          <div class="jornada-winner-photo-wrapper">
+            <img
+              src="${fotoJugador}"
+              alt="Foto de ${winnerName}"
+              class="jornada-winner-photo"
+              onerror="this.style.visibility='hidden'">
+          </div>
+          <div class="jornada-winner-info">
+            <div class="jornada-winner-label">
+              Ganador votación · Jornada ${num}
+            </div>
+            <h3 class="jornada-winner-name">${winnerName}</h3>
+
+            ${teamName ? `
+              <div class="jornada-winner-team">
+                <div class="jornada-winner-team-inner">
+                  ${escudoTeam ? `
+                    <img
+                      src="${escudoTeam}"
+                      alt="Escudo ${teamName}"
+                      class="jornada-winner-team-logo"
+                      onerror="this.style.visibility='hidden'">
+                  ` : ''}
+                  <span class="jornada-winner-team-name">${teamName}</span>
+                </div>
+              </div>
+            ` : ''}
+
+            ${detail ? `
+              <div class="jornada-winner-detail">
+                ${detail}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   const render = () => {
     const j = jornadas[currentIndex];
     if (!j) return;
@@ -35,7 +101,9 @@
     const num = j.jornada ?? (currentIndex + 1);
     if (label) label.textContent = `Jornada ${num}`;
 
-    // Vídeo: marco chulo + iframe o "Próximamente"
+    const hasWinner = !!j.poll?.winner;
+
+    // Vídeo con marco
     const videoHtml = j.gol_youtube
       ? `
         <div class="video-frame">
@@ -50,8 +118,8 @@
       `
       : '<p>Próximamente…</p>';
 
-    // Encuesta (solo si hay poll.embed_url)
-    const pollHtml = j.poll?.embed_url
+    // Encuesta: solo si NO hay ganador
+    const pollHtml = (!hasWinner && j.poll?.embed_url)
       ? `
         <div class="poll-wrap">
           <h3 style="margin:16px 0 8px">Vota el mejor gol</h3>
@@ -68,28 +136,15 @@
       `
       : '';
 
-    // Ganador de la votación (opcional, se rellena en jornada.json)
-    // Ejemplo en JSON:
-    // "poll": { "embed_url": "...", "winner": "Nombre jugador", "winner_detail": "Equipo / gol minuto 80" }
-    const winnerName   = j.poll?.winner;
-    const winnerDetail = j.poll?.winner_detail;
-
-    const winnerHtml = winnerName
-      ? `
-        <div class="poll-winner">
-          <div class="poll-winner-label">Ganador votación</div>
-          <div class="poll-winner-name">${winnerName}</div>
-          ${winnerDetail ? `<div class="poll-winner-detail">${winnerDetail}</div>` : ''}
-        </div>
-      `
-      : '';
+    // Hero de ganador (si hay winner en JSON)
+    const winnerHeroHtml = hasWinner ? renderWinnerHero(j, num) : '';
 
     root.innerHTML = `
       <section class="jornada-bloque">
         <h2>Gol de la jornada ${num}</h2>
         ${videoHtml}
         ${pollHtml}
-        ${winnerHtml}
+        ${winnerHeroHtml}
       </section>
     `;
 
