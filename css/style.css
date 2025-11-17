@@ -1818,3 +1818,70 @@ ul.kv li{
     justify-items:flex-start;
   }
 }
+/* ==========================
+   HERO MVP EQUIPO JORNADA
+   ========================== */
+
+.jornada-mvp-hero{
+  margin-top:10px;
+}
+
+.jornada-mvp-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:16px;
+  background:linear-gradient(135deg,
+    rgba(15,23,42,0.98),
+    rgba(22,163,74,0.45)
+  );
+  border:1px solid rgba(74,222,128,0.6);
+  box-shadow:0 14px 32px rgba(0,0,0,.6);
+}
+
+.jornada-mvp-logo-wrap{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  padding:3px;
+  background:#e5fbe9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.jornada-mvp-logo{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.jornada-mvp-info{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.jornada-mvp-label{
+  font-size:0.75rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:#bbf7d0;
+}
+
+.jornada-mvp-name{
+  font-size:1.05rem;
+  font-weight:700;
+}
+
+.jornada-mvp-meta{
+  font-size:0.85rem;
+  color:#e5e7eb;
+}
+
+@media (max-width:600px){
+  .jornada-mvp-card{
+    padding:9px 10px;
+  }
+}
