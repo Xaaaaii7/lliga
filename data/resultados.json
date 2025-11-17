@@ -179,7 +179,7 @@
   {
     "numero": 6,
     "partidos": [
-      { "id": "J6-P1",  "local": "Gimeno",  "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J6-P1",  "local": "Gimeno",  "visitante": "Leandro", "fecha": "2025-09-22", "hora": "20:00", "goles_local": 4, "goles_visitante": 1 },
       { "id": "J6-P2",  "local": "Franco",  "visitante": "Pablo",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 1, "goles_visitante": 3 },
       { "id": "J6-P3",  "local": "Joel",    "visitante": "Pesico",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J6-P4",  "local": "Eudald",  "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 4, "goles_visitante": 2 },
