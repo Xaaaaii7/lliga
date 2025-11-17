@@ -26,15 +26,9 @@
   const playerPhotoPath = nombre => `img/jugadores/${slug(nombre)}.jpg`;
 
   // ==========================
-  //   MVP POR JORNADA (equipo)
+  //   HELPERS DE MÉTRICAS
   // ==========================
 
-  let mvpPorJornada = {};
-  if (Array.isArray(jornadasRes) && statsIndex) {
-    mvpPorJornada = computeMvpPorJornada(jornadasRes, statsIndex);
-  }
-
-  // --- helpers métricas (copiados del sistema de jugadores) ---
   const parsePct01 = v => {
     if (v == null) return null;
     if (typeof v === 'string') {
@@ -62,9 +56,19 @@
   };
   const efectRival = t => t.tirosRival>0 ? t.golesEncajados/t.tirosRival : NaN;
 
+  // ==========================
+  //   MVP POR JORNADA (equipo)
+  // ==========================
+
+  let mvpPorJornada = {};
+  if (Array.isArray(jornadasRes) && statsIndex) {
+    mvpPorJornada = computeMvpPorJornada(jornadasRes, statsIndex);
+  }
+
   function computeMvpPorJornada(jornadasRes, statsIndex) {
     const result = {};
 
+    // ranking normalizado 0..1 por métrica
     const rankMetric = (teams, valueFn, { highIsBetter }) => {
       const list = teams
         .map(t => ({ t, v: valueFn(t) }))
@@ -260,7 +264,9 @@
   const nextBtn = navWrap.querySelector('#nextJornada');
   const label   = navWrap.querySelector('#jornadaLabel');
 
-  // Hero de ganador de votación (jugador)
+  // ==========================
+  //   HERO ganador votación
+  // ==========================
   function renderWinnerHero(jCfg, num) {
     const poll = jCfg.poll || {};
     const winnerName   = poll.winner;
@@ -314,7 +320,9 @@
     `;
   }
 
-  // Hero MVP de la jornada (equipo)
+  // ==========================
+  //   HERO MVP equipo jornada
+  // ==========================
   function renderMvpHero(num) {
     const mvp = mvpPorJornada[num];
     if (!mvp) return '';
@@ -344,6 +352,9 @@
     `;
   }
 
+  // ==========================
+  //   RENDER PRINCIPAL
+  // ==========================
   const render = () => {
     const jCfg = jornadas[currentIndex];
     if (!jCfg) return;
@@ -353,7 +364,7 @@
 
     const hasWinner = !!jCfg.poll?.winner;
 
-    // Vídeo
+    // Vídeo con marco
     const videoHtml = jCfg.gol_youtube
       ? `
         <div class="video-frame">
