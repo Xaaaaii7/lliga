@@ -1090,3 +1090,171 @@ ul.kv li{
     font-size:.8rem;
   }
 }
+/* ==========================
+   PÁGINA RESULTADOS
+   ========================== */
+
+.page-resultados main{
+  margin-top:18px;
+}
+
+/* Nav de jornadas reutiliza .jornada-nav y .nav-btn,
+   aquí solo afinamos un poco en esta página */
+.page-resultados .resultados-nav{
+  margin-bottom:16px;
+}
+
+/* Grid de partidos de una jornada */
+.results-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:14px;
+}
+
+/* Tarjeta de partido estilo “panel” */
+.result-card{
+  background:var(--bg-elevated);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.result-card.result-played{
+  border-color:var(--accent-soft);
+}
+.result-card.result-pending{
+  border-style:dashed;
+  border-color:rgba(148,163,184,0.4);
+}
+
+/* Botón interior (todo el panel es clicable) */
+.result-main{
+  background:none;
+  border:0;
+  padding:10px 12px 12px;
+  width:100%;
+  text-align:left;
+  color:inherit;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  cursor:pointer;
+}
+.result-card:hover .result-main{
+  transform:translateY(-1px);
+}
+.result-card:hover{
+  box-shadow:0 18px 40px rgba(0,0,0,.6);
+  border-color:var(--accent-soft);
+}
+
+/* Línea equipos + marcador */
+.result-teams{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-weight:600;
+}
+.result-score{
+  font-size:1.4rem;
+  font-weight:800;
+  min-width:60px;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.result-teams .team-name{
+  font-size:.9rem;
+}
+
+/* Línea de estado (Finalizado / Pendiente + enlace stats) */
+.result-status-line{
+  margin-top:6px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:.8rem;
+}
+
+.result-status{
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:600;
+}
+.result-status.played{
+  background:rgba(22,163,74,0.18);
+  color:#bbf7d0;
+}
+.result-status.pending{
+  background:rgba(55,65,81,0.75);
+  color:#e5e7eb;
+}
+
+.result-link{
+  color:var(--accent);
+  font-weight:500;
+}
+
+/* Enlace stream debajo de la card */
+.result-stream{
+  border-top:1px solid rgba(148,163,184,0.25);
+  padding:6px 10px 8px;
+  text-align:center;
+  font-size:.82rem;
+}
+.result-stream a{
+  color:#f97373;
+  text-decoration:none;
+}
+.result-stream a:hover{
+  text-decoration:underline;
+}
+
+/* Ajustes responsive Resultados */
+@media (max-width:720px){
+  .results-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ==========================
+   MODAL DE ESTADÍSTICAS
+   ========================== */
+
+.stats-header{
+  margin-bottom:12px;
+}
+.stats-teams{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.stats-team-name{
+  font-weight:700;
+  font-size:1rem;
+}
+.stats-score{
+  font-size:1.6rem;
+  font-weight:800;
+  min-width:70px;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.stats-meta{
+  margin:4px 0 0;
+  font-size:.85rem;
+  color:var(--muted);
+}
+
+@media (max-width:640px){
+  .stats-teams{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .stats-score{
+    margin:2px 0;
+  }
+}
