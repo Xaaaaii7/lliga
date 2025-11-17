@@ -1,82 +1,307 @@
 (async () => {
   const root = document.getElementById('resultados');
+  if (!root) return;
 
   // Modal refs
-  const backdrop = document.getElementById('stats-backdrop');
-  const bodyEl = document.getElementById('stats-body');
-  const closeBtn = document.getElementById('stats-close');
+  const backdrop  = document.getElementById('stats-backdrop');
+  const bodyEl    = document.getElementById('stats-body');
+  const closeBtn  = document.getElementById('stats-close');
+  const titleEl   = document.getElementById('stats-title');
 
   // Helpers modal
-  const openModal = () => { backdrop.hidden = false; };
-  const closeModal = () => { backdrop.hidden = true; bodyEl.innerHTML = ''; };
+  const openModal = () => {
+    if (!backdrop) return;
+    backdrop.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+  const closeModal = () => {
+    if (!backdrop) return;
+    backdrop.hidden = true;
+    document.body.style.overflow = '';
+    if (bodyEl)  bodyEl.innerHTML = '';
+    if (titleEl) titleEl.textContent = 'Estadísticas del partido';
+  };
 
   // Cerrar siempre al cargar (por si el HTML quedó sin hidden)
   closeModal();
 
   // Listeners de cierre
-  closeBtn.addEventListener('click', closeModal);
-  backdrop.addEventListener('click', (e)=> { if (e.target === backdrop) closeModal(); });
-  document.addEventListener('keydown', (e)=> { if (e.key === 'Escape' && !backdrop.hidden) closeModal(); });
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', (e)=> {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener('keydown', (e)=> {
+    if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
+  });
 
-  // Carga datos
-  const jornadas = await loadJSON('data/resultados.json').catch(()=>[]);
-  jornadas.sort((a,b)=> a.numero - b.numero);
+  // Carga datos de jornadas
+  let jornadas = await loadJSON('data/resultados.json').catch(()=>[]);
+  if (!Array.isArray(jornadas) || !jornadas.length) {
+    root.innerHTML = `<p class="hint">No hay jornadas configuradas todavía.</p>`;
+    return;
+  }
 
-  root.innerHTML = jornadas.map(j=>{
-   const partidos = (j.partidos||[]).map(p=>{
-  const marcador = (p.goles_local ?? '-') + ' - ' + (p.goles_visitante ?? '-');
-   const pid = p.id || `J${j.numero}-P${idx+1}`;
+  jornadas = [...jornadas].sort((a,b)=>(a.numero || 0) - (b.numero || 0));
 
-  const fechaHora = (p.fecha && p.hora)
-    ? `<div class="fecha-hora">${fmtDate(p.fecha)} · ${p.hora}</div>`
-    : '';
+  const isNum = v => typeof v === 'number' && Number.isFinite(v);
 
-  const streamHTML = p.stream
-    ? `<div style="margin-top:6px;text-align:center;">
-         <a href="${p.stream}" target="_blank" rel="noopener noreferrer">🔴 Ver directo</a>
-       </div>`
-    : '';
+  // Buscar última jornada con al menos un resultado jugado
+  let lastPlayed = 0;
+  jornadas.forEach(j => {
+    if ((j.partidos || []).some(p => isNum(p.goles_local) && isNum(p.goles_visitante))) {
+      if (j.numero > lastPlayed) lastPlayed = j.numero;
+    }
+  });
+  if (!lastPlayed) {
+    // fallback: la última jornada por número
+    lastPlayed = jornadas[jornadas.length - 1].numero;
+  }
 
-  return `
-    <div>
-      <button class="player-card partido-card" data-partido-id="${pid}" aria-label="Ver estadísticas">
-        <div><strong>${p.local}</strong> vs <strong>${p.visitante}</strong></div>
-        ${fechaHora}
-        <div style="font-size:1.25rem;margin-top:6px">${marcador}</div>
-      </button>
-      ${streamHTML}
-    </div>`;
-}).join('');
+  const minJornada = Math.min(...jornadas.map(j => j.numero));
+  const maxJornada = Math.max(...jornadas.map(j => j.numero));
 
+  // Índice meta de partidos por id (para el modal)
+  const partidoMeta = {};
+  jornadas.forEach(j => {
+    (j.partidos || []).forEach((p, idx) => {
+      const pid = p.id || `J${j.numero}-P${idx+1}`;
+      partidoMeta[pid] = {
+        id: pid,
+        jornada: j.numero,
+        fechaJornada: j.fecha,
+        fecha: p.fecha || j.fecha,
+        hora: p.hora || '',
+        local: p.local,
+        visitante: p.visitante,
+        goles_local: p.goles_local,
+        goles_visitante: p.goles_visitante
+      };
+    });
+  });
 
-    return `
-      <section class="jornada">
-        <h2>Jornada ${j.numero} ${j.fecha?`· <small>${fmtDate(j.fecha)}</small>`:''}</h2>
-        <div class="team-grid">${partidos}</div>
-      </section>`;
-  }).join('');
+  // Construir contenedor de navegación + bloque de jornada
+  const navWrap = document.createElement('div');
+  navWrap.className = 'jornada-nav resultados-nav';
+  navWrap.innerHTML = `
+    <button id="res-prev" class="nav-btn">◀</button>
+    <span id="res-label" class="jornada-label chip"></span>
+    <button id="res-next" class="nav-btn">▶</button>
+  `;
+
+  const jornadaWrap = document.createElement('div');
+  jornadaWrap.id = 'jornada-contenido';
+  jornadaWrap.className = 'resultados-jornada';
+
+  root.innerHTML = '';
+  root.appendChild(navWrap);
+  root.appendChild(jornadaWrap);
+
+  const labelEl = document.getElementById('res-label');
+  const prevBtn = document.getElementById('res-prev');
+  const nextBtn = document.getElementById('res-next');
 
   // Cargar índice de stats (tolerante a errores)
   let statsIndex = {};
-  try { statsIndex = await loadJSON('data/partidos_stats.json'); } catch { statsIndex = {}; }
+  try {
+    statsIndex = await loadJSON('data/partidos_stats.json');
+  } catch {
+    statsIndex = {};
+  }
 
-  const renderStatsTable = (statsObj)=>{
-    const equipos = Object.keys(statsObj||{});
-    if (equipos.length !== 2) return `<p>No hay estadísticas disponibles.</p>`;
-    const [A,B] = equipos, Adata = statsObj[A], Bdata = statsObj[B];
-    const orden = ['goles','posesion','tiros','tiros_a_puerta','faltas','fueras_de_juego','corners','tiros_libres','pases','pases_completados','centros','pases_interceptados','entradas','paradas'];
-    const rows = orden.filter(k=>Adata?.hasOwnProperty(k)||Bdata?.hasOwnProperty(k))
-      .map(k=>`<tr><th>${k.replace(/_/g,' ')}</th><td>${Adata?.[k] ?? '—'}</td><td>${Bdata?.[k] ?? '—'}</td></tr>`).join('');
-    return `<table class="stats-table"><thead><tr><th>Estadística</th><th>${A}</th><th>${B}</th></tr></thead><tbody>${rows}</tbody></table>`;
+  // Render de tabla de estadísticas + cabecera bonita
+  const renderStats = (statsObj, meta) => {
+    const equipos = Object.keys(statsObj || {});
+    const hasStats = equipos.length === 2;
+
+    const localName  = meta?.local || (equipos[0] || 'Local');
+    const visitName  = meta?.visitante || (equipos[1] || 'Visitante');
+
+    const gl = isNum(meta?.goles_local)     ? meta.goles_local     : null;
+    const gv = isNum(meta?.goles_visitante) ? meta.goles_visitante : null;
+    const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
+
+    const fechaTexto = meta?.fecha ? fmtDate(meta.fecha) : (meta?.fechaJornada ? fmtDate(meta.fechaJornada) : '');
+    const horaTexto  = meta?.hora || '';
+    const jTexto     = meta?.jornada ? `Jornada ${meta.jornada}` : '';
+
+    const metaLine = [fechaTexto, horaTexto, jTexto].filter(Boolean).join(' · ');
+
+    let tableHtml = '';
+    if (!hasStats) {
+      tableHtml = `<p class="hint">No hay estadísticas detalladas para este partido.</p>`;
+    } else {
+      const A = equipos[0];
+      const B = equipos[1];
+      const Adata = statsObj[A] || {};
+      const Bdata = statsObj[B] || {};
+
+      const orden = [
+        'goles','posesion','tiros','tiros_a_puerta','faltas',
+        'fueras_de_juego','corners','tiros_libres','pases',
+        'pases_completados','centros','pases_interceptados',
+        'entradas','paradas'
+      ];
+
+      const rows = orden
+        .filter(k => Adata.hasOwnProperty(k) || Bdata.hasOwnProperty(k))
+        .map(k => `
+          <tr>
+            <th>${k.replace(/_/g,' ')}</th>
+            <td>${Adata[k] ?? '—'}</td>
+            <td>${Bdata[k] ?? '—'}</td>
+          </tr>
+        `).join('');
+
+      tableHtml = `
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Estadística</th>
+              <th>${A}</th>
+              <th>${B}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    return `
+      <div class="stats-header">
+        <div class="stats-teams">
+          <span class="stats-team-name">${localName}</span>
+          <span class="stats-score">${marcador}</span>
+          <span class="stats-team-name">${visitName}</span>
+        </div>
+        ${metaLine ? `<p class="stats-meta">${metaLine}</p>` : ''}
+      </div>
+      ${tableHtml}
+    `;
   };
 
-  // Click en partido → abre modal
-  root.querySelectorAll('.partido-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const id = card.getAttribute('data-partido-id');
-      const stats = statsIndex[id];
-      bodyEl.innerHTML = renderStatsTable(stats);
-      openModal();
-    });
+  // Render de una jornada concreta
+  const renderJornada = (num) => {
+    const j = jornadas.find(x => x.numero === num);
+    if (!j) {
+      jornadaWrap.innerHTML = `<p class="hint">No se ha encontrado la jornada ${num}.</p>`;
+      return;
+    }
+
+    const labelParts = [`Jornada ${j.numero}`];
+    if (j.fecha) labelParts.push(fmtDate(j.fecha));
+    if (labelEl) labelEl.textContent = labelParts.join(' · ');
+
+    const partidos = j.partidos || [];
+    if (!partidos.length) {
+      jornadaWrap.innerHTML = `<p class="hint">Esta jornada no tiene partidos definidos.</p>`;
+      return;
+    }
+
+    const cardsHtml = partidos.map((p, idx) => {
+      const pid = p.id || `J${j.numero}-P${idx+1}`;
+      const gl = isNum(p.goles_local)     ? p.goles_local     : null;
+      const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
+      const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
+      const jugado = (gl !== null && gv !== null);
+
+      const fechaHora = (p.fecha || j.fecha || p.hora)
+        ? `<div class="fecha-hora">
+             ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
+             ${p.hora ? ` · ${p.hora}` : ''}
+           </div>`
+        : '';
+
+      const streamHTML = p.stream
+        ? `<div class="result-stream">
+             <a href="${p.stream}" target="_blank" rel="noopener noreferrer">
+               🔴 Ver directo / VOD
+             </a>
+           </div>`
+        : '';
+
+      const hasStats = !!statsIndex[pid];
+
+      return `
+        <article class="result-card ${jugado ? 'result-played' : 'result-pending'}">
+          <button class="result-main partido-card"
+                  data-partido-id="${pid}"
+                  ${hasStats ? '' : 'data-no-stats="1"'}
+                  aria-label="Ver estadísticas del partido">
+            <div class="result-teams">
+              <span class="team-name">${p.local}</span>
+              <span class="result-score">${marcador}</span>
+              <span class="team-name">${p.visitante}</span>
+            </div>
+            ${fechaHora}
+            <div class="result-status-line">
+              <span class="result-status ${jugado ? 'played' : 'pending'}">
+                ${jugado ? 'Finalizado' : 'Pendiente'}
+              </span>
+              ${hasStats ? '<span class="result-link">Ver estadísticas ▸</span>' : ''}
+            </div>
+          </button>
+          ${streamHTML}
+        </article>
+      `;
+    }).join('');
+
+    jornadaWrap.innerHTML = `
+      <section class="jornada-bloque">
+        <div class="results-grid">
+          ${cardsHtml}
+        </div>
+      </section>
+    `;
+  };
+
+  // Navegación jornadas
+  let current = lastPlayed;
+
+  const updateNav = () => {
+    if (prevBtn) prevBtn.disabled = current <= minJornada;
+    if (nextBtn) nextBtn.disabled = current >= maxJornada;
+  };
+
+  prevBtn?.addEventListener('click', () => {
+    if (current > minJornada) {
+      current--;
+      renderJornada(current);
+      updateNav();
+    }
   });
+
+  nextBtn?.addEventListener('click', () => {
+    if (current < maxJornada) {
+      current++;
+      renderJornada(current);
+      updateNav();
+    }
+  });
+
+  // Delegación: click en tarjeta de partido para abrir stats
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest?.('.partido-card');
+    if (!btn) return;
+
+    const id = btn.getAttribute('data-partido-id');
+    if (!id) return;
+
+    const meta  = partidoMeta[id];
+    const stats = statsIndex[id];
+
+    if (!stats && btn.dataset.noStats === '1') {
+      // Sin estadísticas: simplemente no abrimos nada
+      return;
+    }
+
+    if (bodyEl) bodyEl.innerHTML = renderStats(stats, meta);
+    if (titleEl && meta) {
+      titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
+    }
+    openModal();
+  });
+
+  // Primera carga: última jornada jugada
+  renderJornada(current);
+  updateNav();
 })();
