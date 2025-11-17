@@ -1293,3 +1293,61 @@ ul.kv li{
 .result-chip{
   font-size:.78rem;
 }
+/* ==========================
+   STATS MODERNAS EN MODAL
+   ========================== */
+
+/* Fine-tuning específico de la tabla de stats */
+.stats-table-modern{
+  margin-top:12px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,0.35);
+}
+
+.stats-table-modern thead tr{
+  background:linear-gradient(to right,rgba(31,191,74,0.18),rgba(15,23,42,1));
+}
+.stats-table-modern thead th{
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:.75rem;
+  border-bottom:none;
+}
+
+/* Zebra + hover */
+.stats-table-modern tbody tr:nth-child(odd){
+  background:#050816;
+}
+.stats-table-modern tbody tr:nth-child(even){
+  background:#020513;
+}
+.stats-table-modern tbody tr:hover{
+  background:#0b1120;
+}
+
+/* Columna de nombre de estadística más clara */
+.stats-table-modern tbody th{
+  text-transform:capitalize;
+  font-weight:500;
+  color:#e5e7eb;
+  width:40%;
+}
+
+/* Valores numéricos alineados al centro para look TV */
+.stats-table-modern tbody td{
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Un pelín más compacto en móvil dentro del modal */
+@media (max-width:640px){
+  .stats-summary.cards-2col{
+    margin-bottom:8px;
+  }
+  .stats-table-modern th,
+  .stats-table-modern td{
+    padding:7px;
+    font-size:.9rem;
+  }
+}
