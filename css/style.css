@@ -1258,3 +1258,38 @@ ul.kv li{
     margin:2px 0;
   }
 }
+/* Bloque equipo (escudo encima del nombre) en resultados */
+.result-team-block{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  min-width:70px;
+}
+
+.result-badge{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  background:#fff;
+  padding:3px;
+  object-fit:contain;
+}
+
+/* Ajuste del nombre en este contexto */
+.result-team-block .team-name{
+  font-size:.8rem;
+  text-align:center;
+}
+
+/* Línea de estado: añadimos el chip de resultado al lado del estado */
+.result-status-left{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* Chip de resultado dentro de resultados (reutiliza .chip, .chip-pos, .chip-neg) */
+.result-chip{
+  font-size:.78rem;
+}
