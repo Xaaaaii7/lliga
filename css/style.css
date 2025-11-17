@@ -1478,4 +1478,166 @@ ul.kv li{
   background:#f97316;
   color:#111827;
 }
+/* ==========================
+   PÁGINA PICHICHI JUGADORES
+   ========================== */
+
+.page-pichichi main{
+  margin-top:18px;
+}
+
+/* Hero del máximo goleador */
+.pichichi-hero{
+  margin-bottom:18px;
+}
+
+.pichichi-hero-card{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:16px;
+  align-items:center;
+  padding:16px 18px;
+  border-radius:20px;
+  background:radial-gradient(circle at top left,
+    rgba(31,191,74,0.35),
+    rgba(15,23,42,1));
+  border:1px solid rgba(148,163,184,0.7);
+  box-shadow:0 18px 40px rgba(0,0,0,.65);
+}
+
+.pichichi-hero-photo-wrapper{
+  width:96px;
+  height:96px;
+  border-radius:999px;
+  padding:3px;
+  background:conic-gradient(
+    from 210deg,
+    #fbbf24,
+    #22c55e,
+    #38bdf8,
+    #f97316,
+    #fbbf24
+  );
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.pichichi-hero-photo{
+  width:100%;
+  height:100%;
+  border-radius:999px;
+  object-fit:cover;
+  background:#020617;
+}
+
+.pichichi-hero-info{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.pichichi-hero-label{
+  font-size:.8rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:#bbf7d0;
+}
+
+.pichichi-hero-name{
+  margin:0;
+  font-size:1.5rem;
+  line-height:1.2;
+}
+
+.pichichi-hero-team{
+  font-size:.9rem;
+  color:#e5e7eb;
+}
+
+.pichichi-hero-stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:4px;
+}
+
+.pichichi-hero-stat{
+  min-width:80px;
+}
+
+.pichichi-hero-stat .stat-label{
+  display:block;
+  font-size:.75rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#9ca3af;
+}
+.pichichi-hero-stat .stat-value{
+  display:block;
+  font-size:1.05rem;
+  font-weight:700;
+}
+
+/* Responsive hero */
+@media (max-width:600px){
+  .pichichi-hero-card{
+    grid-template-columns:1fr;
+    justify-items:flex-start;
+  }
+}
+
+/* Tabla Pichichi moderna */
+.page-pichichi .pichichi-table-wrap{
+  background:var(--bg-elevated);
+  border-radius:20px;
+  padding:14px 12px 16px;
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 14px 36px rgba(0,0,0,.5);
+}
+
+.page-pichichi .pichichi-table-wrap h2{
+  font-size:1.15rem;
+  margin:0 0 8px;
+}
+
+.page-pichichi table{
+  font-size:0.92rem;
+}
+.page-pichichi th,
+.page-pichichi td{
+  padding:8px 9px;
+}
+
+/* Cabecera con degradado */
+.page-pichichi thead tr{
+  background:linear-gradient(to right,
+    rgba(31,191,74,0.16),
+    rgba(15,23,42,1));
+}
+.page-pichichi thead th{
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:.75rem;
+  white-space:nowrap;
+}
+
+/* Zebra + hover */
+.page-pichichi tbody tr:nth-child(odd){
+  background:#050816;
+}
+.page-pichichi tbody tr:nth-child(even){
+  background:#020513;
+}
+.page-pichichi tbody tr:hover{
+  background:#0b1120;
+}
+
+/* Columna posición con chip de podio (reutiliza estilos previos) */
+.page-pichichi .jug-pos-cell{
+  white-space:nowrap;
+}
+.page-pichichi .jug-pos-cell .chip-podium{
+  margin-left:4px;
+}
 
