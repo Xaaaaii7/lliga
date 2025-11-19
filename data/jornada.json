@@ -34,8 +34,18 @@
     "gol_youtube": "hBtdhrmSGy0",
     "poll": {
       "type": "strawpoll",
-      "embed_url": "https://strawpoll.com/embed/LVyK2zM25Z0"
+      "embed_url": "https://strawpoll.com/embed/LVyK2zM25Z0",
+      "winner": "Barella",
+      "winner_team": "Gimeno"
     }
+  },
+  {
+    "jornada": 5,
+    "gol_youtube": "",
+    "poll": {
+      "type": "strawpoll",
+      "embed_url": "https://strawpoll.com/embed/SJFHSK"
+    }    
   }
 ]
 
