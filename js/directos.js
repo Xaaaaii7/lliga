@@ -1,106 +1,52 @@
 const API_URL = "https://d39ra5ecf4.execute-api.eu-west-1.amazonaws.com/prod/live-channel";
 const PARENT_DOMAIN = "xaaaaii7.github.io";
 
-// Llama a la Lambda y devuelve array de nicks en directo
-async function fetchLiveChannels() {
+let CHANNEL_TEAM_MAP = {};
+
+// CARGAR MAPPING CANAL → EQUIPO DESDE JSON
+async function loadChannelTeamMap() {
   try {
-    const res = await fetch(API_URL, { cache: "no-store" });
-    if (!res.ok) {
-      console.error("Error al llamar a la API:", res.status);
-      return [];
-    }
-
-    const data = await res.json();
-    if (!data || !Array.isArray(data.channels)) return [];
-    return data.channels;
-  } catch (e) {
-    console.error("Error de red/API:", e);
-    return [];
-  }
-}
-
-// Pone un canal en el iframe principal
-function setMainStream(channel) {
-  const container = document.getElementById("main-stream");
-  const statusEl  = document.getElementById("main-stream-status");
-  if (!container) return;
-
-  if (!channel) {
-    container.innerHTML = "";
-    if (statusEl) {
-      statusEl.textContent = "Ahora mismo no hay ningún canal en directo.";
-    }
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="video-frame live-video-frame">
-      <iframe
-        class="video"
-        src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(PARENT_DOMAIN)}"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
-    </div>
-  `;
-
-  if (statusEl) {
-    statusEl.innerHTML = `
-      <span class="chip chip-live">EN DIRECTO</span>
-      Canal: ${channel}
-    `;
-  }
-}
-
-// Pinta el listado de otros canales y añade los listeners de click
-function renderChannelsList(channels, currentChannel) {
-  const listWrap = document.getElementById("streams-list");
-  const aside    = document.getElementById("streams-list-wrapper");
-  if (!listWrap) return;
-
-  if (!channels.length) {
-    listWrap.innerHTML = "";
-    if (aside) aside.hidden = true;
-    return;
-  }
-
-  if (aside) aside.hidden = channels.length <= 1;
-
-  listWrap.innerHTML = channels.map(ch => `
-    <button
-      class="stream-card ${ch === currentChannel ? "active" : ""}"
-      data-channel="${ch}"
-      type="button"
-    >
-      <div class="stream-card-name">${ch}</div>
-      <div class="stream-card-tag">Cambiar a este directo</div>
-    </button>
-  `).join("");
-
-  listWrap.querySelectorAll(".stream-card").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const ch = btn.dataset.channel;
-      if (!ch) return;
-      setMainStream(ch);
-      // repintamos la lista para actualizar el "active"
-      renderChannelsList(channels, ch);
+    const data = await loadJSON("data/channel_teams.json");
+    const normalized = {};
+    Object.keys(data || {}).forEach(k => {
+      normalized[String(k).toLowerCase()] = data[k];
     });
-  });
+    CHANNEL_TEAM_MAP = normalized;
+  } catch (e) {
+    console.warn("No se pudo cargar data/channel_teams.json", e);
+    CHANNEL_TEAM_MAP = {};
+  }
 }
 
-// Inicialización
 (async () => {
   const root = document.getElementById("stream-container");
   if (!root) return;
 
-  // Montamos layout básico dentro de stream-container
+  // =========================
+  //   Cargamos resultados
+  // =========================
+  const jornadasRes = await loadJSON("data/resultados.json").catch(() => null);
+
+  // ==== helpers de nombres / escudos ====
+  const norm = s => String(s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim();
+
+  const slug = s => norm(s).replace(/\s+/g, "-");
+  const logoPath = eq => eq ? `img/${slug(eq)}.png` : null;
+
+  // =========================
+  //   Layout base
+  // =========================
   root.innerHTML = `
     <div class="stream-layout">
       <div class="stream-main">
         <h2>Directo de la lliga</h2>
         <p id="directo-loading" class="directo-status">Cargando directos...</p>
         <div id="main-stream"></div>
+        <div id="main-stream-match"></div>
         <p id="main-stream-status" class="directo-status"></p>
       </div>
       <aside class="stream-list" id="streams-list-wrapper" hidden>
@@ -110,9 +56,212 @@ function renderChannelsList(channels, currentChannel) {
     </div>
   `;
 
-  const loadingEl = document.getElementById("directo-loading");
+  const loadingEl      = document.getElementById("directo-loading");
+  const matchContainer = document.getElementById("main-stream-match");
 
+  // =========================
+  //   API: canales en directo
+  // =========================
+  async function fetchLiveChannels() {
+    try {
+      const res = await fetch(API_URL, { cache: "no-store" });
+      if (!res.ok) {
+        console.error("Error al llamar a la API:", res.status);
+        return [];
+      }
+
+      const data = await res.json();
+      if (!data || !Array.isArray(data.channels)) return [];
+      return data.channels;
+    } catch (e) {
+      console.error("Error de red/API:", e);
+      return [];
+    }
+  }
+
+  // =========================
+  //   Buscar partido por equipo
+  //   → primer partido sin resultado
+  // =========================
+  function findNextMatchForTeam(teamName) {
+    if (!jornadasRes || !Array.isArray(jornadasRes)) return null;
+    const targetNorm = norm(teamName);
+
+    const jornadasOrdenadas = jornadasRes.slice().sort(
+      (a, b) => (a.numero ?? a.jornada ?? 0) - (b.numero ?? b.jornada ?? 0)
+    );
+
+    for (const j of jornadasOrdenadas) {
+      const jNum   = j.numero ?? j.jornada ?? null;
+      const jFecha = j.fecha;
+
+      for (const p of (j.partidos || [])) {
+        if (!p.local || !p.visitante) continue;
+
+        if (norm(p.local) !== targetNorm && norm(p.visitante) !== targetNorm) continue;
+
+        const glIsNum = typeof p.goles_local === "number" && Number.isFinite(p.goles_local);
+        const gvIsNum = typeof p.goles_visitante === "number" && Number.isFinite(p.goles_visitante);
+
+        // Partido sin resultado aún
+        if (!glIsNum && !gvIsNum) {
+          return {
+            jNum,
+            fecha: p.fecha || jFecha || null,
+            hora:  p.hora || null,
+            local: p.local,
+            visitante: p.visitante
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  // =========================
+  //   Render de bloque partido
+  //   sensitivo a canal
+  // =========================
+  function renderMatchInfoForChannel(channel) {
+    if (!matchContainer) return;
+    matchContainer.innerHTML = "";
+
+    if (!channel) return;
+
+    const key = String(channel).toLowerCase();
+    const teamName = CHANNEL_TEAM_MAP[key];
+    if (!teamName) return;
+
+    const match = findNextMatchForTeam(teamName);
+    if (!match) return;
+
+    const logoLocal = logoPath(match.local);
+    const logoVisit = logoPath(match.visitante);
+
+    const fechaTxt = match.fecha ? fmtDate(match.fecha) : "";
+    const metaLine = (fechaTxt || match.hora)
+      ? `${fechaTxt}${match.hora ? " · " + match.hora : ""}`
+      : "";
+
+    matchContainer.innerHTML = `
+      <div class="directo-match-hero">
+        <div class="directo-match-label">Próximo partido de este canal</div>
+        <div class="directo-match-logos">
+          <div class="directo-match-team">
+            <div class="directo-match-logo-wrap">
+              ${logoLocal ? `
+                <img src="${logoLocal}" alt="Escudo ${match.local}"
+                     onerror="this.style.visibility='hidden'">
+              ` : ""}
+            </div>
+            <div class="directo-match-name">${match.local}</div>
+          </div>
+          <div class="directo-match-vs">VS</div>
+          <div class="directo-match-team">
+            <div class="directo-match-logo-wrap">
+              ${logoVisit ? `
+                <img src="${logoVisit}" alt="Escudo ${match.visitante}"
+                     onerror="this.style.visibility='hidden'">
+              ` : ""}
+            </div>
+            <div class="directo-match-name">${match.visitante}</div>
+          </div>
+        </div>
+        ${metaLine || match.jNum ? `
+          <div class="directo-match-meta">
+            ${match.jNum ? `Jornada ${match.jNum}` : ""}${metaLine ? ` · ${metaLine}` : ""}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }
+
+  // =========================
+  //   Player principal
+  // =========================
+  function setMainStream(channel) {
+    const container = document.getElementById("main-stream");
+    const statusEl  = document.getElementById("main-stream-status");
+    if (!container) return;
+
+    if (!channel) {
+      container.innerHTML = "";
+      if (statusEl) {
+        statusEl.textContent = "Ahora mismo no hay ningún canal en directo.";
+      }
+      renderMatchInfoForChannel(null);
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="video-frame live-video-frame">
+        <iframe
+          class="video"
+          src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(PARENT_DOMAIN)}"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    `;
+
+    if (statusEl) {
+      statusEl.innerHTML = `
+        <span class="chip chip-live">EN DIRECTO</span>
+        Canal: ${channel}
+      `;
+    }
+
+    renderMatchInfoForChannel(channel);
+  }
+
+  // =========================
+  //   Lista lateral de canales
+  // =========================
+  function renderChannelsList(channels, currentChannel) {
+    const listWrap = document.getElementById("streams-list");
+    const aside    = document.getElementById("streams-list-wrapper");
+    if (!listWrap) return;
+
+    if (!channels.length) {
+      listWrap.innerHTML = "";
+      if (aside) aside.hidden = true;
+      return;
+    }
+
+    if (aside) aside.hidden = channels.length <= 1;
+
+    listWrap.innerHTML = channels.map(ch => `
+      <button
+        class="stream-card ${ch === currentChannel ? "active" : ""}"
+        data-channel="${ch}"
+        type="button"
+      >
+        <div class="stream-card-name">${ch}</div>
+        <div class="stream-card-tag">Cambiar a este directo</div>
+      </button>
+    `).join("");
+
+    listWrap.querySelectorAll(".stream-card").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const ch = btn.dataset.channel;
+        if (!ch) return;
+        setMainStream(ch);
+        renderChannelsList(channels, ch);
+      });
+    });
+  }
+
+  // =========================
+  //   Flujo principal
+  // =========================
+
+  // 1) Cargar mapping canal→equipo
+  await loadChannelTeamMap();
+
+  // 2) Pedir canales en directo
   const liveChannels = await fetchLiveChannels();
+
   if (!liveChannels.length) {
     if (loadingEl) {
       loadingEl.innerHTML = `
@@ -127,10 +276,7 @@ function renderChannelsList(channels, currentChannel) {
 
   if (loadingEl) loadingEl.remove();
 
-  // Canal principal = primero en directo
-  const mainChannel   = liveChannels[0];
-  const otherChannels = liveChannels.slice(1);
-
+  const mainChannel = liveChannels[0];
   setMainStream(mainChannel);
   renderChannelsList(liveChannels, mainChannel);
 })();
