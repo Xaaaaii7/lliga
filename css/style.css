@@ -1895,3 +1895,61 @@ ul.kv li{
   font-size:0.9rem;
   color:var(--muted);
 }
+.stream-layout{
+  display:grid;
+  grid-template-columns:2.3fr 1fr;
+  gap:16px;
+  align-items:flex-start;
+}
+
+.stream-main h2{
+  margin-top:0;
+  margin-bottom:8px;
+}
+
+.stream-list h3{
+  margin-top:0;
+  margin-bottom:8px;
+  font-size:0.95rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+/* Tarjetas de canales laterales */
+.stream-card{
+  width:100%;
+  text-align:left;
+  background:var(--card);
+  border-radius:12px;
+  padding:8px 10px;
+  border:1px solid rgba(255,255,255,0.06);
+  cursor:pointer;
+  margin-bottom:8px;
+}
+.stream-card-name{
+  font-weight:600;
+  font-size:0.95rem;
+}
+.stream-card-tag{
+  font-size:0.8rem;
+  color:var(--muted);
+  margin-top:3px;
+}
+.stream-card.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(31,191,74,0.4);
+}
+.stream-card:hover:not(.active){
+  border-color:rgba(255,255,255,0.18);
+}
+
+/* Responsive: pila en vertical si es móvil */
+@media (max-width:800px){
+  .stream-layout{
+    grid-template-columns:1fr;
+  }
+  .stream-list{
+    order:-1; /* si quieres que la lista vaya arriba en móvil, pon esto */
+  }
+}
