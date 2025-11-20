@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['pichichi.html','Pichichi'],
       ['jornada.html','Jornada'],
       ['reglas.html','Reglas'],
-      ['konami.html','Usuarios']// 👈 añadido
+      ['directos.html','Directos']// 👈 añadido
     ];
     nav.innerHTML = links.map(([href,label]) =>
       `<a href="${href}" data-href="${href}">${label}</a>`).join('');
