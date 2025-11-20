@@ -1885,3 +1885,13 @@ ul.kv li{
     padding:9px 10px;
   }
 }
+
+.directo-liga h2{
+  margin-bottom:10px;
+}
+
+.directo-status{
+  margin-top:10px;
+  font-size:0.9rem;
+  color:var(--muted);
+}
