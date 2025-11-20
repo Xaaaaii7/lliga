@@ -136,7 +136,7 @@
       { "id": "J3-P3",  "local": "Jordi",   "visitante": "Franco",  "fecha": "2025-10-27", "hora": "22:00", "goles_local": 2, "goles_visitante": 0, "stream": "https://twitch.tv/enxaiet"},
       { "id": "J3-P4",  "local": "Tes",     "visitante": "Leandro", "fecha": "2025-10-26", "hora": "20:30", "goles_local": 1, "goles_visitante": 0, "stream":"https://twitch.tv/gorritobmx" },
       { "id": "J3-P5",  "local": "Vandal",  "visitante": "Pablo",   "fecha": "2025-10-29", "hora": "22:00", "goles_local": 1, "goles_visitante": 3, "stream":"https://twitch.tv/rodrery" },
-      { "id": "J3-P6",  "local": "Hagen",   "visitante": "Pesico",  "fecha": "2025-10-26", "hora": "20:00", "goles_local": 10, "goles_visitante": 0 },
+      { "id": "J3-P6",  "local": "Elian",   "visitante": "Hagen",  "fecha": "2025-10-26", "hora": "20:00", "goles_local": 10, "goles_visitante": 0 },
       { "id": "J3-P7",  "local": "Adriel",  "visitante": "Isaac",   "fecha": "2025-10-28", "hora": "22:15", "goles_local": 0, "goles_visitante": 4,"stream": "https://www.twitch.tv/gorritobmx"},
       { "id": "J3-P8",  "local": "Tiago",   "visitante": "Ricard",  "fecha": "2025-10-30", "hora": "20:30", "goles_local": 2, "goles_visitante": 1,"stream":"https://twitch.tv/eliansk" },
       { "id": "J3-P9",  "local": "Berni",   "visitante": "Erik",    "fecha": "2025-10-27", "hora": "22:15", "goles_local": 1, "goles_visitante": 0, "stream":"https://twitch.tv/deilik_buksson" },
