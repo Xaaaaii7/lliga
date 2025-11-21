@@ -1,0 +1,253 @@
+{
+  "area": {
+    "id": 2114,
+    "name": "Italy",
+    "code": "ITA",
+    "flag": "https://crests.football-data.org/784.svg"
+  },
+  "id": 102,
+  "name": "Atalanta BC",
+  "shortName": "Atalanta",
+  "tla": "ATA",
+  "crest": "https://crests.football-data.org/102.png",
+  "address": "Corso Europa, 46, Zingonia Ciserano 24040",
+  "website": "http://www.atalanta.it",
+  "founded": 1904,
+  "clubColors": "Black / Blue",
+  "venue": "Stadio Atleti Azzurri d'Italia",
+  "runningCompetitions": [
+    {
+      "id": 2019,
+      "name": "Serie A",
+      "code": "SA",
+      "type": "LEAGUE",
+      "emblem": "https://crests.football-data.org/SA.png"
+    },
+    {
+      "id": 2001,
+      "name": "UEFA Champions League",
+      "code": "CL",
+      "type": "CUP",
+      "emblem": "https://crests.football-data.org/CL.png"
+    }
+  ],
+  "coach": {
+    "id": 2854,
+    "firstName": "Raffaele",
+    "lastName": "Palladino",
+    "name": "Raffaele Palladino",
+    "dateOfBirth": "1984-04-17",
+    "nationality": "Italy",
+    "contract": {
+      "start": "2025-11",
+      "until": "2027-06"
+    }
+  },
+  "squad": [
+    {
+      "id": 1767,
+      "name": "Marco Sportiello",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1992-05-10",
+      "nationality": "Italy"
+    },
+    {
+      "id": 1830,
+      "name": "Francesco Rossi",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1991-04-27",
+      "nationality": "Italy"
+    },
+    {
+      "id": 102220,
+      "name": "Marco Carnesecchi",
+      "position": "Goalkeeper",
+      "dateOfBirth": "2000-07-01",
+      "nationality": "Italy"
+    },
+    {
+      "id": 151933,
+      "name": "Lorenzo Bernasconi",
+      "position": "Defence",
+      "dateOfBirth": "2003-11-16",
+      "nationality": "Italy"
+    },
+    {
+      "id": 246518,
+      "name": "Relja Obrić",
+      "position": "Defence",
+      "dateOfBirth": "2006-04-11",
+      "nationality": "Slovenia"
+    },
+    {
+      "id": 264061,
+      "name": "Pietro Tornaghi",
+      "position": "Defence",
+      "dateOfBirth": "2005-11-24",
+      "nationality": "Italy"
+    },
+    {
+      "id": 81440,
+      "name": "Éderson",
+      "position": "Midfield",
+      "dateOfBirth": "1999-07-07",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 9554,
+      "name": "Ademola Lookman",
+      "position": "Offence",
+      "dateOfBirth": "1997-10-20",
+      "nationality": "Nigeria"
+    },
+    {
+      "id": 261018,
+      "name": "Henry Camara",
+      "position": "Offence",
+      "dateOfBirth": "2006-05-06",
+      "nationality": "Guinea"
+    },
+    {
+      "id": 263661,
+      "name": "Honest Ahanor",
+      "position": "Left-Back",
+      "dateOfBirth": "2008-02-23",
+      "nationality": "Italy"
+    },
+    {
+      "id": 170381,
+      "name": "Berat Djimsiti",
+      "position": "Centre-Back",
+      "dateOfBirth": "2023-06-30",
+      "nationality": "Albania"
+    },
+    {
+      "id": 167098,
+      "name": "Odilon Kossounou",
+      "position": "Centre-Back",
+      "dateOfBirth": "2001-01-04",
+      "nationality": "Ivory Coast"
+    },
+    {
+      "id": 167031,
+      "name": "Isak Hien",
+      "position": "Centre-Back",
+      "dateOfBirth": "1999-01-13",
+      "nationality": "Sweden"
+    },
+    {
+      "id": 153990,
+      "name": "Giorgio Scalvini",
+      "position": "Centre-Back",
+      "dateOfBirth": "2003-12-11",
+      "nationality": "Italy"
+    },
+    {
+      "id": 152528,
+      "name": "Nicola Zalewski",
+      "position": "Left Midfield",
+      "dateOfBirth": "2002-01-23",
+      "nationality": "Poland"
+    },
+    {
+      "id": 150669,
+      "name": "Yunus Musah",
+      "position": "Central Midfield",
+      "dateOfBirth": "2002-11-29",
+      "nationality": "USA"
+    },
+    {
+      "id": 142140,
+      "name": "Kamal Deen Sulemana",
+      "position": "Left Winger",
+      "dateOfBirth": "2002-02-15",
+      "nationality": "Ghana"
+    },
+    {
+      "id": 136113,
+      "name": "Daniel Maldini",
+      "position": "Attacking Midfield",
+      "dateOfBirth": "2001-10-11",
+      "nationality": "Italy"
+    },
+    {
+      "id": 130420,
+      "name": "Lazar Samardzic",
+      "position": "Central Midfield",
+      "dateOfBirth": "2002-02-24",
+      "nationality": "Serbia"
+    },
+    {
+      "id": 129947,
+      "name": "Charles De Ketelaere",
+      "position": "Attacking Midfield",
+      "dateOfBirth": "2001-03-10",
+      "nationality": "Belgium"
+    },
+    {
+      "id": 120679,
+      "name": "Nikola Krstović",
+      "position": "Centre-Forward",
+      "dateOfBirth": "2000-04-05",
+      "nationality": "Montenegro"
+    },
+    {
+      "id": 99858,
+      "name": "Marco Brescianini",
+      "position": "Central Midfield",
+      "dateOfBirth": "2000-01-20",
+      "nationality": "Italy"
+    },
+    {
+      "id": 7807,
+      "name": "Davide Zappacosta",
+      "position": "Right Midfield",
+      "dateOfBirth": "1992-06-11",
+      "nationality": "Italy"
+    },
+    {
+      "id": 7786,
+      "name": "Sead Kolašinac",
+      "position": "Centre-Back",
+      "dateOfBirth": "1993-06-20",
+      "nationality": "Bosnia-Herzegovina"
+    },
+    {
+      "id": 7555,
+      "name": "Mitchel Bakker",
+      "position": "Left-Back",
+      "dateOfBirth": "2000-06-20",
+      "nationality": "Netherlands"
+    },
+    {
+      "id": 3553,
+      "name": "Mario Pašalić",
+      "position": "Central Midfield",
+      "dateOfBirth": "1995-02-09",
+      "nationality": "Croatia"
+    },
+    {
+      "id": 2681,
+      "name": "Gianluca Scamacca",
+      "position": "Centre-Forward",
+      "dateOfBirth": "1999-01-01",
+      "nationality": "Italy"
+    },
+    {
+      "id": 1848,
+      "name": "Marten de Roon",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "1991-03-29",
+      "nationality": "Netherlands"
+    },
+    {
+      "id": 1748,
+      "name": "Raoul Bellanova",
+      "position": "Right Midfield",
+      "dateOfBirth": "2000-05-17",
+      "nationality": "Italy"
+    }
+  ],
+  "staff": [],
+  "lastUpdated": "2024-04-09T16:20:48Z"
+}

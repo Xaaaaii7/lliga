@@ -1,0 +1,281 @@
+{
+  "area": {
+    "id": 2088,
+    "name": "Germany",
+    "code": "DEU",
+    "flag": "https://crests.football-data.org/759.svg"
+  },
+  "id": 4,
+  "name": "Borussia Dortmund",
+  "shortName": "Dortmund",
+  "tla": "BVB",
+  "crest": "https://crests.football-data.org/4.png",
+  "address": "Rheinlanddamm 207-209 Dortmund 44137",
+  "website": "http://www.bvb.de",
+  "founded": 1909,
+  "clubColors": "Black / Yellow",
+  "venue": "Signal Iduna Park",
+  "runningCompetitions": [
+    {
+      "id": 2011,
+      "name": "DFB-Pokal",
+      "code": "DFB",
+      "type": "CUP",
+      "emblem": "https://crests.football-data.org/DFB_CUP.png"
+    },
+    {
+      "id": 2002,
+      "name": "Bundesliga",
+      "code": "BL1",
+      "type": "LEAGUE",
+      "emblem": "https://crests.football-data.org/BL1.png"
+    },
+    {
+      "id": 2001,
+      "name": "UEFA Champions League",
+      "code": "CL",
+      "type": "CUP",
+      "emblem": "https://crests.football-data.org/CL.png"
+    }
+  ],
+  "coach": {
+    "id": 8823,
+    "firstName": "Niko",
+    "lastName": "Kovač",
+    "name": "Niko Kovać",
+    "dateOfBirth": "1971-10-15",
+    "nationality": "Croatia",
+    "contract": {
+      "start": "2025-02",
+      "until": "2027-06"
+    }
+  },
+  "squad": [
+    {
+      "id": 334,
+      "name": "Gregor Kobel",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1997-12-06",
+      "nationality": "Switzerland"
+    },
+    {
+      "id": 7109,
+      "name": "Patrick Drewes",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1993-02-04",
+      "nationality": "Germany"
+    },
+    {
+      "id": 9389,
+      "name": "Alexander Meyer",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1991-04-13",
+      "nationality": "Germany"
+    },
+    {
+      "id": 176268,
+      "name": "Silas Ostrzinski",
+      "position": "Goalkeeper",
+      "dateOfBirth": "2003-11-19",
+      "nationality": "Germany"
+    },
+    {
+      "id": 145937,
+      "name": "Daniel Svensson",
+      "position": "Defence",
+      "dateOfBirth": "2002-02-12",
+      "nationality": "Sweden"
+    },
+    {
+      "id": 261058,
+      "name": "Filippo Mané",
+      "position": "Defence",
+      "dateOfBirth": "2005-03-08",
+      "nationality": "Italy"
+    },
+    {
+      "id": 273354,
+      "name": "Elias Benkara",
+      "position": "Defence",
+      "dateOfBirth": "2007-04-29",
+      "nationality": "Germany"
+    },
+    {
+      "id": 133548,
+      "name": "Ayman Azhil",
+      "position": "Midfield",
+      "dateOfBirth": "2001-04-10",
+      "nationality": "Morocco"
+    },
+    {
+      "id": 279090,
+      "name": "Samuele Inácio",
+      "position": "Offence",
+      "dateOfBirth": "2008-04-02",
+      "nationality": "Italy"
+    },
+    {
+      "id": 279093,
+      "name": "Mathis Albert",
+      "position": "Offence",
+      "dateOfBirth": "2009-05-21",
+      "nationality": "USA"
+    },
+    {
+      "id": 101074,
+      "name": "Felix Kalu Nmecha",
+      "position": "Central Midfield",
+      "dateOfBirth": "2000-10-10",
+      "nationality": "Germany"
+    },
+    {
+      "id": 82515,
+      "name": "Karim Adeyemi",
+      "position": "Left Winger",
+      "dateOfBirth": "2002-01-18",
+      "nationality": "Germany"
+    },
+    {
+      "id": 75539,
+      "name": "Nico Schlotterbeck",
+      "position": "Centre-Back",
+      "dateOfBirth": "1999-12-01",
+      "nationality": "Germany"
+    },
+    {
+      "id": 44030,
+      "name": "Julian Ryerson",
+      "position": "Right-Back",
+      "dateOfBirth": "1997-11-17",
+      "nationality": "Norway"
+    },
+    {
+      "id": 9551,
+      "name": "Marcel Sabitzer",
+      "position": "Central Midfield",
+      "dateOfBirth": "1994-03-17",
+      "nationality": "Austria"
+    },
+    {
+      "id": 8805,
+      "name": "Ramy Bensebaini",
+      "position": "Left-Back",
+      "dateOfBirth": "1995-04-16",
+      "nationality": "Algeria"
+    },
+    {
+      "id": 8273,
+      "name": "Pascal Groß",
+      "position": "Central Midfield",
+      "dateOfBirth": "1991-06-15",
+      "nationality": "Germany"
+    },
+    {
+      "id": 3183,
+      "name": "Emre Can",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "1994-01-12",
+      "nationality": "Germany"
+    },
+    {
+      "id": 379,
+      "name": "Waldemar Anton",
+      "position": "Centre-Back",
+      "dateOfBirth": "1996-07-20",
+      "nationality": "Germany"
+    },
+    {
+      "id": 351,
+      "name": "Niklas Süle",
+      "position": "Centre-Back",
+      "dateOfBirth": "1995-09-03",
+      "nationality": "Germany"
+    },
+    {
+      "id": 211,
+      "name": "Sehrou Guirassy",
+      "position": "Centre-Forward",
+      "dateOfBirth": "1996-03-12",
+      "nationality": "Guinea"
+    },
+    {
+      "id": 201,
+      "name": "Salih Özcan",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "1998-01-11",
+      "nationality": "Turkey"
+    },
+    {
+      "id": 148,
+      "name": "Julian Brandt",
+      "position": "Attacking Midfield",
+      "dateOfBirth": "1996-05-02",
+      "nationality": "Germany"
+    },
+    {
+      "id": 265182,
+      "name": "Cole Campbell",
+      "position": "Right Winger",
+      "dateOfBirth": "2006-02-20",
+      "nationality": "USA"
+    },
+    {
+      "id": 263672,
+      "name": "Almugera Kabar",
+      "position": "Left-Back",
+      "dateOfBirth": "2006-06-06",
+      "nationality": "Germany"
+    },
+    {
+      "id": 209148,
+      "name": "Aaron Anselmino",
+      "position": "Centre-Back",
+      "dateOfBirth": "2005-04-29",
+      "nationality": "Argentina"
+    },
+    {
+      "id": 182280,
+      "name": "Julien Duranville",
+      "position": "Left Winger",
+      "dateOfBirth": "2006-05-05",
+      "nationality": "Belgium"
+    },
+    {
+      "id": 171692,
+      "name": "Jobe Bellingham",
+      "position": "Attacking Midfield",
+      "dateOfBirth": "2005-09-23",
+      "nationality": "England"
+    },
+    {
+      "id": 167570,
+      "name": "Carney Chukwuemeka",
+      "position": "Central Midfield",
+      "dateOfBirth": "2003-10-20",
+      "nationality": "England"
+    },
+    {
+      "id": 144283,
+      "name": "Yan Couto",
+      "position": "Right-Back",
+      "dateOfBirth": "2002-06-03",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 133903,
+      "name": "Maximilian Beier",
+      "position": "Centre-Forward",
+      "dateOfBirth": "2002-10-17",
+      "nationality": "Germany"
+    },
+    {
+      "id": 125151,
+      "name": "Fábio Silva",
+      "position": "Centre-Forward",
+      "dateOfBirth": "2002-07-19",
+      "nationality": "Portugal"
+    }
+  ],
+  "staff": [],
+  "lastUpdated": "2022-02-25T16:50:16Z"
+}

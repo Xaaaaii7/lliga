@@ -1,0 +1,267 @@
+{
+  "area": {
+    "id": 2187,
+    "name": "Portugal",
+    "code": "POR",
+    "flag": "https://crests.football-data.org/765.svg"
+  },
+  "id": 503,
+  "name": "FC Porto",
+  "shortName": "Porto",
+  "tla": "FCP",
+  "crest": "https://crests.football-data.org/503.png",
+  "address": "Estádio do Dragão, Entrada Poente - Piso 3 Porto 4350-451",
+  "website": "http://www.fcporto.pt",
+  "founded": 1893,
+  "clubColors": "Blue / White",
+  "venue": "Estádio Do Dragão",
+  "runningCompetitions": [
+    {
+      "id": 2017,
+      "name": "Primeira Liga",
+      "code": "PPL",
+      "type": "LEAGUE",
+      "emblem": "https://crests.football-data.org/PPL.png"
+    },
+    {
+      "id": 2146,
+      "name": "UEFA Europa League",
+      "code": "EL",
+      "type": "CUP",
+      "emblem": "https://crests.football-data.org/EL.png"
+    }
+  ],
+  "coach": {
+    "id": 166183,
+    "firstName": "Francesco",
+    "lastName": "Farioli",
+    "name": "Francesco Farioli",
+    "dateOfBirth": "1989-04-10",
+    "nationality": "Italy",
+    "contract": {
+      "start": "2025-07",
+      "until": "2027-06"
+    }
+  },
+  "squad": [
+    {
+      "id": 37362,
+      "name": "Diogo Costa",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1999-09-19",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 43598,
+      "name": "Andorinha",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1996-02-02",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 45217,
+      "name": "Cláudio Ramos",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1991-11-16",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 216825,
+      "name": "Dominik Prpić",
+      "position": "Defence",
+      "dateOfBirth": "2004-05-19",
+      "nationality": "Croatia"
+    },
+    {
+      "id": 227047,
+      "name": "Martim Fernandes",
+      "position": "Defence",
+      "dateOfBirth": "2006-01-18",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 250544,
+      "name": "Gabriel Brás",
+      "position": "Defence",
+      "dateOfBirth": "2004-03-25",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 39102,
+      "name": "William da Silva",
+      "position": "Midfield",
+      "dateOfBirth": "1986-11-20",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 213331,
+      "name": "Tomás Pérez",
+      "position": "Midfield",
+      "dateOfBirth": "2005-08-26",
+      "nationality": "Argentina"
+    },
+    {
+      "id": 221262,
+      "name": "Victor Froholdt",
+      "position": "Midfield",
+      "dateOfBirth": "2006-02-25",
+      "nationality": "Denmark"
+    },
+    {
+      "id": 261273,
+      "name": "Rodrigo Mora",
+      "position": "Midfield",
+      "dateOfBirth": "2007-05-05",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 262715,
+      "name": "João Teixeira",
+      "position": "Midfield",
+      "dateOfBirth": "2006-04-09",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 188466,
+      "name": "Deniz Gul",
+      "position": "Offence",
+      "dateOfBirth": "2004-07-02",
+      "nationality": "Turkey"
+    },
+    {
+      "id": 265525,
+      "name": "Bryan Caicedo",
+      "position": "Offence",
+      "dateOfBirth": "2006-08-14",
+      "nationality": "Colombia"
+    },
+    {
+      "id": 285295,
+      "name": "André Miranda",
+      "position": "Offence",
+      "dateOfBirth": "2007-09-25",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 150519,
+      "name": "Gabriel Veiga",
+      "position": "Central Midfield",
+      "dateOfBirth": "2002-05-27",
+      "nationality": "Spain"
+    },
+    {
+      "id": 147286,
+      "name": "Jakub Kiwior",
+      "position": "Centre-Back",
+      "dateOfBirth": "2000-02-15",
+      "nationality": "Poland"
+    },
+    {
+      "id": 127034,
+      "name": "Borja Sainz",
+      "position": "Left Winger",
+      "dateOfBirth": "2001-02-01",
+      "nationality": "Spain"
+    },
+    {
+      "id": 125160,
+      "name": "Zaidu Sanusi",
+      "position": "Left-Back",
+      "dateOfBirth": "1997-06-13",
+      "nationality": "Nigeria"
+    },
+    {
+      "id": 98611,
+      "name": "Moura",
+      "position": "Left-Back",
+      "dateOfBirth": "1999-08-16",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 45671,
+      "name": "Nehuén Pérez",
+      "position": "Centre-Back",
+      "dateOfBirth": "2000-06-24",
+      "nationality": "Argentina"
+    },
+    {
+      "id": 37479,
+      "name": "Stephen Eustáquio",
+      "position": "Central Midfield",
+      "dateOfBirth": "1996-12-21",
+      "nationality": "Canada"
+    },
+    {
+      "id": 8086,
+      "name": "Jan Bednarek",
+      "position": "Centre-Back",
+      "dateOfBirth": "1996-04-12",
+      "nationality": "Poland"
+    },
+    {
+      "id": 7452,
+      "name": "Luuk de Jong",
+      "position": "Centre-Forward",
+      "dateOfBirth": "1990-08-27",
+      "nationality": "Netherlands"
+    },
+    {
+      "id": 7448,
+      "name": "Pablo Rosario",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "1997-01-07",
+      "nationality": "Dominican Republic"
+    },
+    {
+      "id": 2018,
+      "name": "Yann Karamoh",
+      "position": "Left Winger",
+      "dateOfBirth": "1998-07-08",
+      "nationality": "France"
+    },
+    {
+      "id": 1166,
+      "name": "Pepê",
+      "position": "Left Winger",
+      "dateOfBirth": "1997-02-24",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 249435,
+      "name": "Pedro Lima",
+      "position": "Right-Back",
+      "dateOfBirth": "2006-07-01",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 215434,
+      "name": "Samu Omorodion",
+      "position": "Centre-Forward",
+      "dateOfBirth": null,
+      "nationality": "Spain"
+    },
+    {
+      "id": 191058,
+      "name": "Angel Alarcon",
+      "position": "Left Winger",
+      "dateOfBirth": "2004-05-15",
+      "nationality": "Spain"
+    },
+    {
+      "id": 184496,
+      "name": "Alberto Baio",
+      "position": "Right-Back",
+      "dateOfBirth": "2003-09-29",
+      "nationality": "Portugal"
+    },
+    {
+      "id": 153629,
+      "name": "Alan Varela",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "2001-07-04",
+      "nationality": "Argentina"
+    }
+  ],
+  "staff": [],
+  "lastUpdated": "2022-02-10T19:26:43Z"
+}

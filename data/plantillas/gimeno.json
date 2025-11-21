@@ -1,0 +1,295 @@
+{
+  "area": {
+    "id": 2114,
+    "name": "Italy",
+    "code": "ITA",
+    "flag": "https://crests.football-data.org/784.svg"
+  },
+  "id": 108,
+  "name": "FC Internazionale Milano",
+  "shortName": "Inter",
+  "tla": "INT",
+  "crest": "https://crests.football-data.org/108.png",
+  "address": "Corso Vittorio Emanuele II 9 Milano 20122",
+  "website": "http://www.inter.it",
+  "founded": 1908,
+  "clubColors": "Blue / Black",
+  "venue": "Stadio Giuseppe Meazza",
+  "runningCompetitions": [
+    {
+      "id": 2019,
+      "name": "Serie A",
+      "code": "SA",
+      "type": "LEAGUE",
+      "emblem": "https://crests.football-data.org/SA.png"
+    },
+    {
+      "id": 2124,
+      "name": "Supercoppa",
+      "code": "ISC",
+      "type": "SUPER_CUP",
+      "emblem": "https://crests.football-data.org/isc.png"
+    },
+    {
+      "id": 2001,
+      "name": "UEFA Champions League",
+      "code": "CL",
+      "type": "CUP",
+      "emblem": "https://crests.football-data.org/CL.png"
+    }
+  ],
+  "coach": {
+    "id": 194383,
+    "firstName": "Cristian",
+    "lastName": "Chivu",
+    "name": "Cristian Chivu",
+    "dateOfBirth": "1980-10-26",
+    "nationality": "Romania",
+    "contract": {
+      "start": "2025-06",
+      "until": "2027-06"
+    }
+  },
+  "squad": [
+    {
+      "id": 2819,
+      "name": "Raffaele Di Gennaro",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1993-10-03",
+      "nationality": "Italy"
+    },
+    {
+      "id": 3470,
+      "name": "Yann Sommer",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1988-12-17",
+      "nationality": "Switzerland"
+    },
+    {
+      "id": 101415,
+      "name": "Josep Martinez",
+      "position": "Goalkeeper",
+      "dateOfBirth": "1998-05-27",
+      "nationality": "Spain"
+    },
+    {
+      "id": 217713,
+      "name": "Alessandro Calligaris",
+      "position": "Goalkeeper",
+      "dateOfBirth": "2005-03-07",
+      "nationality": "Italy"
+    },
+    {
+      "id": 275967,
+      "name": "Alain Taho",
+      "position": "Goalkeeper",
+      "dateOfBirth": "2007-04-30",
+      "nationality": "Albania"
+    },
+    {
+      "id": 167689,
+      "name": "Carlos Augusto Lobaton",
+      "position": "Defence",
+      "dateOfBirth": "1999-01-07",
+      "nationality": "Brazil"
+    },
+    {
+      "id": 273853,
+      "name": "Christos Alexiou",
+      "position": "Defence",
+      "dateOfBirth": "2005-06-30",
+      "nationality": "Greece"
+    },
+    {
+      "id": 274403,
+      "name": "Gabriele Re Cecconi",
+      "position": "Defence",
+      "dateOfBirth": "2006-04-25",
+      "nationality": "Italy"
+    },
+    {
+      "id": 276065,
+      "name": "Matteo Cocchi",
+      "position": "Defence",
+      "dateOfBirth": "2007-02-01",
+      "nationality": "Italy"
+    },
+    {
+      "id": 154013,
+      "name": "Petar Sucic",
+      "position": "Midfield",
+      "dateOfBirth": "2003-10-25",
+      "nationality": "Croatia"
+    },
+    {
+      "id": 271989,
+      "name": "Thomas Berenbruch",
+      "position": "Midfield",
+      "dateOfBirth": "2005-05-31",
+      "nationality": "Italy"
+    },
+    {
+      "id": 215433,
+      "name": "Francesco Esposito",
+      "position": "Offence",
+      "dateOfBirth": "2005-06-28",
+      "nationality": "Italy"
+    },
+    {
+      "id": 277505,
+      "name": "Matteo Spinaccè",
+      "position": "Offence",
+      "dateOfBirth": "2006-07-13",
+      "nationality": "Italy"
+    },
+    {
+      "id": 277575,
+      "name": "Matteo Lavelli",
+      "position": "Offence",
+      "dateOfBirth": "2006-12-08",
+      "nationality": "Italy"
+    },
+    {
+      "id": 283941,
+      "name": "Mattia Mosconi",
+      "position": "Offence",
+      "dateOfBirth": "2007-03-26",
+      "nationality": "Italy"
+    },
+    {
+      "id": 30821,
+      "name": "Federico Dimarco",
+      "position": "Left-Back",
+      "dateOfBirth": "1997-11-10",
+      "nationality": "Italy"
+    },
+    {
+      "id": 8685,
+      "name": "Marcus Thuram-Ulien",
+      "position": "Centre-Forward",
+      "dateOfBirth": "1997-08-06",
+      "nationality": "France"
+    },
+    {
+      "id": 7900,
+      "name": "Matteo Darmian",
+      "position": "Right-Back",
+      "dateOfBirth": "1989-12-02",
+      "nationality": "Italy"
+    },
+    {
+      "id": 7795,
+      "name": "Henrikh Mkhitaryan",
+      "position": "Central Midfield",
+      "dateOfBirth": "1989-01-21",
+      "nationality": "Armenia"
+    },
+    {
+      "id": 7417,
+      "name": "Denzel Dumfries",
+      "position": "Right-Back",
+      "dateOfBirth": "1996-04-18",
+      "nationality": "Netherlands"
+    },
+    {
+      "id": 3220,
+      "name": "Lautaro Martínez",
+      "position": "Centre-Forward",
+      "dateOfBirth": "1997-08-22",
+      "nationality": "Argentina"
+    },
+    {
+      "id": 2200,
+      "name": "Davide Frattesi",
+      "position": "Central Midfield",
+      "dateOfBirth": "1999-09-22",
+      "nationality": "Italy"
+    },
+    {
+      "id": 2180,
+      "name": "Francesco Acerbi",
+      "position": "Centre-Back",
+      "dateOfBirth": "1988-02-10",
+      "nationality": "Italy"
+    },
+    {
+      "id": 2097,
+      "name": "Piotr Zieliński",
+      "position": "Central Midfield",
+      "dateOfBirth": "1994-05-20",
+      "nationality": "Poland"
+    },
+    {
+      "id": 2053,
+      "name": "Stefan de Vrij",
+      "position": "Centre-Back",
+      "dateOfBirth": "1992-02-05",
+      "nationality": "Netherlands"
+    },
+    {
+      "id": 1911,
+      "name": "Nicolò Barella",
+      "position": "Central Midfield",
+      "dateOfBirth": "1997-02-07",
+      "nationality": "Italy"
+    },
+    {
+      "id": 1834,
+      "name": "Alessandro Bastoni",
+      "position": "Centre-Back",
+      "dateOfBirth": "1999-04-13",
+      "nationality": "Italy"
+    },
+    {
+      "id": 1754,
+      "name": "Hakan Çalhanoğlu",
+      "position": "Defensive Midfield",
+      "dateOfBirth": "1994-02-08",
+      "nationality": "Turkey"
+    },
+    {
+      "id": 193,
+      "name": "Yann Aurel Bisseck",
+      "position": "Centre-Back",
+      "dateOfBirth": "2000-11-29",
+      "nationality": "Germany"
+    },
+    {
+      "id": 143,
+      "name": "Manuel Akanji",
+      "position": "Centre-Back",
+      "dateOfBirth": "1995-07-19",
+      "nationality": "Switzerland"
+    },
+    {
+      "id": 168656,
+      "name": "Andy Diouf",
+      "position": "Central Midfield",
+      "dateOfBirth": "2003-05-17",
+      "nationality": "France"
+    },
+    {
+      "id": 152738,
+      "name": "Ange-Yoan Bonny",
+      "position": "Centre-Forward",
+      "dateOfBirth": "2003-10-25",
+      "nationality": "France"
+    },
+    {
+      "id": 142990,
+      "name": "Tiago Palacios",
+      "position": "Centre-Back",
+      "dateOfBirth": "2003-04-28",
+      "nationality": "Argentina"
+    },
+    {
+      "id": 115074,
+      "name": "Luis Henrique",
+      "position": "Left Winger",
+      "dateOfBirth": "2001-12-14",
+      "nationality": "Brazil"
+    }
+  ],
+  "staff": [],
+  "lastUpdated": "2021-11-24T14:55:58Z"
+}
