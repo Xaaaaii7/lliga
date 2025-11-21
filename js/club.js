@@ -345,11 +345,125 @@
   // --------------------------
   // TABs placeholder (de momento)
   // --------------------------
-  document.getElementById("tab-plantilla").innerHTML =
-    `<div class="club-box" style="grid-column:span 12">
-       <h3>Plantilla</h3>
-       <p class="muted">Aquí conectaremos la plantilla cuando tengas el JSON.</p>
-     </div>`;
+    // --------------------------
+  // TAB PLANTILLA (desde data/plantillas/<equipo>.json)
+  // --------------------------
+
+  const plantillaEl = document.getElementById("tab-plantilla");
+
+  // Ruta del JSON de plantilla del club
+  const plantillaPath = (team) => `data/plantillas/${slug(team)}.json`;
+
+  const calcAge = (dob) => {
+    if (!dob) return null;
+    const d = new Date(dob);
+    if (isNaN(d)) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age;
+  };
+
+  const posGroup = (pos) => {
+    const p = (pos || "").toLowerCase();
+    if (p.includes("goalkeeper") || p.includes("portero")) return "Porteros";
+    if (p.includes("defence") || p.includes("back") || p.includes("centre-back") || p.includes("defensa")) return "Defensas";
+    if (p.includes("midfield") || p.includes("medio") || p.includes("mid")) return "Centrocampistas";
+    if (p.includes("offence") || p.includes("forward") || p.includes("wing") || p.includes("striker") || p.includes("delantero")) return "Delanteros";
+    return "Otros";
+  };
+
+  const renderPlantilla = (teamData) => {
+    const coachName = teamData?.coach?.name || [teamData?.coach?.firstName, teamData?.coach?.lastName].filter(Boolean).join(" ");
+    const squad = Array.isArray(teamData?.squad) ? teamData.squad : [];
+
+    if (!squad.length) {
+      plantillaEl.innerHTML = `
+        <div class="club-box" style="grid-column:span 12">
+          <h3>Plantilla</h3>
+          <p class="muted">No hay jugadores en el JSON de plantilla.</p>
+        </div>`;
+      return;
+    }
+
+    // Agrupar por líneas
+    const groups = {};
+    for (const pl of squad) {
+      const g = posGroup(pl.position);
+      (groups[g] ||= []).push(pl);
+    }
+
+    // Orden interno por posición -> nombre
+    Object.values(groups).forEach(arr =>
+      arr.sort((a,b)=>
+        String(a.position||"").localeCompare(String(b.position||""), "es", {sensitivity:"base"}) ||
+        String(a.name||"").localeCompare(String(b.name||""), "es", {sensitivity:"base"})
+      )
+    );
+
+    const groupOrder = ["Porteros","Defensas","Centrocampistas","Delanteros","Otros"];
+
+    plantillaEl.innerHTML = `
+      <div class="club-box club-plantilla-head" style="grid-column:span 12">
+        <div class="club-plantilla-title">
+          <h3>Plantilla</h3>
+          ${coachName ? `<div class="coach-line">Entrenador: <strong>${coachName}</strong></div>` : ""}
+        </div>
+        <div class="squad-meta muted">${squad.length} jugadores</div>
+      </div>
+
+      ${groupOrder.filter(k=>groups[k]?.length).map(k=>{
+        const players = groups[k];
+        return `
+          <div class="club-box club-plantilla-group" style="grid-column:span 12">
+            <h4 class="plantilla-group-title">${k} <span class="muted">(${players.length})</span></h4>
+            <div class="plantilla-grid">
+              ${players.map(pl=>{
+                const age = calcAge(pl.dateOfBirth);
+                return `
+                  <div class="plantilla-card">
+                    <div class="plantilla-card-top">
+                      <div class="plantilla-name">${pl.name || "—"}</div>
+                      <div class="plantilla-pos muted">${pl.position || ""}</div>
+                    </div>
+                    <div class="plantilla-card-meta">
+                      ${pl.nationality ? `<span class="pill">${pl.nationality}</span>` : ""}
+                      ${age!=null ? `<span class="pill">${age} años</span>` : ""}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("")}
+    `;
+  };
+
+  try {
+    const teamData = await loadJSON(plantillaPath(CLUB)).catch(()=>null);
+
+    if (!teamData) {
+      plantillaEl.innerHTML = `
+        <div class="club-box" style="grid-column:span 12">
+          <h3>Plantilla</h3>
+          <p class="muted">
+            No se encontró <code>${plantillaPath(CLUB)}</code>.
+            Revisa nombre o ruta del JSON.
+          </p>
+        </div>`;
+    } else {
+      renderPlantilla(teamData);
+    }
+  } catch (e) {
+    console.error("Error cargando plantilla:", e);
+    plantillaEl.innerHTML = `
+      <div class="club-box" style="grid-column:span 12">
+        <h3>Plantilla</h3>
+        <p class="muted">Error cargando la plantilla.</p>
+      </div>`;
+  }
 
   document.getElementById("tab-stats").innerHTML =
     `<div class="club-box" style="grid-column:span 12">
