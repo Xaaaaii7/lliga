@@ -2430,3 +2430,34 @@ ul.kv li{
   .club-banner-logo{ width:72px;height:72px;border-radius:16px; }
   .club-banner-info h2{ font-size:1.45rem; }
 }
+/* Stats en banner de club */
+.club-banner-stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.club-stat{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,0.08);
+  font-size:.85rem;
+}
+
+.club-stat .label{
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:700;
+  font-size:.72rem;
+}
+
+.club-stat .value{
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
