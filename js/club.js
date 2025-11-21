@@ -11,6 +11,8 @@
     return;
   }
 
+  const isNum = v => typeof v === "number" && Number.isFinite(v);
+
   const norm = s => String(s||'').toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s-]/g, "").trim();
@@ -18,22 +20,28 @@
   const slug = s => norm(s).replace(/\s+/g, "-");
 
   const logoPath = (team) => `img/${slug(team)}.png`;
+  const formationPath = (team) => `img/formacion/${slug(team)}.png`;
+  const playerPhotoPath = (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
 
+  // --------------------------
+  // HERO
+  // --------------------------
   document.getElementById("club-title").textContent = CLUB;
   document.getElementById("club-name").textContent  = CLUB;
-  document.getElementById("club-banner-logo").src  = logoPath(CLUB);
+
+  const bannerLogo = document.getElementById("club-banner-logo");
+  bannerLogo.src = logoPath(CLUB);
+  bannerLogo.onerror = ()=> bannerLogo.style.visibility = "hidden";
 
   // --------------------------
-  // Datos
+  // Datos base
   // --------------------------
-
   const resultados = await loadJSON("data/resultados.json").catch(() => []);
   const statsIndex = await loadJSON("data/partidos_stats.json").catch(()=>({}));
 
   // --------------------------
   // Obtener todos los partidos del equipo
   // --------------------------
-
   let partidosClub = [];
 
   for (const j of resultados) {
@@ -41,16 +49,16 @@
       if (p.local === CLUB || p.visitante === CLUB) {
         partidosClub.push({
           ...p,
-          jornada: j.numero
+          jornada: j.numero,
+          fecha_jornada: j.fecha
         });
       }
     }
   }
 
   // --------------------------
-  // Próximo partido (primero con goles null)
+  // Próximo partido (primero sin resultado)
   // --------------------------
-
   const nextMatch = partidosClub.find(p =>
     p.goles_local == null || p.goles_visitante == null
   );
@@ -58,19 +66,15 @@
   // --------------------------
   // Último partido jugado
   // --------------------------
-
   const lastMatch = [...partidosClub].reverse().find(p =>
-    p.goles_local != null && p.goles_visitante != null
+    isNum(p.goles_local) && isNum(p.goles_visitante)
   );
 
   // --------------------------
-  // Crear mini clasificación (9 equipos centrando al club)
+  // Mini clasificación (9 equipos centrando al club)
   // --------------------------
-
   function calcularClasificacion() {
-    // igual que en clasificación.js pero más rápido/simplificado
     const teams = new Map();
-
     const getT = (name) => {
       const k = norm(name);
       if (!teams.has(k)) {
@@ -81,28 +85,25 @@
 
     for (const j of resultados) {
       for (const p of (j.partidos||[])) {
-        const L = p.local, V = p.visitante;
-        if (!L || !V) continue;
-
-        const gl = Number.isFinite(p.goles_local) ? p.goles_local : null;
-        const gv = Number.isFinite(p.goles_visitante) ? p.goles_visitante : null;
+        if (!p.local || !p.visitante) continue;
+        const gl = isNum(p.goles_local) ? p.goles_local : null;
+        const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
         if (gl==null || gv==null) continue;
 
-        const tL = getT(L);
-        const tV = getT(V);
+        const L = getT(p.local);
+        const V = getT(p.visitante);
 
-        tL.pj++; tV.pj++;
-        tL.gf+=gl; tL.gc+=gv;
-        tV.gf+=gv; tV.gc+=gl;
+        L.pj++; V.pj++;
+        L.gf+=gl; L.gc+=gv;
+        V.gf+=gv; V.gc+=gl;
 
-        if (gl>gv) { tL.g++; tL.pts+=3; tV.p++; }
-        else if (gl<gv){ tV.g++; tV.pts+=3; tL.p++; }
-        else { tL.e++; tV.e++; tL.pts++; tV.pts++; }
+        if (gl>gv) { L.g++; L.pts+=3; V.p++; }
+        else if (gl<gv){ V.g++; V.pts+=3; L.p++; }
+        else { L.e++; V.e++; L.pts++; V.pts++; }
       }
     }
 
     const arr = Array.from(teams.values());
-
     arr.sort((A,B)=>{
       if (B.pts !== A.pts) return B.pts - A.pts;
       const dgA = A.gf-A.gc, dgB = B.gf-B.gc;
@@ -110,54 +111,67 @@
       if (B.gf !== A.gf) return B.gf - A.gf;
       return A.nombre.localeCompare(B.nombre);
     });
-
     return arr;
   }
 
   const fullClasif = calcularClasificacion();
-  const idxClub = fullClasif.findIndex(t=> t.nombre===CLUB);
+  const idxClub = fullClasif.findIndex(t=> norm(t.nombre) === norm(CLUB));
 
   let mini = [];
+  if (idxClub === -1) mini = fullClasif.slice(0,9);
+  else mini = fullClasif.slice(Math.max(0, idxClub-4), idxClub+5);
 
-  if (idxClub === -1) {
-    mini = fullClasif.slice(0,9);
-  } else {
-    mini = fullClasif.slice(Math.max(0, idxClub-4), idxClub+5);
+  // --------------------------
+  // TOP SCORER desde Google Sheet TSV (igual que pichichi)
+  // --------------------------
+
+  const SHEET_TSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv";
+
+  function parseTSV(text) {
+    const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
+    if (!lines.length) return { headers: [], rows: [] };
+    const headers = lines[0].split('\t').map(h => h.trim());
+    const rows = lines.slice(1).map(line => {
+      const cols = line.split('\t');
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (cols[i] ?? '').trim());
+      return obj;
+    });
+    return { headers, rows };
   }
 
-  // --------------------------
-  // Top scorer del club
-  // --------------------------
+  const toNum = (v) => {
+    if (v == null || v === "") return 0;
+    const n = parseFloat(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  };
 
-  function topScorer() {
-    const golesPorJugador = {}; // jugador → { goles, foto? }
+  let goleador = null;
 
-    for (const matchId of Object.keys(statsIndex)) {
-      const porEq = statsIndex[matchId];
-      if (!porEq) continue;
+  try {
+    const res = await fetch(SHEET_TSV_URL, { cache:"no-store" });
+    if (res.ok) {
+      const txt = await res.text();
+      const { rows } = parseTSV(txt);
 
-      const equipoStats = porEq[CLUB];
-      if (!equipoStats) continue;
+      const jugadoresClub = rows.map(r => ({
+        jugador: r["Jugador"] || "",
+        equipo:  r["Equipo"]  || "",
+        pj:      toNum(r["Partidos"]),
+        goles:   toNum(r["Goles"])
+      }))
+      .filter(x => x.jugador && x.equipo && norm(x.equipo) === norm(CLUB))
+      .sort((a,b)=> b.goles - a.goles || a.jugador.localeCompare(b.jugador,"es",{sensitivity:"base"}));
 
-      if (equipoStats.goleadores) {
-        for (const j of equipoStats.goleadores) {
-          if (!golesPorJugador[j]) golesPorJugador[j] = 0;
-          golesPorJugador[j]++;
-        }
-      }
+      goleador = jugadoresClub[0] || null;
     }
-
-    const arr = Object.entries(golesPorJugador)
-      .map(([jug, g]) => ({jug, goles:g}))
-      .sort((a,b)=>b.goles-a.goles);
-
-    return arr[0] || null;
+  } catch (e) {
+    console.warn("No se pudo cargar pichichi TSV para club:", e);
   }
 
-  const goleador = topScorer();
-
   // --------------------------
-  // TAB: RESUMEN
+  // TAB RESUMEN render
   // --------------------------
 
   const tabResumen = document.getElementById("tab-resumen");
@@ -171,7 +185,7 @@
         <span>vs</span>
         <strong>${nextMatch.visitante}</strong>
         <img src="${logoPath(nextMatch.visitante)}" class="club-mini-logo">
-        <div class="club-date">${nextMatch.fecha || ""} ${nextMatch.hora || ""}</div>
+        <div class="club-date">${nextMatch.fecha || nextMatch.fecha_jornada || ""} ${nextMatch.hora || ""}</div>
       </div>
     </div>
   ` : `
@@ -197,17 +211,16 @@
     <div class="club-box">
       <h3>Clasificación</h3>
       <table class="club-mini-table">
-        <thead>
-          <tr><th>#</th><th>Equipo</th><th>Pts</th></tr>
-        </thead>
+        <thead><tr><th>#</th><th>Equipo</th><th>Pts</th></tr></thead>
         <tbody>
-          ${mini.map((t,i)=>`
-            <tr class="${t.nombre===CLUB ? "club-highlight" : ""}">
-              <td>${fullClasif.findIndex(x=>x.nombre===t.nombre)+1}</td>
-              <td>${t.nombre}</td>
-              <td>${t.pts}</td>
-            </tr>
-          `).join("")}
+          ${mini.map(t=>{
+            const pos = fullClasif.findIndex(x=> norm(x.nombre)===norm(t.nombre)) + 1;
+            return `
+              <tr class="${norm(t.nombre)===norm(CLUB) ? "club-highlight" : ""}">
+                <td>${pos}</td><td>${t.nombre}</td><td>${t.pts}</td>
+              </tr>
+            `;
+          }).join("")}
         </tbody>
       </table>
     </div>
@@ -216,8 +229,11 @@
   const formacionHTML = `
     <div class="club-box">
       <h3>Formación</h3>
-      <img class="club-formacion" src="img/formacion/${slug(CLUB)}.png" 
+      <img class="club-formacion"
+           src="${formationPath(CLUB)}"
+           alt="Formación ${CLUB}"
            onerror="this.style.display='none'">
+      <p class="muted" style="margin-top:6px">* Si no hay imagen, no se muestra.</p>
     </div>
   `;
 
@@ -225,17 +241,19 @@
     <div class="club-box">
       <h3>Máximo goleador</h3>
       <div class="club-player">
-        <img class="club-player-photo" 
-             src="img/jugadores/${slug(goleador.jug)}.jpg" 
-             onerror="this.style.opacity='0'">
+        <img class="club-player-photo"
+             src="${playerPhotoPath(goleador.jugador)}"
+             alt="${goleador.jugador}"
+             onerror="this.style.visibility='hidden'">
         <div class="club-player-info">
-          <strong>${goleador.jug}</strong>
+          <strong>${goleador.jugador}</strong>
           <span>${goleador.goles} goles</span>
+          <small class="muted">${goleador.pj} PJ</small>
         </div>
       </div>
     </div>
   ` : `
-    <div class="club-box"><h3>Máximo goleador</h3><p>Sin datos.</p></div>
+    <div class="club-box"><h3>Máximo goleador</h3><p>Sin datos en pichichi.</p></div>
   `;
 
   tabResumen.innerHTML = `
@@ -249,30 +267,29 @@
   `;
 
   // --------------------------
-  // TAB: PLANTILLA
+  // TABs placeholder (de momento)
   // --------------------------
-  document.getElementById("tab-plantilla").innerHTML = `
-    <p style="color:var(--muted)">Aquí mostrará plantilla del equipo (puedo ayudarte si defines el JSON).</p>
-  `;
+  document.getElementById("tab-plantilla").innerHTML =
+    `<div class="club-box" style="grid-column:span 12">
+       <h3>Plantilla</h3>
+       <p class="muted">Aquí conectaremos la plantilla cuando tengas el JSON.</p>
+     </div>`;
 
-  // --------------------------
-  // TAB: STATS
-  // --------------------------
-  document.getElementById("tab-stats").innerHTML = `
-    <p style="color:var(--muted)">Aquí saldrán estadísticas agregadas del equipo.</p>
-  `;
+  document.getElementById("tab-stats").innerHTML =
+    `<div class="club-box" style="grid-column:span 12">
+       <h3>Estadísticas</h3>
+       <p class="muted">Aquí conectaremos stats de equipo.</p>
+     </div>`;
 
-  // --------------------------
-  // TAB: VIDEOS
-  // --------------------------
-  document.getElementById("tab-videos").innerHTML = `
-    <p style="color:var(--muted)">Integraremos vídeos de YouTube automáticamente con tags.</p>
-  `;
+  document.getElementById("tab-videos").innerHTML =
+    `<div class="club-box" style="grid-column:span 12">
+       <h3>Vídeos</h3>
+       <p class="muted">Aquí meteremos la playlist automática del club.</p>
+     </div>`;
 
   // --------------------------
   // Tabs click
   // --------------------------
-
   document.querySelectorAll(".tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
