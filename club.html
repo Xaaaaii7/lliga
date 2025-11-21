@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Club</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="page-club">
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1 id="club-page-title">Club</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container" id="club-root">
+  <!-- Banner superior -->
+  <section class="club-hero">
+    <div class="club-hero-left">
+      <div class="club-hero-badge">
+        <img id="club-hero-logo" alt="Escudo club" />
+      </div>
+      <div>
+        <h2 id="club-hero-name">Club</h2>
+        <p class="club-hero-sub" id="club-hero-sub">Temporada actual</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <div class="club-tabs tabs" id="club-tabs">
+    <button data-tab="resumen" class="active">Resumen</button>
+    <button data-tab="video">Vídeos</button>
+    <button data-tab="plantilla">Plantilla</button>
+    <button data-tab="stats">Stats</button>
+  </div>
+
+  <!-- Panels -->
+  <section class="tab-panel active" id="tab-resumen">
+    <!-- aquí pinta el JS -->
+  </section>
+
+  <section class="tab-panel" id="tab-video">
+    <div class="club-panel-card">
+      <h3>Vídeos del club</h3>
+      <p class="muted">Aquí iremos metiendo la playlist/galería automática.</p>
+      <div id="club-videos"></div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-plantilla">
+    <div class="club-panel-card">
+      <h3>Plantilla</h3>
+      <p class="muted">Después conectamos con tus datos de plantilla.</p>
+      <div id="club-plantilla"></div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-stats">
+    <div class="club-panel-card">
+      <h3>Stats del club</h3>
+      <p class="muted">Después conectamos con rankings y medias.</p>
+      <div id="club-stats"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">© Torneo entre amigos</footer>
+
+<script>
+  // Antes era window.CLUB_NAME, ahora se pasa por URL
+  const params = new URLSearchParams(window.location.search);
+  window.CLUB_NAME = params.get("team") || "";
+</script>
+
+<script src="js/common.js"></script>
+<script src="js/club.js"></script>
+</body>
+</html>
