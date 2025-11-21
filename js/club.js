@@ -1,9 +1,7 @@
 (async () => {
-
   // --------------------------
-  // Helpers
+  // CLUB target
   // --------------------------
-
   const CLUB = window.CLUB_NAME;
   if (!CLUB) {
     document.getElementById("club-root").innerHTML =
@@ -11,17 +9,17 @@
     return;
   }
 
-  const isNum = v => typeof v === "number" && Number.isFinite(v);
+  // --------------------------
+  // Helpers desde CoreStats
+  // --------------------------
+  const isNum = CoreStats.isNum;
+  const norm  = CoreStats.norm;
+  const slug  = CoreStats.slug;
 
-  const norm = s => String(s||'').toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "").trim();
-
-  const slug = s => norm(s).replace(/\s+/g, "-");
-
-  const logoPath = (team) => `img/${slug(team)}.png`;
-  const formationPath = (team) => `img/formacion/${slug(team)}.png`;
-  const playerPhotoPath = (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
+  const logoPath       = (team) => `img/${slug(team)}.png`;
+  const formationPath  = (team) => `img/formacion/${slug(team)}.png`;
+  const playerPhotoPath= (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
+  const plantillaPath  = (team) => `data/plantillas/${slug(team)}.json`;
 
   // --------------------------
   // HERO
@@ -31,22 +29,21 @@
 
   const bannerLogo = document.getElementById("club-banner-logo");
   bannerLogo.src = logoPath(CLUB);
-  bannerLogo.onerror = ()=> bannerLogo.style.visibility = "hidden";
+  bannerLogo.onerror = () => bannerLogo.style.visibility = "hidden";
 
   // --------------------------
-  // Datos base
+  // Datos base (core cache)
   // --------------------------
-  const resultados = await loadJSON("data/resultados.json").catch(() => []);
-  const statsIndex = await loadJSON("data/partidos_stats.json").catch(()=>({}));
+  const resultados = await CoreStats.getResultados();  // ya viene normalizado y cacheado
+  const statsIndex = await CoreStats.getStatsIndex();  // (ahora no se usa aquí, pero futuro tab stats)
 
-  // Aseguramos orden por jornada
+  // Orden por jornada por si acaso
   resultados.sort((a,b)=> (a.numero||0) - (b.numero||0));
 
   // --------------------------
-  // Obtener todos los partidos del equipo
+  // Partidos del club (cronológicos)
   // --------------------------
-  let partidosClub = [];
-
+  const partidosClub = [];
   for (const j of resultados) {
     for (const p of (j.partidos || [])) {
       if (p.local === CLUB || p.visitante === CLUB) {
@@ -60,15 +57,12 @@
   }
 
   // --------------------------
-  // Próximo partido (primero sin resultado)
+  // Próximo partido / último partido
   // --------------------------
   const nextMatch = partidosClub.find(p =>
     p.goles_local == null || p.goles_visitante == null
   );
 
-  // --------------------------
-  // Último partido jugado
-  // --------------------------
   const lastMatch = [...partidosClub].reverse().find(p =>
     isNum(p.goles_local) && isNum(p.goles_visitante)
   );
@@ -80,21 +74,20 @@
     isNum(p.goles_local) && isNum(p.goles_visitante)
   );
 
-  const last3 = playedMatches.slice(-3); // últimos 3 partidos jugados
+  const last3 = playedMatches.slice(-3);
 
   const formResults = last3.map(p => {
     const clubIsLocal = norm(p.local) === norm(CLUB);
     const gl = p.goles_local, gv = p.goles_visitante;
 
-    if (gl === gv) return "D"; // draw
-
+    if (gl === gv) return "D";
     const clubWon = clubIsLocal ? (gl > gv) : (gv > gl);
     return clubWon ? "W" : "L";
   });
 
-  const countW = formResults.filter(r=>r==="W").length;
-  const countD = formResults.filter(r=>r==="D").length;
-  const countL = formResults.filter(r=>r==="L").length;
+  const countW = formResults.filter(r => r==="W").length;
+  const countD = formResults.filter(r => r==="D").length;
+  const countL = formResults.filter(r => r==="L").length;
 
   const formRating = (() => {
     if (formResults.length < 3) return "NO DATA";
@@ -119,7 +112,6 @@
     `
     : `<p class="muted">Aún no hay 3 partidos jugados.</p>`;
 
-  // ✅ Definimos el box aquí (ANTES de usarlo)
   const teamFormBox = `
     <div class="club-box">
       <h3>Team Form</h3>
@@ -128,53 +120,12 @@
   `;
 
   // --------------------------
-  // Mini clasificación (9 equipos centrando al club)
+  // Clasificación desde CoreStats (con H2H)
   // --------------------------
-  function calcularClasificacion() {
-    const teams = new Map();
-    const getT = (name) => {
-      const k = norm(name);
-      if (!teams.has(k)) {
-        teams.set(k, { nombre:name, pj:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 });
-      }
-      return teams.get(k);
-    };
+  const fullClasif = await CoreStats.computeClasificacion(null, { useH2H:true });
+  const idxClub = fullClasif.findIndex(t => norm(t.nombre) === norm(CLUB));
 
-    for (const j of resultados) {
-      for (const p of (j.partidos||[])) {
-        if (!p.local || !p.visitante) continue;
-        const gl = isNum(p.goles_local) ? p.goles_local : null;
-        const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
-        if (gl==null || gv==null) continue;
-
-        const L = getT(p.local);
-        const V = getT(p.visitante);
-
-        L.pj++; V.pj++;
-        L.gf+=gl; L.gc+=gv;
-        V.gf+=gv; V.gc+=gl;
-
-        if (gl>gv) { L.g++; L.pts+=3; V.p++; }
-        else if (gl<gv){ V.g++; V.pts+=3; L.p++; }
-        else { L.e++; V.e++; L.pts++; V.pts++; }
-      }
-    }
-
-    const arr = Array.from(teams.values());
-    arr.sort((A,B)=>{
-      if (B.pts !== A.pts) return B.pts - A.pts;
-      const dgA = A.gf-A.gc, dgB = B.gf-B.gc;
-      if (dgB !== dgA) return dgB - dgA;
-      if (B.gf !== A.gf) return B.gf - A.gf;
-      return A.nombre.localeCompare(B.nombre);
-    });
-    return arr;
-  }
-
-  const fullClasif = calcularClasificacion();
-  const idxClub = fullClasif.findIndex(t=> norm(t.nombre) === norm(CLUB));
-
-  // ---- Stats generales para banner ----
+  // ---- Stats banner ----
   const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
   const clubPos = (idxClub >= 0) ? idxClub + 1 : "—";
 
@@ -191,58 +142,23 @@
     </div>
   ` : `<p class="club-banner-stats muted">Sin datos aún.</p>`;
 
-  // Pintar en el banner (debajo del nombre)
   const descEl = document.getElementById("club-description");
   if (descEl) descEl.innerHTML = bannerStatsHTML;
 
+  // Mini tabla 9 equipos
   let mini = [];
   if (idxClub === -1) mini = fullClasif.slice(0,9);
   else mini = fullClasif.slice(Math.max(0, idxClub-4), idxClub+5);
 
   // --------------------------
-  // TOP SCORER desde Google Sheet TSV (igual que pichichi)
+  // Máximo goleador del club desde TSV (CoreStats)
   // --------------------------
-  const SHEET_TSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv";
-
-  function parseTSV(text) {
-    const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
-    if (!lines.length) return { headers: [], rows: [] };
-    const headers = lines[0].split('\t').map(h => h.trim());
-    const rows = lines.slice(1).map(line => {
-      const cols = line.split('\t');
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = (cols[i] ?? '').trim());
-      return obj;
-    });
-    return { headers, rows };
-  }
-
-  const toNum = (v) => {
-    if (v == null || v === "") return 0;
-    const n = parseFloat(String(v).replace(",", "."));
-    return Number.isFinite(n) ? n : 0;
-  };
-
   let goleador = null;
-
   try {
-    const res = await fetch(SHEET_TSV_URL, { cache:"no-store" });
-    if (res.ok) {
-      const txt = await res.text();
-      const { rows } = parseTSV(txt);
-
-      const jugadoresClub = rows.map(r => ({
-        jugador: r["Jugador"] || "",
-        equipo:  r["Equipo"]  || "",
-        pj:      toNum(r["Partidos"]),
-        goles:   toNum(r["Goles"])
-      }))
-      .filter(x => x.jugador && x.equipo && norm(x.equipo) === norm(CLUB))
-      .sort((a,b)=> b.goles - a.goles || a.jugador.localeCompare(b.jugador,"es",{sensitivity:"base"}));
-
-      goleador = jugadoresClub[0] || null;
-    }
+    const rows = await CoreStats.getPichichiRows();
+    const data = CoreStats.computePichichiPlayers(rows);
+    const jugadoresClub = data.filter(x => norm(x.equipo) === norm(CLUB));
+    goleador = jugadoresClub[0] || null;
   } catch (e) {
     console.warn("No se pudo cargar pichichi TSV para club:", e);
   }
@@ -256,11 +172,11 @@
     <div class="club-box">
       <h3>Próximo partido</h3>
       <div class="club-match">
-        <img src="${logoPath(nextMatch.local)}" class="club-mini-logo">
+        <img src="${logoPath(nextMatch.local)}" class="club-mini-logo" onerror="this.style.visibility='hidden'">
         <strong>${nextMatch.local}</strong>
         <span>vs</span>
         <strong>${nextMatch.visitante}</strong>
-        <img src="${logoPath(nextMatch.visitante)}" class="club-mini-logo">
+        <img src="${logoPath(nextMatch.visitante)}" class="club-mini-logo" onerror="this.style.visibility='hidden'">
         <div class="club-date">${nextMatch.fecha || nextMatch.fecha_jornada || ""} ${nextMatch.hora || ""}</div>
       </div>
     </div>
@@ -272,11 +188,11 @@
     <div class="club-box">
       <h3>Último partido</h3>
       <div class="club-match">
-        <img src="${logoPath(lastMatch.local)}" class="club-mini-logo">
+        <img src="${logoPath(lastMatch.local)}" class="club-mini-logo" onerror="this.style.visibility='hidden'">
         <strong>${lastMatch.local}</strong>
         <span>${lastMatch.goles_local} - ${lastMatch.goles_visitante}</span>
         <strong>${lastMatch.visitante}</strong>
-        <img src="${logoPath(lastMatch.visitante)}" class="club-mini-logo">
+        <img src="${logoPath(lastMatch.visitante)}" class="club-mini-logo" onerror="this.style.visibility='hidden'">
       </div>
     </div>
   ` : `
@@ -343,16 +259,9 @@
   `;
 
   // --------------------------
-  // TABs placeholder (de momento)
+  // TAB PLANTILLA (JSON local)
   // --------------------------
-    // --------------------------
-  // TAB PLANTILLA (desde data/plantillas/<equipo>.json)
-  // --------------------------
-
   const plantillaEl = document.getElementById("tab-plantilla");
-
-  // Ruta del JSON de plantilla del club
-  const plantillaPath = (team) => `data/plantillas/${slug(team)}.json`;
 
   const calcAge = (dob) => {
     if (!dob) return null;
@@ -375,7 +284,10 @@
   };
 
   const renderPlantilla = (teamData) => {
-    const coachName = teamData?.coach?.name || [teamData?.coach?.firstName, teamData?.coach?.lastName].filter(Boolean).join(" ");
+    const coachName =
+      teamData?.coach?.name ||
+      [teamData?.coach?.firstName, teamData?.coach?.lastName].filter(Boolean).join(" ");
+
     const squad = Array.isArray(teamData?.squad) ? teamData.squad : [];
 
     if (!squad.length) {
@@ -387,14 +299,12 @@
       return;
     }
 
-    // Agrupar por líneas
     const groups = {};
     for (const pl of squad) {
       const g = posGroup(pl.position);
       (groups[g] ||= []).push(pl);
     }
 
-    // Orden interno por posición -> nombre
     Object.values(groups).forEach(arr =>
       arr.sort((a,b)=>
         String(a.position||"").localeCompare(String(b.position||""), "es", {sensitivity:"base"}) ||
@@ -465,10 +375,13 @@
       </div>`;
   }
 
+  // --------------------------
+  // TAB STATS / VIDEOS placeholders
+  // --------------------------
   document.getElementById("tab-stats").innerHTML =
     `<div class="club-box" style="grid-column:span 12">
        <h3>Estadísticas</h3>
-       <p class="muted">Aquí conectaremos stats de equipo.</p>
+       <p class="muted">Aquí conectaremos stats de equipo (desde CoreStats).</p>
      </div>`;
 
   document.getElementById("tab-videos").innerHTML =
@@ -490,5 +403,4 @@
       document.getElementById("tab-" + t).classList.add("active");
     });
   });
-
 })();
