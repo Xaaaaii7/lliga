@@ -35,7 +35,7 @@
   grid.innerHTML = equipos.map(eq => {
     const s = slug(eq);
     return `
-      <a class="club-card" href="club-${s}.html" aria-label="Entrar a ${eq}">
+      <a class="club-card" href="club.html?team=${encodeURIComponent(eq)}" aria-label="Entrar a ${eq}">
         <div class="club-badge-wrap">
           <img class="club-badge" src="${logoPath(eq)}" alt="Escudo ${eq}"
                onerror="this.style.visibility='hidden'">
