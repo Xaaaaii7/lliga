@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['resultados.html','Resultados'],
       ['jugadores.html','Jugadores'],
       ['pichichi.html','Pichichi'],
+      ['clubs.html','Clubs'],
       ['jornada.html','Jornada'],
       ['reglas.html','Reglas'],
       ['directos.html','Directos']// 👈 añadido
