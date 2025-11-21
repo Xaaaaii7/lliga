@@ -7,70 +7,46 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="page-club">
+
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1 id="club-page-title">Club</h1>
+  <h1 id="club-title">Club</h1>
   <nav id="main-nav"></nav>
 </header>
 
 <main class="container" id="club-root">
+
   <!-- Banner superior -->
-  <section class="club-hero">
-    <div class="club-hero-left">
-      <div class="club-hero-badge">
-        <img id="club-hero-logo" alt="Escudo club" />
-      </div>
-      <div>
-        <h2 id="club-hero-name">Club</h2>
-        <p class="club-hero-sub" id="club-hero-sub">Temporada actual</p>
-      </div>
+  <section id="club-banner" class="club-banner">
+    <img id="club-banner-logo" class="club-banner-logo" src="" alt="">
+    <div class="club-banner-info">
+      <h2 id="club-name"></h2>
+      <p id="club-description" class="club-description"></p>
     </div>
   </section>
 
   <!-- Tabs -->
-  <div class="club-tabs tabs" id="club-tabs">
+  <div class="tabs club-tabs">
     <button data-tab="resumen" class="active">Resumen</button>
-    <button data-tab="video">Vídeos</button>
     <button data-tab="plantilla">Plantilla</button>
-    <button data-tab="stats">Stats</button>
+    <button data-tab="stats">Estadísticas</button>
+    <button data-tab="videos">Vídeos</button>
   </div>
 
-  <!-- Panels -->
-  <section class="tab-panel active" id="tab-resumen">
-    <!-- aquí pinta el JS -->
-  </section>
+  <!-- Paneles -->
+  <section id="tab-resumen" class="tab-panel active"></section>
+  <section id="tab-plantilla" class="tab-panel"></section>
+  <section id="tab-stats" class="tab-panel"></section>
+  <section id="tab-videos" class="tab-panel"></section>
 
-  <section class="tab-panel" id="tab-video">
-    <div class="club-panel-card">
-      <h3>Vídeos del club</h3>
-      <p class="muted">Aquí iremos metiendo la playlist/galería automática.</p>
-      <div id="club-videos"></div>
-    </div>
-  </section>
-
-  <section class="tab-panel" id="tab-plantilla">
-    <div class="club-panel-card">
-      <h3>Plantilla</h3>
-      <p class="muted">Después conectamos con tus datos de plantilla.</p>
-      <div id="club-plantilla"></div>
-    </div>
-  </section>
-
-  <section class="tab-panel" id="tab-stats">
-    <div class="club-panel-card">
-      <h3>Stats del club</h3>
-      <p class="muted">Después conectamos con rankings y medias.</p>
-      <div id="club-stats"></div>
-    </div>
-  </section>
 </main>
 
 <footer class="site-footer">© Torneo entre amigos</footer>
 
 <script>
-  // Antes era window.CLUB_NAME, ahora se pasa por URL
+  // Lee el equipo desde ?team=Atalanta
   const params = new URLSearchParams(window.location.search);
-  window.CLUB_NAME = params.get("team") || "";
+  window.CLUB_NAME = params.get("team") || null;
 </script>
 
 <script src="js/common.js"></script>
