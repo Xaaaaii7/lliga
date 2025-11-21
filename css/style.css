@@ -2511,3 +2511,79 @@ ul.kv li{
   letter-spacing:.03em;
   padding-top:2px;
 }
+/* ==========================
+   PLANTILLA (club)
+   ========================== */
+
+.club-plantilla-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.coach-line{
+  margin-top:4px;
+  font-size:.95rem;
+  color:#d8e3f5;
+}
+
+.plantilla-group-title{
+  margin:0 0 10px;
+  font-size:1.05rem;
+  font-weight:800;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+
+.plantilla-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:10px;
+}
+
+.plantilla-card{
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  transition:transform .12s ease, border-color .12s ease;
+}
+.plantilla-card:hover{
+  transform:translateY(-2px);
+  border-color:var(--accent-soft);
+}
+
+.plantilla-name{
+  font-weight:800;
+  font-size:1rem;
+}
+.plantilla-pos{
+  font-size:.85rem;
+}
+
+.plantilla-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:2px;
+}
+
+.plantilla-card .pill{
+  font-size:.75rem;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#111827;
+  border:1px solid rgba(255,255,255,0.08);
+  color:#cde;
+}
+
+@media (max-width:640px){
+  .plantilla-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:420px){
+  .plantilla-grid{grid-template-columns:1fr;}
+}
