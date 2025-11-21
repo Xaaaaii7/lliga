@@ -116,6 +116,26 @@
 
   const fullClasif = calcularClasificacion();
   const idxClub = fullClasif.findIndex(t=> norm(t.nombre) === norm(CLUB));
+    // ---- Stats generales para banner ----
+  const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
+  const clubPos = (idxClub >= 0) ? idxClub + 1 : "—";
+  
+  const bannerStatsHTML = clubRow ? `
+    <div class="club-banner-stats">
+      <div class="club-stat"><span class="label">Pos</span><span class="value">${clubPos}</span></div>
+      <div class="club-stat"><span class="label">PJ</span><span class="value">${clubRow.pj}</span></div>
+      <div class="club-stat"><span class="label">G</span><span class="value">${clubRow.g}</span></div>
+      <div class="club-stat"><span class="label">E</span><span class="value">${clubRow.e}</span></div>
+      <div class="club-stat"><span class="label">P</span><span class="value">${clubRow.p}</span></div>
+      <div class="club-stat"><span class="label">GF</span><span class="value">${clubRow.gf}</span></div>
+      <div class="club-stat"><span class="label">GC</span><span class="value">${clubRow.gc}</span></div>
+      <div class="club-stat"><span class="label">Pts</span><span class="value">${clubRow.pts}</span></div>
+    </div>
+  ` : `<p class="club-banner-stats muted">Sin datos aún.</p>`;
+  
+  // Pintar en el banner (debajo del nombre)
+  const descEl = document.getElementById("club-description");
+  if (descEl) descEl.innerHTML = bannerStatsHTML;
 
   let mini = [];
   if (idxClub === -1) mini = fullClasif.slice(0,9);
