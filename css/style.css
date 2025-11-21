@@ -2258,3 +2258,175 @@ ul.kv li{
     width:64px;height:64px;
   }
 }
+/* ==========================
+   PÁGINA CLUB (template único)
+   ========================== */
+
+.page-club main{ margin-top:14px; }
+
+/* Banner superior */
+.club-banner{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:16px 18px;
+  border-radius:20px;
+  background:linear-gradient(135deg, rgba(31,191,74,0.14), rgba(16,21,34,1));
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 18px 40px rgba(0,0,0,.55);
+}
+
+.club-banner-logo{
+  width:86px;
+  height:86px;
+  border-radius:18px;
+  background:#fff;
+  padding:6px;
+  object-fit:contain;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+
+.club-banner-info h2{
+  margin:0;
+  font-size:1.7rem;
+  font-weight:900;
+}
+
+.club-description{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+/* Tabs club (reusa tu .tabs) */
+.club-tabs{ margin-top:14px; }
+
+/* Grid resumen */
+.club-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:14px;
+  margin-top:10px;
+}
+
+/* Caja resumen */
+.club-box{
+  grid-column:span 6;
+  background:var(--bg-elevated);
+  border-radius:18px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 10px 24px rgba(0,0,0,.45);
+}
+
+.club-box h3{
+  margin:0 0 8px;
+  font-size:1.05rem;
+  font-weight:800;
+}
+
+/* Partido (next / last) */
+.club-match{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:8px 10px;
+  font-variant-numeric:tabular-nums;
+  flex-wrap:wrap;
+}
+
+.club-mini-logo{
+  width:26px;height:26px;
+  object-fit:contain;
+  background:#fff;
+  border-radius:6px;
+  padding:2px;
+}
+
+.club-date{
+  width:100%;
+  text-align:center;
+  font-size:.85rem;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* Mini tabla clasificación */
+.club-mini-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.95rem;
+}
+
+.club-mini-table th,
+.club-mini-table td{
+  padding:8px 8px;
+  border-bottom:1px solid var(--border-subtle);
+  text-align:left;
+}
+
+.club-mini-table th{
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--muted);
+}
+
+.club-mini-table tr.club-highlight{
+  background:rgba(31,191,74,0.12);
+  outline:2px solid var(--accent);
+}
+
+/* Formación */
+.club-formacion{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#0b1220;
+  border:1px dashed rgba(255,255,255,0.10);
+  padding:8px;
+}
+
+/* Top scorer */
+.club-player{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.club-player-photo{
+  width:76px;height:96px;
+  border-radius:12px;
+  object-fit:cover;
+  background:#111827;
+  flex:0 0 auto;
+}
+
+.club-player-info{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.club-player-info strong{
+  font-size:1.05rem;
+  font-weight:900;
+}
+.club-player-info span{
+  font-weight:800;
+}
+
+/* Responsive */
+@media (max-width:900px){
+  .club-box{ grid-column:span 12; }
+}
+
+@media (max-width:640px){
+  .club-banner{ padding:12px; }
+  .club-banner-logo{ width:72px;height:72px;border-radius:16px; }
+  .club-banner-info h2{ font-size:1.45rem; }
+}
