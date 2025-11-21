@@ -39,6 +39,9 @@
   const resultados = await loadJSON("data/resultados.json").catch(() => []);
   const statsIndex = await loadJSON("data/partidos_stats.json").catch(()=>({}));
 
+  // Aseguramos orden por jornada
+  resultados.sort((a,b)=> (a.numero||0) - (b.numero||0));
+
   // --------------------------
   // Obtener todos los partidos del equipo
   // --------------------------
@@ -69,10 +72,10 @@
   const lastMatch = [...partidosClub].reverse().find(p =>
     isNum(p.goles_local) && isNum(p.goles_visitante)
   );
-    // --------------------------
+
+  // --------------------------
   // TEAM FORM (últimos 3 jugados)
   // --------------------------
-
   const playedMatches = partidosClub.filter(p =>
     isNum(p.goles_local) && isNum(p.goles_visitante)
   );
@@ -115,6 +118,14 @@
       <div class="club-form-rating">${formRating}</div>
     `
     : `<p class="muted">Aún no hay 3 partidos jugados.</p>`;
+
+  // ✅ Definimos el box aquí (ANTES de usarlo)
+  const teamFormBox = `
+    <div class="club-box">
+      <h3>Team Form</h3>
+      ${formHTML}
+    </div>
+  `;
 
   // --------------------------
   // Mini clasificación (9 equipos centrando al club)
@@ -162,10 +173,11 @@
 
   const fullClasif = calcularClasificacion();
   const idxClub = fullClasif.findIndex(t=> norm(t.nombre) === norm(CLUB));
-    // ---- Stats generales para banner ----
+
+  // ---- Stats generales para banner ----
   const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
   const clubPos = (idxClub >= 0) ? idxClub + 1 : "—";
-  
+
   const bannerStatsHTML = clubRow ? `
     <div class="club-banner-stats">
       <div class="club-stat"><span class="label">Pos</span><span class="value">${clubPos}</span></div>
@@ -178,7 +190,7 @@
       <div class="club-stat"><span class="label">Pts</span><span class="value">${clubRow.pts}</span></div>
     </div>
   ` : `<p class="club-banner-stats muted">Sin datos aún.</p>`;
-  
+
   // Pintar en el banner (debajo del nombre)
   const descEl = document.getElementById("club-description");
   if (descEl) descEl.innerHTML = bannerStatsHTML;
@@ -190,7 +202,6 @@
   // --------------------------
   // TOP SCORER desde Google Sheet TSV (igual que pichichi)
   // --------------------------
-
   const SHEET_TSV_URL =
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv";
 
@@ -239,7 +250,6 @@
   // --------------------------
   // TAB RESUMEN render
   // --------------------------
-
   const tabResumen = document.getElementById("tab-resumen");
 
   const nextHTML = nextMatch ? `
