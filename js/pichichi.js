@@ -1,52 +1,18 @@
 (async () => {
-  // URL TSV pública de Google Sheets
-  const SHEET_TSV_URL =
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv';
-
-  const msgEl   = document.getElementById('pichichi-msg');
-  const tbody   = document.getElementById('tabla-pichichi-jug');
-  const heroEl  = document.getElementById('pichichi-hero');
+  const msgEl  = document.getElementById('pichichi-msg');
+  const tbody  = document.getElementById('tabla-pichichi-jug');
+  const heroEl = document.getElementById('pichichi-hero');
 
   if (!tbody) return;
 
   const setMsg = (t) => { if (msgEl) msgEl.textContent = t || ''; };
 
-  // Normalizadores
-  const norm = s => String(s||'')
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s-]/g,'')
-    .trim();
-
-  const slug = s => norm(s).replace(/\s+/g,'-');
+  // Helpers desde Core
+  const slug = CoreStats.slug;
+  const toNum = CoreStats.toNum;
 
   const logoPath = eq => `img/${slug(eq)}.png`;
-
-  // PARA LA FOTO DEL JUGADOR LÍDER:
-  // Usa imágenes locales en: img/jugadores/<slug-del-jugador>.jpg
-  // Ejemplo: "Leo Messi" -> img/jugadores/leo-messi.jpg
   const playerPhotoPath = nombre => `img/jugadores/${slug(nombre)}.jpg`;
-
-  // --- Parser TSV ---
-  function parseTSV(text) {
-    const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
-    if (!lines.length) return { headers: [], rows: [] };
-    const headers = lines[0].split('\t').map(h => h.trim());
-    const rows = lines.slice(1).map(line => {
-      const cols = line.split('\t');
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = (cols[i] ?? '').trim());
-      return obj;
-    });
-    return { headers, rows };
-  }
-
-  const toNum = (v) => {
-    if (v == null || v === '') return 0;
-    const n = parseFloat(String(v).replace(',', '.'));
-    return Number.isFinite(n) ? n : 0;
-  };
-
   const gpp = (g, pj) => pj > 0 ? (g / pj) : 0;
 
   // Chip podio (top 3)
@@ -100,27 +66,7 @@
     `;
   }
 
-  // --- Render tabla ---
-  function render(rows) {
-    // Mapear columnas esperadas de la hoja
-    const fullData = rows.map(r => ({
-      jugador: r["Jugador"] || '',
-      equipo:  r["Equipo"]  || '',
-      pj:      toNum(r["Partidos"]),
-      goles:   toNum(r["Goles"])
-    }))
-    // Filtramos registros sin jugador/equipo o sin partidos
-    .filter(r => r.jugador && r.equipo && r.pj > 0);
-
-    // Orden: goles → g/pj → pj → jugador
-    fullData.sort((a,b)=>{
-      if (b.goles !== a.goles) return b.goles - a.goles;
-      const ag = gpp(a.goles, a.pj), bg = gpp(b.goles, b.pj);
-      if (bg !== ag) return bg - ag;
-      if (b.pj !== a.pj) return b.pj - a.pj;
-      return a.jugador.localeCompare(b.jugador, 'es', { sensitivity:'base' });
-    });
-
+  function render(fullData) {
     if (!fullData.length) {
       tbody.innerHTML = '';
       renderHero(null);
@@ -129,13 +75,12 @@
     }
 
     // Héroe = primer clasificado
-    const top = fullData[0];
-    renderHero(top);
+    renderHero(fullData[0]);
 
-    // Solo top 30 para la tabla
+    // Solo top 30 tabla
     const data = fullData.slice(0, 30);
 
-    const rowsHtml = data.map((r,i)=>`
+    tbody.innerHTML = data.map((r,i)=>`
       <tr>
         <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
         <td>${r.jugador}</td>
@@ -152,20 +97,16 @@
       </tr>
     `).join('');
 
-    tbody.innerHTML = rowsHtml;
-
-    const total = fullData.length;
-    const shown = data.length;
-    setMsg(`Mostrando top ${shown} goleadores (de ${total} registrados).`);
+    setMsg(`Mostrando top ${data.length} goleadores (de ${fullData.length} registrados).`);
   }
 
-  // --- Carga TSV ---
+  // -----------------------------
+  // Carga desde Core + render
+  // -----------------------------
   try {
-    const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const { rows } = parseTSV(text);
-    render(rows);
+    const rows = await CoreStats.getPichichiRows();
+    const fullData = CoreStats.computePichichiPlayers(rows);
+    render(fullData);
   } catch (e) {
     console.error(e);
     setMsg('No se pudo cargar la hoja publicada. Revisa la URL TSV.');
