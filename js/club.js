@@ -69,6 +69,52 @@
   const lastMatch = [...partidosClub].reverse().find(p =>
     isNum(p.goles_local) && isNum(p.goles_visitante)
   );
+    // --------------------------
+  // TEAM FORM (últimos 3 jugados)
+  // --------------------------
+
+  const playedMatches = partidosClub.filter(p =>
+    isNum(p.goles_local) && isNum(p.goles_visitante)
+  );
+
+  const last3 = playedMatches.slice(-3); // últimos 3 partidos jugados
+
+  const formResults = last3.map(p => {
+    const clubIsLocal = norm(p.local) === norm(CLUB);
+    const gl = p.goles_local, gv = p.goles_visitante;
+
+    if (gl === gv) return "D"; // draw
+
+    const clubWon = clubIsLocal ? (gl > gv) : (gv > gl);
+    return clubWon ? "W" : "L";
+  });
+
+  const countW = formResults.filter(r=>r==="W").length;
+  const countD = formResults.filter(r=>r==="D").length;
+  const countL = formResults.filter(r=>r==="L").length;
+
+  const formRating = (() => {
+    if (formResults.length < 3) return "NO DATA";
+    if (countW === 3) return "🔥 ON FIRE";
+    if (countW === 2) return "🟩 STRONG";
+    if (countW === 1 && countL === 0) return "🟨 SOLID";
+    if (countD === 3) return "⚪ STEADY";
+    if (countW === 0 && countL === 1) return "🟧 SHAKY";
+    if (countL === 2) return "🟥 BAD MOMENT";
+    if (countL === 3) return "❄️ COLD";
+    return "🟨 SOLID";
+  })();
+
+  const formHTML = (formResults.length)
+    ? `
+      <div class="club-form-row">
+        ${formResults.map(r => `
+          <span class="form-pill form-${r.toLowerCase()}">${r}</span>
+        `).join("")}
+      </div>
+      <div class="club-form-rating">${formRating}</div>
+    `
+    : `<p class="muted">Aún no hay 3 partidos jugados.</p>`;
 
   // --------------------------
   // Mini clasificación (9 equipos centrando al club)
@@ -279,6 +325,7 @@
     <div class="club-grid">
       ${nextHTML}
       ${lastHTML}
+      ${teamFormBox}
       ${miniClasifHTML}
       ${formacionHTML}
       ${goleadorHTML}
