@@ -233,7 +233,6 @@
            src="${formationPath(CLUB)}"
            alt="Formación ${CLUB}"
            onerror="this.style.display='none'">
-      <p class="muted" style="margin-top:6px">* Si no hay imagen, no se muestra.</p>
     </div>
   `;
 
