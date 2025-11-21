@@ -2150,3 +2150,111 @@ ul.kv li{
     font-size:0.95rem;
   }
 }
+/* ==========================
+   PÁGINA CLUBS (listado)
+   ========================== */
+.page-clubs .clubs-header{
+  margin-top:10px;
+  margin-bottom:14px;
+}
+.page-clubs .clubs-header h2{
+  margin:0 0 6px;
+}
+.page-clubs .clubs-sub{
+  margin:0;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+/* Grid moderno tipo web de liga */
+.clubs-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:16px;
+}
+
+/* Card club */
+.club-card{
+  background:var(--bg-elevated);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:18px;
+  padding:16px 12px 14px;
+  text-decoration:none;
+  color:inherit;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.45);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Borde fino con degradado marca torneo */
+.club-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  padding:1px;
+  background:linear-gradient(140deg,rgba(31,191,74,.9),rgba(49,130,206,.4));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask-composite:exclude;
+  pointer-events:none;
+  opacity:.35;
+}
+
+.club-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 40px rgba(0,0,0,.6);
+  border-color:rgba(31,191,74,0.35);
+}
+
+/* Escudo grande */
+.club-badge-wrap{
+  width:92px;
+  height:92px;
+  border-radius:20px;
+  background:#ffffff;
+  display:grid;
+  place-items:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+.club-badge{
+  width:72px;
+  height:72px;
+  object-fit:contain;
+}
+
+/* Nombre club */
+.club-name{
+  font-weight:800;
+  font-size:1.05rem;
+  letter-spacing:.02em;
+  text-align:center;
+}
+
+/* CTA pequeñita */
+.club-cta{
+  font-size:.85rem;
+  color:var(--muted);
+  letter-spacing:.03em;
+}
+
+/* Responsive */
+@media (max-width:720px){
+  .clubs-grid{
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:12px;
+  }
+  .club-badge-wrap{
+    width:82px;height:82px;border-radius:18px;
+  }
+  .club-badge{
+    width:64px;height:64px;
+  }
+}
