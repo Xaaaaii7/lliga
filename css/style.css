@@ -2599,3 +2599,27 @@ ul.kv li{
 .weather-lluvia{ background:rgba(80,140,255,.12); }
 .weather-nieve{ background:rgba(180,220,255,.12); }
 .weather-despejado{ background:rgba(255,210,80,.12); }
+.weather-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #eef2f8;
+}
+
+.weather-despejado {
+  background: #fff3c4;
+}
+
+.weather-lluvia {
+  background: #d0e7ff;
+}
+
+.weather-nieve {
+  background: #e8f0ff;
+}
+
+.match-weather {
+  font-size: 0.85rem;
+}
+
