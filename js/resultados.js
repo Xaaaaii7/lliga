@@ -44,6 +44,86 @@
     if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
   });
 
+  // -----------------------------
+  // METEO: mapa clave -> ciudad (tu JSON)
+  // -----------------------------
+  let ciudadesConfig = {};
+  try {
+    ciudadesConfig = await loadJSON('data/equipos_ciudades.json');
+  } catch {
+    ciudadesConfig = {};
+  }
+
+  // Cache meteo por ciudad (para no repetir peticiones)
+  const weatherCache = new Map(); // key (city lower) -> { label, emoji }
+
+  // Map weathercode (Open-Meteo) a categoría simple
+  const weatherCodeToCategory = (code) => {
+    if (code == null) return null;
+    const c = Number(code);
+
+    if (c === 0) return { label: "Despejado", emoji: "☀️" };
+    if ([1,2,3].includes(c)) return { label: "Nublado", emoji: "⛅" };
+    if ([45,48].includes(c)) return { label: "Niebla", emoji: "🌫️" };
+
+    if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(c))
+      return { label: "Lluvia", emoji: "🌧️" };
+
+    if ([71,73,75,77,85,86].includes(c))
+      return { label: "Nieve", emoji: "❄️" };
+
+    return { label: "Variable", emoji: "🌥️" };
+  };
+
+  // Meteo a partir del NOMBRE de ciudad (usando geocoding + current_weather)
+  const fetchWeatherForCity = async (cityName) => {
+    if (!cityName) return null;
+    const key = cityName.toLowerCase();
+
+    if (weatherCache.has(key)) return weatherCache.get(key);
+
+    try {
+      // 1) Geocoding
+      const geoUrl =
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=es&format=json`;
+      const geoRes = await fetch(geoUrl, { cache: 'no-store' });
+      if (!geoRes.ok) throw new Error(`Geo HTTP ${geoRes.status}`);
+      const geo = await geoRes.json();
+      const loc = geo?.results?.[0];
+      if (!loc) {
+        weatherCache.set(key, null);
+        return null;
+      }
+
+      const lat = loc.latitude;
+      const lon = loc.longitude;
+
+      // 2) Tiempo actual
+      const meteoUrl =
+        `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current_weather=true`;
+      const meteoRes = await fetch(meteoUrl, { cache: 'no-store' });
+      if (!meteoRes.ok) throw new Error(`Meteo HTTP ${meteoRes.status}`);
+      const meteoData = await meteoRes.json();
+
+      const cat = weatherCodeToCategory(meteoData?.current_weather?.weathercode);
+      if (cat) {
+        weatherCache.set(key, cat);
+        return cat;
+      }
+    } catch (e) {
+      console.warn('Meteo error para ciudad', cityName, e);
+    }
+
+    weatherCache.set(key, null);
+    return null;
+  };
+
+  // Dado un "equipo local" (o nombre clave), saca la ciudad desde tu JSON
+  const getCityForKey = (keyName) => {
+    if (!keyName) return null;
+    return ciudadesConfig[keyName] || null;
+  };
+
   // Carga datos de jornadas
   let jornadas = await loadJSON('data/resultados.json').catch(()=>[]);
   if (!Array.isArray(jornadas) || !jornadas.length) {
@@ -61,7 +141,6 @@
     }
   });
   if (!lastPlayed) {
-    // fallback: la última jornada por número
     lastPlayed = jornadas[jornadas.length - 1].numero;
   }
 
@@ -87,7 +166,7 @@
     });
   });
 
-  // Construir contenedor de navegación + bloque de jornada
+  // Contenedor de navegación + bloque de jornada
   const navWrap = document.createElement('div');
   navWrap.className = 'jornada-nav resultados-nav';
   navWrap.innerHTML = `
@@ -116,7 +195,7 @@
     statsIndex = {};
   }
 
-   // Render de tabla de estadísticas + cabecera bonita (sin escudos)
+  // Render de tabla de estadísticas + cabecera
   const renderStats = (statsObj, meta) => {
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
@@ -147,9 +226,8 @@
 
       const get = (data, k) => (data && Object.prototype.hasOwnProperty.call(data, k)) ? data[k] : null;
 
-      // ===== Tarjetas-resumen (moderno) =====
-      const ataqueKeys   = ['goles','tiros','tiros_a_puerta'];
-      const balonKeys    = ['posesion','pases','pases_completados','centros'];
+      const ataqueKeys = ['goles','tiros','tiros_a_puerta'];
+      const balonKeys  = ['posesion','pases','pases_completados','centros'];
 
       const buildKvList = (keys) => keys
         .filter(k => get(Adata,k) !== null || get(Bdata,k) !== null)
@@ -186,7 +264,6 @@
         `;
       }
 
-      // ===== Tabla completa =====
       const orden = [
         'goles','posesion','tiros','tiros_a_puerta','faltas',
         'fueras_de_juego','corners','tiros_libres','pases',
@@ -232,8 +309,8 @@
     `;
   };
 
-  // Render de una jornada concreta
-  const renderJornada = (num) => {
+  // Render de una jornada concreta (async por meteo)
+  const renderJornada = async (num) => {
     const j = jornadas.find(x => x.numero === num);
     if (!j) {
       jornadaWrap.innerHTML = `<p class="hint">No se ha encontrado la jornada ${num}.</p>`;
@@ -249,6 +326,14 @@
       jornadaWrap.innerHTML = `<p class="hint">Esta jornada no tiene partidos definidos.</p>`;
       return;
     }
+
+    // Pre-cargar meteo para cada "clave" (usamos p.local como clave del JSON)
+    const meteoArr = await Promise.all(
+      partidos.map(p => {
+        const cityName = getCityForKey(p.local);
+        return cityName ? fetchWeatherForCity(cityName) : Promise.resolve(null);
+      })
+    );
 
     const cardsHtml = partidos.map((p, idx) => {
       const pid = p.id || `J${j.numero}-P${idx+1}`;
@@ -293,6 +378,15 @@
 
       const hasStats = !!statsIndex[pid];
 
+      // Meteo
+      const cityName   = getCityForKey(p.local);
+      const meteo      = meteoArr[idx];
+      const meteoHTML  = (meteo && cityName)
+        ? `<div class="result-meteo muted">Meteo hoy en ${cityName}: ${meteo.emoji} ${meteo.label}</div>`
+        : (meteo
+            ? `<div class="result-meteo muted">Meteo hoy: ${meteo.emoji} ${meteo.label}</div>`
+            : '');
+
       return `
         <article class="result-card ${jugado ? 'result-played' : 'result-pending'}">
           <button class="result-main partido-card"
@@ -315,6 +409,7 @@
               </div>
             </div>
             ${fechaHora}
+            ${meteoHTML}
             <div class="result-status-line">
               <div class="result-status-left">
                 <span class="result-status ${jugado ? 'played' : 'pending'}">
@@ -347,18 +442,18 @@
     if (nextBtn) nextBtn.disabled = current >= maxJornada;
   };
 
-  prevBtn?.addEventListener('click', () => {
+  prevBtn?.addEventListener('click', async () => {
     if (current > minJornada) {
       current--;
-      renderJornada(current);
+      await renderJornada(current);
       updateNav();
     }
   });
 
-  nextBtn?.addEventListener('click', () => {
+  nextBtn?.addEventListener('click', async () => {
     if (current < maxJornada) {
       current++;
-      renderJornada(current);
+      await renderJornada(current);
       updateNav();
     }
   });
@@ -375,7 +470,6 @@
     const stats = statsIndex[id];
 
     if (!stats && btn.dataset.noStats === '1') {
-      // Sin estadísticas: simplemente no abrimos nada
       return;
     }
 
@@ -387,6 +481,6 @@
   });
 
   // Primera carga: última jornada jugada
-  renderJornada(current);
+  await renderJornada(current);
   updateNav();
 })();
