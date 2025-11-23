@@ -2587,3 +2587,15 @@ ul.kv li{
 @media (max-width:420px){
   .plantilla-grid{grid-template-columns:1fr;}
 }
+
+.match-weather { margin-top:6px; }
+
+.weather-pill{
+  display:inline-flex; gap:.35rem; align-items:center;
+  padding:4px 8px; border-radius:999px; font-size:.82rem;
+  background:rgba(255,255,255,.06);
+}
+
+.weather-lluvia{ background:rgba(80,140,255,.12); }
+.weather-nieve{ background:rgba(180,220,255,.12); }
+.weather-despejado{ background:rgba(255,210,80,.12); }
