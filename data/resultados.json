@@ -201,7 +201,7 @@
       { "id": "J7-P4",  "local": "Joel",    "visitante": "Ricard",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P5",  "local": "Eudald",  "visitante": "Erik",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P6",  "local": "Enric",   "visitante": "Josep",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J7-P7",  "local": "Raka",   "visitante": "Jordi",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J7-P7",  "local": "Raka",   "visitante": "Jordi",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": 3, "goles_visitante": 1 },
       { "id": "J7-P8",  "local": "Jose",     "visitante": "Tes",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P9",  "local": "Eloi",  "visitante": "Vandal",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P10", "local": "Berni",   "visitante": "Elian",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
