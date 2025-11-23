@@ -5,7 +5,7 @@
 // 3) Un contenedor en HTML: <div id="resultados-root"></div>
 
 (async () => {
-  const root = document.getElementById("resultados-root"); // <-- cambia si tu html usa otro id
+  const root = document.getElementById("resultados"); // <-- cambia si tu html usa otro id
   if (!root) return;
 
   // -----------------------------
