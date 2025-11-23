@@ -1,208 +1,157 @@
 (async () => {
-  const root = document.getElementById('jugadores');
+  const root = document.getElementById("resultados-root"); // o el id que uses
+  if (!root) return;
 
   // -----------------------------
-  // Tabs Jugadores (UI only)
-  // -----------------------------
-  if (root) {
-    const tabsContainer = root.querySelector('.tabs-jugadores');
-    const tabButtons = tabsContainer?.querySelectorAll('button') || [];
-    const panels = root.querySelectorAll('.tab-panel');
-
-    const switchTab = (id) => {
-      panels.forEach(p => p.classList.toggle('active', p.id === id));
-      tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === id));
-    };
-
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.tab;
-        if (id) switchTab(id);
-      });
-    });
-  }
-
-  // -----------------------------
-  // Core helpers
+  // Core helpers (igual que tú)
   // -----------------------------
   const norm = CoreStats.norm;
   const slug = CoreStats.slug;
+  const isNum = CoreStats.isNum;
 
   const logoPath = (team) => `img/${slug(team)}.png`;
 
-  const teamCell = (name) => `
-    <div class="team-cell">
-      <img class="team-badge team-badge-sm"
-           src="${logoPath(name)}"
-           alt="Escudo ${name}"
-           onerror="this.style.visibility='hidden'">
-      <span class="team-name">${name}</span>
-    </div>
-  `;
+  // -----------------------------
+  // Render de resultados (TU CÓDIGO)
+  // -----------------------------
+  const jornadas = await CoreStats.getResultados().catch(() => []);
+  if (!Array.isArray(jornadas)) return;
 
-  const podiumChip = (i) => {
-    if (i === 0) return '<span class="chip chip-podium chip-p1">TOP 1</span>';
-    if (i === 1) return '<span class="chip chip-podium chip-p2">TOP 2</span>';
-    if (i === 2) return '<span class="chip chip-podium chip-p3">TOP 3</span>';
-    return '';
-  };
+  // ... aquí tu render actual de tarjetas ...
+  // Asegúrate de que cada tarjeta tenga:
+  //   - data-local="Nombre Equipo Local"
+  //   - un div .match-weather donde poner la meteo
+  //
+  // Ejemplo de card:
+  // <div class="match-card" data-local="Chelsea">
+  //    ...
+  //    <div class="match-weather"></div>
+  // </div>
 
-  const setHTML = (id, html) => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = html;
-  };
+  // === (tu render aquí) ===
 
-  const setRows = (id, rows) => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = rows.join('');
-  };
 
   // =========================================================
-  // 1) PICHICHI / ZAMORA EQUIPOS (GLOBAL)
-  //    Totales vienen del core, aquí solo ordenamos/pintamos
+  // METEO HOY POR CIUDAD DEL LOCAL (adaptado a tu JS)
   // =========================================================
-  const totals = await CoreStats.computeTeamTotals().catch(() => []);
 
-  const gfPJ = t => (t.pj > 0) ? (t.gf / t.pj).toFixed(2) : '—';
-  const gcPJ = t => (t.pj > 0) ? (t.gc / t.pj).toFixed(2) : '—';
-  const dg   = t => (t.gf - t.gc);
-
-  const pichichiEq = totals.slice().sort((a,b)=>
-    (b.gf - a.gf) || (dg(b)-dg(a)) || (a.gc - b.gc) ||
-    a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'})
-  );
-
-  const zamoraEq = totals.slice().sort((a,b)=>
-    (a.gc - b.gc) || (dg(b)-dg(a)) || (b.gf - a.gf) ||
-    a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'})
-  );
-
-  const rowPichichi = (t,i)=>`
-    <tr>
-      <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-      <td>${teamCell(t.nombre)}</td>
-      <td>${t.pj}</td>
-      <td>${t.gf}</td>
-      <td>${gfPJ(t)}</td>
-    </tr>`;
-
-  const rowZamora = (t,i)=>`
-    <tr>
-      <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-      <td>${teamCell(t.nombre)}</td>
-      <td>${t.pj}</td>
-      <td>${t.gc}</td>
-      <td>${gcPJ(t)}</td>
-    </tr>`;
-
-  setHTML('tabla-pichichi', pichichiEq.map(rowPichichi).join(''));
-  setHTML('tabla-zamora',   zamoraEq.map(rowZamora).join(''));
-
-  // =========================================================
-  // 2) RANKINGS AVANZADOS POR EQUIPO (GLOBAL)
-  //    100% CoreStats.computeRankingsPorEquipo()
-  // =========================================================
-  const adv = await CoreStats.computeRankingsPorEquipo().catch(() => null);
-
-  if (adv) {
-    const {
-      posesionTop = [],
-      fairTop = [],
-      passTop = [],
-      shotTop = [],
-      efectTop = [],
-      posMed,
-      fair,
-      passAcc,
-      precisionTiro,
-      conversionGol,
-      combinedShot,
-      efectRival
-    } = adv;
-
-    const fmtPct = v => Number.isFinite(v) ? (v*100).toFixed(1)+'%' : '—';
-
-    const rPos = (t,i)=> `
-      <tr>
-        <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-        <td>${teamCell(t.nombre)}</td>
-        <td>${t.pj}</td>
-        <td>${fmtPct(posMed(t))}</td>
-      </tr>`;
-
-    const rFair= (t,i)=> `
-      <tr>
-        <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-        <td>${teamCell(t.nombre)}</td>
-        <td>${t.pj}</td>
-        <td>${t.entradas}</td>
-        <td>${t.faltas}</td>
-        <td>${t.rojas}</td>
-        <td>${fair(t).toFixed(2)}</td>
-      </tr>`;
-
-    const rPass= (t,i)=> `
-      <tr>
-        <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-        <td>${teamCell(t.nombre)}</td>
-        <td>${t.pj}</td>
-        <td>${t.pases}</td>
-        <td>${t.completados}</td>
-        <td>${fmtPct(passAcc(t))}</td>
-      </tr>`;
-
-    const rShot= (t,i)=> `
-      <tr>
-        <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-        <td>${teamCell(t.nombre)}</td>
-        <td>${t.pj}</td>
-        <td>${t.tiros}</td>
-        <td>${t.taPuerta}</td>
-        <td>${t.goles}</td>
-        <td>${fmtPct(precisionTiro(t))}</td>
-        <td>${fmtPct(conversionGol(t))}</td>
-        <td>${fmtPct(combinedShot(t))}</td>
-      </tr>`;
-
-    const rEfect = (t,i)=> `
-      <tr>
-        <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-        <td>${teamCell(t.nombre)}</td>
-        <td>${t.pj}</td>
-        <td>${t.golesEncajados}</td>
-        <td>${t.tirosRival}</td>
-        <td>${fmtPct(efectRival(t))}</td>
-      </tr>`;
-
-    setRows('tabla-posesion-eq', posesionTop.map(rPos));
-    setRows('tabla-fairplay-eq', fairTop.map(rFair));
-    setRows('tabla-pass-eq',     passTop.map(rPass));
-    setRows('tabla-shot-eq',     shotTop.map(rShot));
-    setRows('tabla-efect-rival', efectTop.map(rEfect));
+  async function loadTeamCities() {
+    const obj = await loadJSON("data/team_cities.json").catch(() => ({}));
+    return (obj && typeof obj === "object") ? obj : {};
   }
 
-  // =========================================================
-  // 3) MVP TEMPORADA (EQUIPOS)
-  //    100% CoreStats.computeMvpTemporada()
-  // =========================================================
-  const mvpSeasonArr = await CoreStats.computeMvpTemporada().catch(() => []);
-
-  const mvpTbody = document.getElementById('tabla-mvp-jornada');
-  if (mvpTbody) {
-    mvpTbody.innerHTML = mvpSeasonArr.map((s,i)=>{
-      const puntos = (s.mvpAvg * 100).toFixed(1);
-      return `
-        <tr>
-          <td class="jug-pos-cell">${i+1}${podiumChip(i)}</td>
-          <td>${teamCell(s.nombre)}</td>
-          <td>${s.jornadas}</td>
-          <td>${s.pj}</td>
-          <td>${s.gf}</td>
-          <td>${s.gc}</td>
-          <td>${puntos}</td>
-        </tr>
-      `;
-    }).join('');
+  function getTodayISO() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
   }
+
+  function codeToCategory(code) {
+    if (code == null) return null;
+
+    // Nieve (WMO: 71-77, 85-86)
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
+      return { label: "Nieve", icon: "❄️" };
+    }
+
+    // Lluvia / tormenta (51-67, 80-82, 95-99)
+    if (
+      (code >= 51 && code <= 67) ||
+      (code >= 80 && code <= 82) ||
+      (code >= 95 && code <= 99)
+    ) {
+      return { label: "Lluvia", icon: "🌧️" };
+    }
+
+    // resto: despejado/nublado
+    return { label: "Despejado", icon: "☀️" };
+  }
+
+  async function geocodeCity(city) {
+    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    url.searchParams.set("name", city);
+    url.searchParams.set("count", "1");
+    url.searchParams.set("language", "en");
+    url.searchParams.set("format", "json");
+
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error("geocoding error");
+    const data = await res.json();
+    const r = data?.results?.[0];
+    if (!r) return null;
+
+    return { lat: r.latitude, lon: r.longitude };
+  }
+
+  async function fetchWeatherToday(lat, lon) {
+    const today = getTodayISO();
+
+    const url = new URL("https://api.open-meteo.com/v1/forecast");
+    url.searchParams.set("latitude", lat);
+    url.searchParams.set("longitude", lon);
+    url.searchParams.set("daily", "weathercode");
+    url.searchParams.set("timezone", "Europe/Madrid");
+    url.searchParams.set("start_date", today);
+    url.searchParams.set("end_date", today);
+
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error("weather api error");
+    const data = await res.json();
+    const code = data?.daily?.weathercode?.[0];
+
+    return Number.isFinite(code) ? code : null;
+  }
+
+  async function enrichMatchesWithTodayWeather() {
+    const TEAM_CITY = await loadTeamCities();
+
+    // IMPORTANTE:
+    // tus tarjetas deben tener .match-card[data-local]
+    const cards = document.querySelectorAll(".match-card[data-local]");
+    if (!cards.length) return;
+
+    const geoCache = new Map();      // city -> coords
+    const weatherCache = new Map();  // city -> code
+
+    for (const card of cards) {
+      const localTeam = card.dataset.local;
+      const city = TEAM_CITY[localTeam];
+      const target = card.querySelector(".match-weather");
+      if (!target || !city) continue;
+
+      try {
+        let coords = geoCache.get(city);
+        if (!coords) {
+          coords = await geocodeCity(city);
+          geoCache.set(city, coords);
+        }
+        if (!coords) throw new Error("no coords");
+
+        let code = weatherCache.get(city);
+        if (code === undefined) {
+          code = await fetchWeatherToday(coords.lat, coords.lon);
+          weatherCache.set(city, code);
+        }
+
+        const cat = codeToCategory(code);
+        if (!cat) {
+          target.innerHTML = `<span class="weather-pill muted">Sin meteo</span>`;
+        } else {
+          target.innerHTML = `
+            <span class="weather-pill weather-${cat.label.toLowerCase()}">
+              ${cat.icon} ${cat.label} · ${city} (hoy)
+            </span>
+          `;
+        }
+      } catch (e) {
+        target.innerHTML = `<span class="weather-pill muted">Sin meteo</span>`;
+      }
+    }
+  }
+
+  // Llamada final (después del render)
+  enrichMatchesWithTodayWeather();
 
 })();
