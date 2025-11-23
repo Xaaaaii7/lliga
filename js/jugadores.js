@@ -1,38 +1,96 @@
+// resultados.js  (con meteo hoy por ciudad del local)
+// Requisitos:
+// 1) core-stats.js cargado antes (CoreStats global)
+// 2) data/team_cities.json -> { "Chelsea":"London", "Real Betis":"Sevilla", ... }
+// 3) Un contenedor en HTML: <div id="resultados-root"></div>
+
 (async () => {
-  const root = document.getElementById("resultados-root"); // o el id que uses
+  const root = document.getElementById("resultados-root"); // <-- cambia si tu html usa otro id
   if (!root) return;
 
   // -----------------------------
-  // Core helpers (igual que tú)
+  // Core helpers
   // -----------------------------
-  const norm = CoreStats.norm;
-  const slug = CoreStats.slug;
+  const norm  = CoreStats.norm;
+  const slug  = CoreStats.slug;
   const isNum = CoreStats.isNum;
 
   const logoPath = (team) => `img/${slug(team)}.png`;
 
   // -----------------------------
-  // Render de resultados (TU CÓDIGO)
+  // Cargar resultados
   // -----------------------------
   const jornadas = await CoreStats.getResultados().catch(() => []);
-  if (!Array.isArray(jornadas)) return;
+  if (!Array.isArray(jornadas) || !jornadas.length) {
+    root.innerHTML = `<p class="muted" style="text-align:center">No hay jornadas todavía.</p>`;
+    return;
+  }
 
-  // ... aquí tu render actual de tarjetas ...
-  // Asegúrate de que cada tarjeta tenga:
-  //   - data-local="Nombre Equipo Local"
-  //   - un div .match-weather donde poner la meteo
-  //
-  // Ejemplo de card:
-  // <div class="match-card" data-local="Chelsea">
-  //    ...
-  //    <div class="match-weather"></div>
-  // </div>
+  // Orden seguro
+  jornadas.sort((a,b)=> (a.numero ?? a.jornada ?? 0) - (b.numero ?? b.jornada ?? 0));
 
-  // === (tu render aquí) ===
+  // -----------------------------
+  // Render jornadas + partidos
+  // -----------------------------
+  root.innerHTML = jornadas.map(j => {
+    const num      = j.numero ?? j.jornada ?? "";
+    const fechaJ   = j.fecha || "";
+    const partidos = j.partidos || [];
 
+    const partidosHTML = partidos.map(p => {
+      const gl = p.goles_local;
+      const gv = p.goles_visitante;
+      const jugado = isNum(gl) && isNum(gv);
+
+      return `
+        <div class="match-card" data-local="${p.local || ""}">
+          <div class="match-head">
+            <span class="chip chip-jornada">J${num}</span>
+            ${fechaJ ? `<span class="muted match-fecha">${fechaJ}</span>` : ""}
+          </div>
+
+          <div class="match-body">
+            <div class="match-team match-team-local">
+              <img class="match-logo"
+                   src="${logoPath(p.local)}"
+                   alt="Escudo ${p.local}"
+                   onerror="this.style.visibility='hidden'">
+              <span class="match-team-name">${p.local}</span>
+            </div>
+
+            <div class="match-score ${jugado ? "" : "muted"}">
+              ${jugado ? `${gl} - ${gv}` : "vs"}
+            </div>
+
+            <div class="match-team match-team-visit">
+              <img class="match-logo"
+                   src="${logoPath(p.visitante)}"
+                   alt="Escudo ${p.visitante}"
+                   onerror="this.style.visibility='hidden'">
+              <span class="match-team-name">${p.visitante}</span>
+            </div>
+          </div>
+
+          <div class="match-foot">
+            <div class="match-weather muted">Meteo: …</div>
+            ${p.hora ? `<div class="match-hora muted">${p.hora}</div>` : ""}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <section class="jornada-block">
+        <h2 class="jornada-title">Jornada ${num}</h2>
+        <div class="match-grid">
+          ${partidosHTML || `<p class="muted">Sin partidos</p>`}
+        </div>
+      </section>
+    `;
+  }).join("");
 
   // =========================================================
-  // METEO HOY POR CIUDAD DEL LOCAL (adaptado a tu JS)
+  // METEO HOY POR CIUDAD DEL LOCAL
   // =========================================================
 
   async function loadTeamCities() {
@@ -48,15 +106,16 @@
     return `${yyyy}-${mm}-${dd}`;
   }
 
+  // Mapeo WMO -> tus 3 categorías
   function codeToCategory(code) {
     if (code == null) return null;
 
-    // Nieve (WMO: 71-77, 85-86)
+    // Nieve (71–77, 85–86)
     if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
       return { label: "Nieve", icon: "❄️" };
     }
 
-    // Lluvia / tormenta (51-67, 80-82, 95-99)
+    // Lluvia / tormenta (51–67, 80–82, 95–99)
     if (
       (code >= 51 && code <= 67) ||
       (code >= 80 && code <= 82) ||
@@ -99,16 +158,14 @@
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error("weather api error");
     const data = await res.json();
-    const code = data?.daily?.weathercode?.[0];
 
+    const code = data?.daily?.weathercode?.[0];
     return Number.isFinite(code) ? code : null;
   }
 
   async function enrichMatchesWithTodayWeather() {
     const TEAM_CITY = await loadTeamCities();
 
-    // IMPORTANTE:
-    // tus tarjetas deben tener .match-card[data-local]
     const cards = document.querySelectorAll(".match-card[data-local]");
     if (!cards.length) return;
 
@@ -137,7 +194,7 @@
 
         const cat = codeToCategory(code);
         if (!cat) {
-          target.innerHTML = `<span class="weather-pill muted">Sin meteo</span>`;
+          target.textContent = "Meteo: sin datos";
         } else {
           target.innerHTML = `
             <span class="weather-pill weather-${cat.label.toLowerCase()}">
@@ -146,12 +203,12 @@
           `;
         }
       } catch (e) {
-        target.innerHTML = `<span class="weather-pill muted">Sin meteo</span>`;
+        target.textContent = "Meteo: sin datos";
       }
     }
   }
 
-  // Llamada final (después del render)
+  // ejecutar tras render
   enrichMatchesWithTodayWeather();
 
 })();
