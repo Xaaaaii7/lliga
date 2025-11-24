@@ -2622,4 +2622,45 @@ ul.kv li{
 .match-weather {
   font-size: 0.85rem;
 }
+.playlist-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.playlist-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  background:rgba(0,0,0,0.2);
+  cursor:pointer;
+  text-align:left;
+}
+
+.playlist-item.active{
+  outline:2px solid var(--accent, #6ee7ff);
+  background:rgba(110,231,255,0.08);
+}
+
+.playlist-thumb{
+  width:120px;
+  height:68px;
+  object-fit:cover;
+  border-radius:8px;
+  flex:0 0 auto;
+}
+
+.playlist-title{
+  font-weight:600;
+  line-height:1.2;
+  font-size:0.95rem;
+}
+
+.playlist-sub{
+  font-size:0.8rem;
+}
 
