@@ -16,10 +16,10 @@
   const norm  = CoreStats.norm;
   const slug  = CoreStats.slug;
 
-  const logoPath       = (team) => `img/${slug(team)}.png`;
-  const formationPath  = (team) => `img/formacion/${slug(team)}.png`;
-  const playerPhotoPath= (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
-  const plantillaPath  = (team) => `data/plantillas/${slug(team)}.json`;
+  const logoPath        = (team)   => `img/${slug(team)}.png`;
+  const formationPath   = (team)   => `img/formacion/${slug(team)}.png`;
+  const playerPhotoPath = (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
+  const plantillaPath   = (team)   => `data/plantillas/${slug(team)}.json`;
 
   // --------------------------
   // HERO
@@ -34,10 +34,9 @@
   // --------------------------
   // Datos base (core cache)
   // --------------------------
-  const resultados = await CoreStats.getResultados();  // ya viene normalizado y cacheado
-  const statsIndex = await CoreStats.getStatsIndex();  // (ahora no se usa aquí, pero futuro tab stats)
+  const resultados = await CoreStats.getResultados();
+  const statsIndex = await CoreStats.getStatsIndex();
 
-  // Orden por jornada por si acaso
   resultados.sort((a,b)=> (a.numero||0) - (b.numero||0));
 
   // --------------------------
@@ -125,7 +124,6 @@
   const fullClasif = await CoreStats.computeClasificacion(null, { useH2H:true });
   const idxClub = fullClasif.findIndex(t => norm(t.nombre) === norm(CLUB));
 
-  // ---- Stats banner ----
   const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
   const clubPos = (idxClub >= 0) ? idxClub + 1 : "—";
 
@@ -145,7 +143,6 @@
   const descEl = document.getElementById("club-description");
   if (descEl) descEl.innerHTML = bannerStatsHTML;
 
-  // Mini tabla 9 equipos
   let mini = [];
   if (idxClub === -1) mini = fullClasif.slice(0,9);
   else mini = fullClasif.slice(Math.max(0, idxClub-4), idxClub+5);
@@ -289,7 +286,6 @@
       [teamData?.coach?.firstName, teamData?.coach?.lastName].filter(Boolean).join(" ");
 
     const squad = Array.isArray(teamData?.squad) ? teamData.squad : [];
-
     if (!squad.length) {
       plantillaEl.innerHTML = `
         <div class="club-box" style="grid-column:span 12">
@@ -376,7 +372,7 @@
   }
 
   // --------------------------
-  // TAB STATS / VIDEOS placeholders
+  // TAB STATS placeholder
   // --------------------------
   document.getElementById("tab-stats").innerHTML =
     `<div class="club-box" style="grid-column:span 12">
@@ -384,11 +380,75 @@
        <p class="muted">Aquí conectaremos stats de equipo (desde CoreStats).</p>
      </div>`;
 
-  document.getElementById("tab-videos").innerHTML =
-    `<div class="club-box" style="grid-column:span 12">
-       <h3>Vídeos</h3>
-       <p class="muted">Aquí meteremos la playlist automática del club.</p>
-     </div>`;
+  // --------------------------
+  // TAB VIDEOS (playlist automática)
+  // --------------------------
+  const videosMsgEl   = document.getElementById("videos-msg");
+  const playlistEl    = document.getElementById("playlist-embed");
+
+  const setVideosMsg = (t) => { if (videosMsgEl) videosMsgEl.textContent = t || ""; };
+
+  async function resolvePlaylistIdForClub(clubName) {
+    // 1) playlists.json: canal -> playlistId
+    const playlists = await loadJSON("data/playlists.json").catch(()=> ({}));
+
+    if (!playlists || typeof playlists !== "object") return null;
+
+    // 2) Intento directo: "Liga Voll Damm - <CLUB>"
+    const directKey = `Liga Voll Damm - ${clubName}`;
+    if (playlists[directKey]) return playlists[directKey];
+
+    // 3) Intento tolerante por norm (por si acentos/mayúsculas)
+    const nkDirect = norm(directKey);
+    const foundDirect = Object.keys(playlists).find(k => norm(k) === nkDirect);
+    if (foundDirect) return playlists[foundDirect];
+
+    // 4) Si existe un puente club -> dueño/canal, lo usamos
+    const owners = await loadJSON("data/equipos_duenos.json").catch(()=> null);
+    if (owners && typeof owners === "object") {
+      const ownerName = owners[clubName] || owners[Object.keys(owners).find(k => norm(k)===norm(clubName))];
+      if (ownerName) {
+        const keyOwner = `Liga Voll Damm - ${ownerName}`;
+        if (playlists[keyOwner]) return playlists[keyOwner];
+
+        const nkOwner = norm(keyOwner);
+        const foundOwner = Object.keys(playlists).find(k => norm(k) === nkOwner);
+        if (foundOwner) return playlists[foundOwner];
+      }
+    }
+
+    return null;
+  }
+
+  async function renderPlaylist() {
+    if (!playlistEl) return;
+
+    setVideosMsg("Cargando playlist del club…");
+
+    const playlistId = await resolvePlaylistIdForClub(CLUB);
+
+    if (!playlistId) {
+      playlistEl.innerHTML = "";
+      setVideosMsg("No hay playlist configurada para este club.");
+      return;
+    }
+
+    // Embed playlist YouTube
+    playlistEl.innerHTML = `
+      <div class="video-frame">
+        <iframe
+          class="video"
+          src="https://www.youtube.com/embed/videoseries?list=${playlistId}"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    `;
+    setVideosMsg("");
+  }
+
+  renderPlaylist();
 
   // --------------------------
   // Tabs click
@@ -401,6 +461,9 @@
       const t = btn.dataset.tab;
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
       document.getElementById("tab-" + t).classList.add("active");
+
+      // Si entra a vídeos y aún no cargó, reintenta (por si tab lazy)
+      if (t === "videos") renderPlaylist();
     });
   });
 })();
