@@ -37,7 +37,14 @@
   <section id="tab-resumen" class="tab-panel active"></section>
   <section id="tab-plantilla" class="tab-panel"></section>
   <section id="tab-stats" class="tab-panel"></section>
-  <section id="tab-videos" class="tab-panel"></section>
+
+  <!-- ✅ Pestaña Vídeos con contenedor -->
+  <section id="tab-videos" class="tab-panel">
+    <div id="videos-wrap" class="videos-wrap">
+      <div id="videos-msg" style="color:var(--muted)"></div>
+      <div id="playlist-embed"></div>
+    </div>
+  </section>
 
 </main>
 
@@ -52,5 +59,9 @@
 <script src="js/common.js"></script>
 <script src="js/core-stats.js"></script>
 <script src="js/club.js"></script>
+
+<!-- ✅ Nuevo script para vídeos -->
+<script src="js/club-videos.js"></script>
+
 </body>
 </html>
