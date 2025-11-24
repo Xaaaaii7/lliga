@@ -380,8 +380,8 @@
        <p class="muted">Aquí conectaremos stats de equipo (desde CoreStats).</p>
      </div>`;
 
-  // --------------------------
-  // TAB VIDEOS (playlist automática)
+    // --------------------------
+  // TAB VIDEOS (playlist lista + player)
   // --------------------------
   const videosMsgEl   = document.getElementById("videos-msg");
   const playlistEl    = document.getElementById("playlist-embed");
@@ -389,24 +389,22 @@
   const setVideosMsg = (t) => { if (videosMsgEl) videosMsgEl.textContent = t || ""; };
 
   async function resolvePlaylistIdForClub(clubName) {
-    // 1) playlists.json: canal -> playlistId
     const playlists = await loadJSON("data/playlists.json").catch(()=> ({}));
-
     if (!playlists || typeof playlists !== "object") return null;
 
-    // 2) Intento directo: "Liga Voll Damm - <CLUB>"
     const directKey = `Liga Voll Damm - ${clubName}`;
     if (playlists[directKey]) return playlists[directKey];
 
-    // 3) Intento tolerante por norm (por si acentos/mayúsculas)
     const nkDirect = norm(directKey);
     const foundDirect = Object.keys(playlists).find(k => norm(k) === nkDirect);
     if (foundDirect) return playlists[foundDirect];
 
-    // 4) Si existe un puente club -> dueño/canal, lo usamos
     const owners = await loadJSON("data/equipos_duenos.json").catch(()=> null);
     if (owners && typeof owners === "object") {
-      const ownerName = owners[clubName] || owners[Object.keys(owners).find(k => norm(k)===norm(clubName))];
+      const ownerName =
+        owners[clubName] ||
+        owners[Object.keys(owners).find(k => norm(k)===norm(clubName))];
+
       if (ownerName) {
         const keyOwner = `Liga Voll Damm - ${ownerName}`;
         if (playlists[keyOwner]) return playlists[keyOwner];
@@ -418,6 +416,89 @@
     }
 
     return null;
+  }
+
+  // RSS público de YouTube (no requiere API key)
+  async function fetchPlaylistItemsRSS(playlistId) {
+    const url = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const xmlText = await res.text();
+
+    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    const entries = Array.from(doc.querySelectorAll("entry"));
+
+    return entries.map(e => {
+      const videoId = e.querySelector("yt\\:videoId, videoId")?.textContent?.trim();
+      const title   = e.querySelector("title")?.textContent?.trim() || "Vídeo";
+      // thumbnails vienen como media:thumbnail
+      const thumbEl = e.querySelector("media\\:thumbnail, thumbnail");
+      const thumb   = thumbEl?.getAttribute("url") || "";
+
+      return { videoId, title, thumb };
+    }).filter(x => x.videoId);
+  }
+
+  function renderVideosUI({ playlistId, items }) {
+    if (!playlistEl) return;
+
+    if (!items.length) {
+      playlistEl.innerHTML = "";
+      setVideosMsg("La playlist está vacía o no se pudieron leer los vídeos.");
+      return;
+    }
+
+    const first = items[0];
+
+    const playerHtml = `
+      <div class="video-frame">
+        <iframe
+          id="club-playlist-player"
+          class="video"
+          src="https://www.youtube.com/embed/${first.videoId}?list=${playlistId}&playsinline=1"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    `;
+
+    const listHtml = `
+      <div class="playlist-list">
+        ${items.map((v, i) => `
+          <button
+            class="playlist-item ${i===0 ? "active" : ""}"
+            data-video-id="${v.videoId}">
+            <img class="playlist-thumb" src="${v.thumb}" alt="">
+            <div class="playlist-meta">
+              <div class="playlist-title">${v.title}</div>
+              <div class="playlist-sub muted">Vídeo ${i+1}</div>
+            </div>
+          </button>
+        `).join("")}
+      </div>
+    `;
+
+    playlistEl.innerHTML = playerHtml + listHtml;
+
+    // Click handler: cambia el player al vídeo seleccionado
+    const player = document.getElementById("club-playlist-player");
+    const buttons = playlistEl.querySelectorAll(".playlist-item");
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const vid = btn.dataset.videoId;
+        if (!vid || !player) return;
+
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        player.src = `https://www.youtube.com/embed/${vid}?list=${playlistId}&playsinline=1`;
+        player.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+
+    setVideosMsg("");
   }
 
   async function renderPlaylist() {
@@ -433,19 +514,25 @@
       return;
     }
 
-    // Embed playlist YouTube
-    playlistEl.innerHTML = `
-      <div class="video-frame">
-        <iframe
-          class="video"
-          src="https://www.youtube.com/embed/videoseries?list=${playlistId}"
-          allowfullscreen
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-    `;
-    setVideosMsg("");
+    try {
+      const items = await fetchPlaylistItemsRSS(playlistId);
+      renderVideosUI({ playlistId, items });
+    } catch (e) {
+      console.warn("Error cargando RSS playlist:", e);
+      // fallback: al menos el player normal
+      playlistEl.innerHTML = `
+        <div class="video-frame">
+          <iframe
+            class="video"
+            src="https://www.youtube.com/embed/videoseries?list=${playlistId}&playsinline=1"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      `;
+      setVideosMsg("No pude cargar la lista, pero te dejo el reproductor de la playlist.");
+    }
   }
 
   renderPlaylist();
