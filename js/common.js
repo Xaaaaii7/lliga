@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Cliente Supabase (se inicializa más abajo)
 let supabase = null;
-
+window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Estado global minimal
 window.currentUser = null;
 window.isAdmin = () => !!(window.currentUser && window.currentUser.role === 'admin');
