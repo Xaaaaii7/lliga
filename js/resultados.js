@@ -2,17 +2,22 @@
   const root = document.getElementById('resultados');
   if (!root) return;
 
-  // ==========================
-  // REFS MODAL
-  // =========================
+  // ─────────────────────────────────────
+  // Supabase client
+  // ─────────────────────────────────────
+  const supa = window.supabase;
+  if (!supa || typeof supa.from !== 'function') {
+    root.innerHTML = `<p class="hint error">Error de configuración de Supabase en resultados.</p>`;
+    return;
+  }
+
+  // Modal refs
   const backdrop  = document.getElementById('stats-backdrop');
   const bodyEl    = document.getElementById('stats-body');
   const closeBtn  = document.getElementById('stats-close');
   const titleEl   = document.getElementById('stats-title');
 
-  // =========================
-  // HELPERS COMUNES
-  // =========================
+  // Helpers comunes
   const isNum = v => typeof v === 'number' && Number.isFinite(v);
   const norm = s => String(s || '')
     .toLowerCase()
@@ -22,9 +27,7 @@
   const slug = s => norm(s).replace(/\s+/g,'-');
   const logoPath = name => `img/${slug(name)}.png`;
 
-  // =========================
-  // MODAL
-  // =========================
+  // Helpers modal
   const openModal = () => {
     if (!backdrop) return;
     backdrop.hidden = false;
@@ -38,7 +41,7 @@
     if (titleEl) titleEl.textContent = 'Estadísticas del partido';
   };
 
-  closeModal(); // asegurar que arranca cerrado
+  closeModal(); // por si acaso
 
   closeBtn?.addEventListener('click', closeModal);
   backdrop?.addEventListener('click', (e)=> {
@@ -48,9 +51,9 @@
     if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
   });
 
-  // =========================
-  // METEO (equipos_ciudades.json)
-  // =========================
+  // ─────────────────────────────────────
+  // METEO: clave (nickname equipo) -> ciudad
+  // ─────────────────────────────────────
   let ciudadesConfig = {};
   try {
     ciudadesConfig = await loadJSON('data/equipos_ciudades.json');
@@ -58,7 +61,7 @@
     ciudadesConfig = {};
   }
 
-  const weatherCache = new Map(); // city -> { label, emoji }
+  const weatherCache = new Map(); // city lower -> { label, emoji }
 
   const weatherCodeToCategory = (code) => {
     if (code == null) return null;
@@ -67,10 +70,8 @@
     if (c === 0) return { label: "Despejado", emoji: "☀️" };
     if ([1,2,3].includes(c)) return { label: "Nublado", emoji: "⛅" };
     if ([45,48].includes(c)) return { label: "Niebla", emoji: "🌫️" };
-
     if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(c))
       return { label: "Lluvia", emoji: "🌧️" };
-
     if ([71,73,75,77,85,86].includes(c))
       return { label: "Nieve", emoji: "❄️" };
 
@@ -80,7 +81,6 @@
   const fetchWeatherForCity = async (cityName) => {
     if (!cityName) return null;
     const key = cityName.toLowerCase();
-
     if (weatherCache.has(key)) return weatherCache.get(key);
 
     try {
@@ -105,16 +105,13 @@
       const meteoData = await meteoRes.json();
 
       const cat = weatherCodeToCategory(meteoData?.current_weather?.weathercode);
-      if (cat) {
-        weatherCache.set(key, cat);
-        return cat;
-      }
+      weatherCache.set(key, cat || null);
+      return cat || null;
     } catch (e) {
       console.warn('Meteo error para ciudad', cityName, e);
+      weatherCache.set(key, null);
+      return null;
     }
-
-    weatherCache.set(key, null);
-    return null;
   };
 
   const getCityForKey = (keyName) => {
@@ -122,216 +119,174 @@
     return ciudadesConfig[keyName] || null;
   };
 
-  // =========================
-  // CARGA DESDE SUPABASE
-  // =========================
-  const SEASON = '2025-26';
+  // ─────────────────────────────────────
+  // Datos desde Supabase
+  // ─────────────────────────────────────
+  let jornadas = [];
+  let partidoMeta = {};
+  let statsIndex = {};
+  let minJornada = 0;
+  let maxJornada = 0;
+  let lastPlayed = 0;
 
   async function loadFromSupabase() {
-    if (!window.supabase) {
-      throw new Error('window.supabase no está definido');
-    }
-    const supabase = window.supabase;
-
-    // 1) Equipos
-    const { data: teams, error: teamsErr } = await supabase
+    // 1) league_teams (para mapear IDs -> nickname)
+    const { data: leagueTeams, error: ltError } = await supa
       .from('league_teams')
-      .select('id, nickname');
+      .select('id, nickname, season');
 
-    if (teamsErr) {
-      console.error('Error cargando league_teams:', teamsErr);
-      throw teamsErr;
+    if (ltError) {
+      console.error('Error league_teams:', ltError);
+      throw ltError;
     }
 
-    const teamsById = new Map();
-    (teams || []).forEach(t => {
-      if (t && t.id != null) teamsById.set(t.id, t);
+    // Filtramos solo la temporada actual (ajusta si hace falta)
+    const season = '2025-26';
+    const leagueTeamsFiltered = (leagueTeams || []).filter(t => t.season === season);
+    const leagueTeamIndex = new Map();
+    leagueTeamsFiltered.forEach(t => {
+      leagueTeamIndex.set(t.id, t);
     });
 
-    // 2) Partidos (matches)
-    const { data: matches, error: matchesErr } = await supabase
+    // 2) matches
+    const { data: matches, error: mError } = await supa
       .from('matches')
-      .select('*')
-      .eq('season', SEASON)
+      .select('id, season, round_id, home_league_team_id, away_league_team_id, match_date, match_time, home_goals, away_goals, stream_url')
+      .eq('season', season)
       .order('round_id', { ascending: true })
-      .order('match_date', { ascending: true })
-      .order('match_time', { ascending: true });
+      .order('match_date', { ascending: true, nullsFirst: false });
 
-    if (matchesErr) {
-      console.error('Error cargando matches:', matchesErr);
-      throw matchesErr;
+    if (mError) {
+      console.error('Error matches:', mError);
+      throw mError;
     }
 
-    const byRound = new Map(); // round_id -> array de partidos
+    if (!matches || !matches.length) {
+      root.innerHTML = `<p class="hint">No hay partidos configurados todavía.</p>`;
+      return;
+    }
 
-    for (const m of matches || []) {
-      const rd = m.round_id;
-      if (rd == null) continue; // si alguna fila no tiene round_id, la ignoramos
+    // 3) Stats por partido
+    const matchIds = matches.map(m => m.id);
+    let statsRows = [];
+    if (matchIds.length) {
+      const { data: stats, error: sError } = await supa
+        .from('match_team_stats')
+        .select('*')
+        .in('match_id', matchIds);
 
-      if (!byRound.has(rd)) byRound.set(rd, []);
+      if (sError) {
+        console.warn('Error match_team_stats, sigo sin stats:', sError);
+        statsRows = [];
+      } else {
+        statsRows = stats || [];
+      }
+    }
 
-      const homeTeam = teamsById.get(m.home_league_team_id);
-      const awayTeam = teamsById.get(m.away_league_team_id);
+    // Índice rápido
+    const matchesIndex = new Map();
+    matches.forEach(m => matchesIndex.set(m.id, m));
 
-      const localName = homeTeam?.nickname || 'Local';
-      const visitName = awayTeam?.nickname || 'Visitante';
+    // Construimos statsIndex en el mismo formato que tus JSON anteriores:
+    // statsIndex[match_id][nickname] = { goles, posesion, tiros, ... }
+    statsIndex = {};
+    statsRows.forEach(r => {
+      const nick = leagueTeamIndex.get(r.league_team_id)?.nickname || `Equipo ${r.league_team_id}`;
+      if (!statsIndex[r.match_id]) statsIndex[r.match_id] = {};
+      statsIndex[r.match_id][nick] = {
+        goles:               r.goals,
+        posesion:            r.possession,
+        tiros:               r.shots,
+        tiros_a_puerta:      r.shots_on_target,
+        faltas:              r.fouls,
+        fueras_de_juego:     r.offsides,
+        corners:             r.corners,
+        tiros_libres:        r.free_kicks,
+        pases:               r.passes,
+        pases_completados:   r.passes_completed,
+        centros:             r.crosses,
+        pases_interceptados: r.interceptions,
+        entradas:            r.tackles,
+        paradas:             r.saves,
+        rojas:               r.red_cards
+      };
+    });
 
-      let hora = null;
-      if (m.match_time) {
-        const t = String(m.match_time);
-        hora = t.slice(0,5); // "HH:MM"
+    // Agrupamos por "jornada" usando round_id como número de jornada
+    const jornadaMap = new Map(); // round_id -> { numero, partidos: [] }
+
+    matches.forEach(m => {
+      const roundNum = m.round_id || 0;
+      if (!jornadaMap.has(roundNum)) {
+        jornadaMap.set(roundNum, { numero: roundNum, partidos: [] });
       }
 
-      byRound.get(rd).push({
-        id: m.id,
+      const homeLT = leagueTeamIndex.get(m.home_league_team_id);
+      const awayLT = leagueTeamIndex.get(m.away_league_team_id);
+
+      const localName  = homeLT?.nickname || 'Local';
+      const visitName  = awayLT?.nickname || 'Visitante';
+
+      const fecha = m.match_date || null;
+      // match_time puede venir como 'HH:MM:SS' → lo recortamos a HH:MM
+      const hora  = m.match_time ? String(m.match_time).slice(0,5) : '';
+
+      jornadaMap.get(roundNum).partidos.push({
+        id: m.id, // importante: usamos id de la tabla (ej. J1-P1)
         local: localName,
         visitante: visitName,
-        fecha: m.match_date || null,
-        hora: hora,
-        goles_local: (typeof m.home_goals === 'number' ? m.home_goals : null),
-        goles_visitante: (typeof m.away_goals === 'number' ? m.away_goals : null),
+        fecha,
+        hora,
+        goles_local: m.home_goals,
+        goles_visitante: m.away_goals,
         stream: m.stream_url || null
       });
-    }
-
-    // Construimos jornadas [{ numero, fecha, partidos }]
-    const jornadas = Array.from(byRound.entries())
-      .map(([roundId, partidos]) => {
-        const fechas = partidos.map(p => p.fecha).filter(Boolean);
-        let fecha_jornada = null;
-        if (fechas.length) {
-          // Como son YYYY-MM-DD, ordenar strings funciona
-          fecha_jornada = fechas.sort()[0];
-        }
-        return { numero: roundId, fecha: fecha_jornada, partidos };
-      })
-      .sort((a, b) => a.numero - b.numero);
-
-    // 3) Stats (match_team_stats)
-    const { data: statsRows, error: statsErr } = await supabase
-      .from('match_team_stats')
-      .select('*');
-
-    if (statsErr) {
-      console.error('Error cargando match_team_stats:', statsErr);
-      throw statsErr;
-    }
-
-    // statsIndex[match_id][nickname] = {...}
-    const statsIndex = {};
-
-    for (const row of statsRows || []) {
-      const mid = row.match_id;
-      const team = teamsById.get(row.league_team_id);
-      const teamName = team?.nickname;
-      if (!mid || !teamName) continue;
-
-      if (!statsIndex[mid]) statsIndex[mid] = {};
-
-      statsIndex[mid][teamName] = {
-        posesion: row.possession ?? null,
-        tiros: row.shots ?? null,
-        tiros_a_puerta: row.shots_on_target ?? null,
-        goles: row.goals ?? null,
-        faltas: row.fouls ?? null,
-        fueras_de_juego: row.offsides ?? null,
-        corners: row.corners ?? null,
-        tiros_libres: row.free_kicks ?? null,
-        pases: row.passes ?? null,
-        pases_completados: row.passes_completed ?? null,
-        centros: row.crosses ?? null,
-        pases_interceptados: row.interceptions ?? null,
-        entradas: row.tackles ?? null,
-        paradas: row.saves ?? null,
-        rojas: row.red_cards ?? null
-      };
-    }
-
-    return { jornadas, statsIndex };
-  }
-
-  // =========================
-  // CARGA INICIAL
-  // =========================
-  let jornadas = [];
-  let statsIndex = {};
-
-  try {
-    const data = await loadFromSupabase();
-    jornadas = data.jornadas;
-    statsIndex = data.statsIndex;
-  } catch (e) {
-    console.error('Error crítico cargando datos desde Supabase:', e);
-    root.innerHTML = `<p class="hint">No se han podido cargar los resultados desde la base de datos.</p>`;
-    return;
-  }
-
-  if (!Array.isArray(jornadas) || !jornadas.length) {
-    root.innerHTML = `<p class="hint">No hay jornadas configuradas todavía.</p>`;
-    return;
-  }
-
-  jornadas = [...jornadas].sort((a,b)=>(a.numero || 0) - (b.numero || 0));
-
-  // Última jornada con al menos un resultado
-  let lastPlayed = 0;
-  jornadas.forEach(j => {
-    if ((j.partidos || []).some(p => isNum(p.goles_local) && isNum(p.goles_visitante))) {
-      if (j.numero > lastPlayed) lastPlayed = j.numero;
-    }
-  });
-  if (!lastPlayed) {
-    lastPlayed = jornadas[jornadas.length - 1].numero;
-  }
-
-  const minJornada = Math.min(...jornadas.map(j => j.numero));
-  const maxJornada = Math.max(...jornadas.map(j => j.numero));
-
-  // Índice meta de partidos por id (para modal)
-  const partidoMeta = {};
-  jornadas.forEach(j => {
-    (j.partidos || []).forEach((p, idx) => {
-      const pid = p.id || `J${j.numero}-P${idx+1}`;
-      partidoMeta[pid] = {
-        id: pid,
-        jornada: j.numero,
-        fechaJornada: j.fecha,
-        fecha: p.fecha || j.fecha,
-        hora: p.hora || '',
-        local: p.local,
-        visitante: p.visitante,
-        goles_local: p.goles_local,
-        goles_visitante: p.goles_visitante
-      };
     });
-  });
 
-  // =========================
-  // CONTENEDOR NAV + JORNADA
-  // =========================
-  const navWrap = document.createElement('div');
-  navWrap.className = 'jornada-nav resultados-nav';
-  navWrap.innerHTML = `
-    <button id="res-prev" class="nav-btn">◀</button>
-    <span id="res-label" class="jornada-label chip"></span>
-    <button id="res-next" class="nav-btn">▶</button>
-  `;
+    jornadas = Array.from(jornadaMap.values())
+      .sort((a,b) => (a.numero || 0) - (b.numero || 0));
 
-  const jornadaWrap = document.createElement('div');
-  jornadaWrap.id = 'jornada-contenido';
-  jornadaWrap.className = 'resultados-jornada';
+    if (!jornadas.length) {
+      root.innerHTML = `<p class="hint">No hay jornadas configuradas todavía.</p>`;
+      return;
+    }
 
-  root.innerHTML = '';
-  root.appendChild(navWrap);
-  root.appendChild(jornadaWrap);
+    minJornada = Math.min(...jornadas.map(j => j.numero || 0));
+    maxJornada = Math.max(...jornadas.map(j => j.numero || 0));
 
-  const labelEl = document.getElementById('res-label');
-  const prevBtn = document.getElementById('res-prev');
-  const nextBtn = document.getElementById('res-next');
+    // Índice meta para el modal
+    partidoMeta = {};
+    jornadas.forEach(j => {
+      (j.partidos || []).forEach(p => {
+        partidoMeta[p.id] = {
+          id: p.id,
+          jornada: j.numero,
+          fechaJornada: null,
+          fecha: p.fecha,
+          hora: p.hora || '',
+          local: p.local,
+          visitante: p.visitante,
+          goles_local: p.goles_local,
+          goles_visitante: p.goles_visitante
+        };
+      });
+    });
 
-  // =========================
-  // RENDER STATS (modal)
-  // =========================
+    // Última jornada con algún resultado cargado
+    lastPlayed = 0;
+    jornadas.forEach(j => {
+      if ((j.partidos || []).some(p => isNum(p.goles_local) && isNum(p.goles_visitante))) {
+        if (j.numero > lastPlayed) lastPlayed = j.numero;
+      }
+    });
+    if (!lastPlayed) {
+      lastPlayed = jornadas[jornadas.length - 1].numero;
+    }
+  }
+
+  // ─────────────────────────────────────
+  // Render de estadísticas (igual que antes)
+  // ─────────────────────────────────────
   const renderStats = (statsObj, meta) => {
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
@@ -445,9 +400,32 @@
     `;
   };
 
-  // =========================
-  // RENDER DE UNA JORNADA
-  // =========================
+  // ─────────────────────────────────────
+  // Contenedor de navegación + bloque de jornada
+  // ─────────────────────────────────────
+  const navWrap = document.createElement('div');
+  navWrap.className = 'jornada-nav resultados-nav';
+  navWrap.innerHTML = `
+    <button id="res-prev" class="nav-btn">◀</button>
+    <span id="res-label" class="jornada-label chip"></span>
+    <button id="res-next" class="nav-btn">▶</button>
+  `;
+
+  const jornadaWrap = document.createElement('div');
+  jornadaWrap.id = 'jornada-contenido';
+  jornadaWrap.className = 'resultados-jornada';
+
+  root.innerHTML = '';
+  root.appendChild(navWrap);
+  root.appendChild(jornadaWrap);
+
+  const labelEl = document.getElementById('res-label');
+  const prevBtn = document.getElementById('res-prev');
+  const nextBtn = document.getElementById('res-next');
+
+  // ─────────────────────────────────────
+  // Render de una jornada concreta
+  // ─────────────────────────────────────
   const renderJornada = async (num) => {
     const j = jornadas.find(x => x.numero === num);
     if (!j) {
@@ -456,7 +434,6 @@
     }
 
     const labelParts = [`Jornada ${j.numero}`];
-    if (j.fecha) labelParts.push(fmtDate(j.fecha));
     if (labelEl) labelEl.textContent = labelParts.join(' · ');
 
     const partidos = j.partidos || [];
@@ -465,6 +442,7 @@
       return;
     }
 
+    // Pre-cargar meteo para cada partido (clave = equipo local)
     const meteoArr = await Promise.all(
       partidos.map(p => {
         const cityName = getCityForKey(p.local);
@@ -473,7 +451,7 @@
     );
 
     const cardsHtml = partidos.map((p, idx) => {
-      const pid = p.id || `J${j.numero}-P${idx+1}`;
+      const pid = p.id;
       const gl = isNum(p.goles_local)     ? p.goles_local     : null;
       const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
       const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
@@ -497,9 +475,9 @@
         ? `<span class="result-chip ${chipClass}">${chipText}</span>`
         : '';
 
-      const fechaHora = (p.fecha || j.fecha || p.hora)
+      const fechaHora = (p.fecha || p.hora)
         ? `<div class="fecha-hora">
-             ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
+             ${p.fecha ? fmtDate(p.fecha) : ''}
              ${p.hora ? ` · ${p.hora}` : ''}
            </div>`
         : '';
@@ -526,7 +504,6 @@
         <article class="result-card ${jugado ? 'result-played' : 'result-pending'}">
           <button class="result-main partido-card"
                   data-partido-id="${pid}"
-                  ${hasStats ? '' : 'data-no-stats="1"'}
                   aria-label="Ver estadísticas del partido">
             <div class="result-teams">
               <div class="result-team-block">
@@ -569,10 +546,8 @@
     `;
   };
 
-  // =========================
-  // NAV JORNADAS
-  // =========================
-  let current = lastPlayed;
+  // Navegación jornadas
+  let current = 0;
 
   const updateNav = () => {
     if (prevBtn) prevBtn.disabled = current <= minJornada;
@@ -595,9 +570,7 @@
     }
   });
 
-  // =========================
-  // CLICK EN PARTIDO → MODAL
-  // =========================
+  // Delegación: click en tarjeta de partido para abrir stats
   root.addEventListener('click', (e) => {
     const btn = e.target.closest?.('.partido-card');
     if (!btn) return;
@@ -606,9 +579,10 @@
     if (!id) return;
 
     const meta  = partidoMeta[id];
-    const stats = statsIndex[id];
+    const stats = statsIndex[id] || null;
 
-    if (!stats && btn.dataset.noStats === '1') {
+    if (!meta && !stats) {
+      console.warn('No meta ni stats para partido', id);
       return;
     }
 
@@ -619,9 +593,17 @@
     openModal();
   });
 
-  // =========================
-  // PRIMERA CARGA
-  // =========================
-  await renderJornada(current);
-  updateNav();
+  // ─────────────────────────────────────
+  // Carga inicial
+  // ─────────────────────────────────────
+  try {
+    await loadFromSupabase();
+    if (!jornadas.length) return;
+    current = lastPlayed || jornadas[0].numero;
+    await renderJornada(current);
+    updateNav();
+  } catch (err) {
+    console.error('Error crítico cargando datos desde Supabase:', err);
+    root.innerHTML = `<p class="hint error">Error cargando resultados desde la base de datos.</p>`;
+  }
 })();
