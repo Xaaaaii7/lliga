@@ -1,4 +1,4 @@
-// ===============================
+// ================================
 // CONFIG SUPABASE (rellenar)
 // ===============================
 const SUPABASE_URL = 'https://jdbjgrkvwawdibntngpk.supabase.co';
