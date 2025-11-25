@@ -2,7 +2,7 @@
   const root = document.getElementById('resultados');
   if (!root) return;
 
-  // =========================
+  // ==========================
   // REFS MODAL
   // =========================
   const backdrop  = document.getElementById('stats-backdrop');
