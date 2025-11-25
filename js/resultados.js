@@ -131,22 +131,23 @@
 
   async function loadFromSupabase() {
     // 1) league_teams (para mapear IDs -> nickname)
-    const { data: leagueTeams, error: ltError } = await supa
-      .from('league_teams')
-      .select('id, nickname, season');
+   const { data: leagueTeams, error: ltError } = await supa
+  .from('league_teams')
+  .select('id, nickname, display_name, season');
 
-    if (ltError) {
-      console.error('Error league_teams:', ltError);
-      throw ltError;
-    }
+if (ltError) {
+  console.error('Error league_teams:', ltError);
+  throw ltError;
+}
 
-    // Filtramos solo la temporada actual (ajusta si hace falta)
-    const season = '2025-26';
-    const leagueTeamsFiltered = (leagueTeams || []).filter(t => t.season === season);
-    const leagueTeamIndex = new Map();
-    leagueTeamsFiltered.forEach(t => {
-      leagueTeamIndex.set(t.id, t);
-    });
+// temporada actual per als PARTITS
+const season = '2025-26';
+
+// Índex d'equips amb objecte (claus com a string → 1 i "1" és el mateix)
+const leagueTeamIndex = {};
+(leagueTeams || []).forEach(t => {
+  leagueTeamIndex[t.id] = t;
+});
 
     // 2) matches
     const { data: matches, error: mError } = await supa
@@ -191,7 +192,9 @@
     // statsIndex[match_id][nickname] = { goles, posesion, tiros, ... }
     statsIndex = {};
     statsRows.forEach(r => {
-      const nick = leagueTeamIndex.get(r.league_team_id)?.nickname || `Equipo ${r.league_team_id}`;
+      const nick = leagueTeamIndex[r.league_team_id]?.nickname
+          || leagueTeamIndex[r.league_team_id]?.display_name
+          || `Equipo ${r.league_team_id}`;
       if (!statsIndex[r.match_id]) statsIndex[r.match_id] = {};
       statsIndex[r.match_id][nick] = {
         goles:               r.goals,
@@ -221,11 +224,12 @@
         jornadaMap.set(roundNum, { numero: roundNum, partidos: [] });
       }
 
-      const homeLT = leagueTeamIndex.get(m.home_league_team_id);
-      const awayLT = leagueTeamIndex.get(m.away_league_team_id);
+      const homeLT = leagueTeamIndex[m.home_league_team_id];
+      const awayLT = leagueTeamIndex[m.away_league_team_id];
+      
+      const localName  = homeLT?.nickname || homeLT?.display_name || 'Local';
+      const visitName  = awayLT?.nickname || awayLT?.display_name || 'Visitante';
 
-      const localName  = homeLT?.nickname || 'Local';
-      const visitName  = awayLT?.nickname || 'Visitante';
 
       const fecha = m.match_date || null;
       // match_time puede venir como 'HH:MM:SS' → lo recortamos a HH:MM
