@@ -2,13 +2,17 @@
   const root = document.getElementById('resultados');
   if (!root) return;
 
-  // Modal refs
+  // =========================
+  // REFS MODAL
+  // =========================
   const backdrop  = document.getElementById('stats-backdrop');
   const bodyEl    = document.getElementById('stats-body');
   const closeBtn  = document.getElementById('stats-close');
   const titleEl   = document.getElementById('stats-title');
 
-  // Helpers comunes
+  // =========================
+  // HELPERS COMUNES
+  // =========================
   const isNum = v => typeof v === 'number' && Number.isFinite(v);
   const norm = s => String(s || '')
     .toLowerCase()
@@ -18,7 +22,9 @@
   const slug = s => norm(s).replace(/\s+/g,'-');
   const logoPath = name => `img/${slug(name)}.png`;
 
-  // Helpers modal
+  // =========================
+  // MODAL
+  // =========================
   const openModal = () => {
     if (!backdrop) return;
     backdrop.hidden = false;
@@ -32,10 +38,8 @@
     if (titleEl) titleEl.textContent = 'Estadísticas del partido';
   };
 
-  // Cerrar siempre al cargar (por si el HTML quedó sin hidden)
-  closeModal();
+  closeModal(); // asegurar que arranca cerrado
 
-  // Listeners de cierre
   closeBtn?.addEventListener('click', closeModal);
   backdrop?.addEventListener('click', (e)=> {
     if (e.target === backdrop) closeModal();
@@ -44,9 +48,9 @@
     if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
   });
 
-  // -----------------------------
-  // METEO: mapa clave -> ciudad (tu JSON)
-  // -----------------------------
+  // =========================
+  // METEO (equipos_ciudades.json)
+  // =========================
   let ciudadesConfig = {};
   try {
     ciudadesConfig = await loadJSON('data/equipos_ciudades.json');
@@ -54,10 +58,8 @@
     ciudadesConfig = {};
   }
 
-  // Cache meteo por ciudad (para no repetir peticiones)
-  const weatherCache = new Map(); // key (city lower) -> { label, emoji }
+  const weatherCache = new Map(); // city -> { label, emoji }
 
-  // Map weathercode (Open-Meteo) a categoría simple
   const weatherCodeToCategory = (code) => {
     if (code == null) return null;
     const c = Number(code);
@@ -75,7 +77,6 @@
     return { label: "Variable", emoji: "🌥️" };
   };
 
-  // Meteo a partir del NOMBRE de ciudad (usando geocoding + current_weather)
   const fetchWeatherForCity = async (cityName) => {
     if (!cityName) return null;
     const key = cityName.toLowerCase();
@@ -83,7 +84,6 @@
     if (weatherCache.has(key)) return weatherCache.get(key);
 
     try {
-      // 1) Geocoding
       const geoUrl =
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=es&format=json`;
       const geoRes = await fetch(geoUrl, { cache: 'no-store' });
@@ -98,7 +98,6 @@
       const lat = loc.latitude;
       const lon = loc.longitude;
 
-      // 2) Tiempo actual
       const meteoUrl =
         `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current_weather=true`;
       const meteoRes = await fetch(meteoUrl, { cache: 'no-store' });
@@ -118,14 +117,155 @@
     return null;
   };
 
-  // Dado un "equipo local" (o nombre clave), saca la ciudad desde tu JSON
   const getCityForKey = (keyName) => {
     if (!keyName) return null;
     return ciudadesConfig[keyName] || null;
   };
 
-  // Carga datos de jornadas
-  let jornadas = await loadJSON('data/resultados.json').catch(()=>[]);
+  // =========================
+  // CARGA DESDE SUPABASE
+  // =========================
+  const SEASON = '2025-26';
+
+  async function loadFromSupabase() {
+    if (!window.supabase) {
+      throw new Error('window.supabase no está definido');
+    }
+    const supabase = window.supabase;
+
+    // 1) Equipos
+    const { data: teams, error: teamsErr } = await supabase
+      .from('league_teams')
+      .select('id, nickname');
+
+    if (teamsErr) {
+      console.error('Error cargando league_teams:', teamsErr);
+      throw teamsErr;
+    }
+
+    const teamsById = new Map();
+    (teams || []).forEach(t => {
+      if (t && t.id != null) teamsById.set(t.id, t);
+    });
+
+    // 2) Partidos (matches)
+    const { data: matches, error: matchesErr } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('season', SEASON)
+      .order('round_id', { ascending: true })
+      .order('match_date', { ascending: true })
+      .order('match_time', { ascending: true });
+
+    if (matchesErr) {
+      console.error('Error cargando matches:', matchesErr);
+      throw matchesErr;
+    }
+
+    const byRound = new Map(); // round_id -> array de partidos
+
+    for (const m of matches || []) {
+      const rd = m.round_id;
+      if (rd == null) continue; // si alguna fila no tiene round_id, la ignoramos
+
+      if (!byRound.has(rd)) byRound.set(rd, []);
+
+      const homeTeam = teamsById.get(m.home_league_team_id);
+      const awayTeam = teamsById.get(m.away_league_team_id);
+
+      const localName = homeTeam?.nickname || 'Local';
+      const visitName = awayTeam?.nickname || 'Visitante';
+
+      let hora = null;
+      if (m.match_time) {
+        const t = String(m.match_time);
+        hora = t.slice(0,5); // "HH:MM"
+      }
+
+      byRound.get(rd).push({
+        id: m.id,
+        local: localName,
+        visitante: visitName,
+        fecha: m.match_date || null,
+        hora: hora,
+        goles_local: (typeof m.home_goals === 'number' ? m.home_goals : null),
+        goles_visitante: (typeof m.away_goals === 'number' ? m.away_goals : null),
+        stream: m.stream_url || null
+      });
+    }
+
+    // Construimos jornadas [{ numero, fecha, partidos }]
+    const jornadas = Array.from(byRound.entries())
+      .map(([roundId, partidos]) => {
+        const fechas = partidos.map(p => p.fecha).filter(Boolean);
+        let fecha_jornada = null;
+        if (fechas.length) {
+          // Como son YYYY-MM-DD, ordenar strings funciona
+          fecha_jornada = fechas.sort()[0];
+        }
+        return { numero: roundId, fecha: fecha_jornada, partidos };
+      })
+      .sort((a, b) => a.numero - b.numero);
+
+    // 3) Stats (match_team_stats)
+    const { data: statsRows, error: statsErr } = await supabase
+      .from('match_team_stats')
+      .select('*');
+
+    if (statsErr) {
+      console.error('Error cargando match_team_stats:', statsErr);
+      throw statsErr;
+    }
+
+    // statsIndex[match_id][nickname] = {...}
+    const statsIndex = {};
+
+    for (const row of statsRows || []) {
+      const mid = row.match_id;
+      const team = teamsById.get(row.league_team_id);
+      const teamName = team?.nickname;
+      if (!mid || !teamName) continue;
+
+      if (!statsIndex[mid]) statsIndex[mid] = {};
+
+      statsIndex[mid][teamName] = {
+        posesion: row.possession ?? null,
+        tiros: row.shots ?? null,
+        tiros_a_puerta: row.shots_on_target ?? null,
+        goles: row.goals ?? null,
+        faltas: row.fouls ?? null,
+        fueras_de_juego: row.offsides ?? null,
+        corners: row.corners ?? null,
+        tiros_libres: row.free_kicks ?? null,
+        pases: row.passes ?? null,
+        pases_completados: row.passes_completed ?? null,
+        centros: row.crosses ?? null,
+        pases_interceptados: row.interceptions ?? null,
+        entradas: row.tackles ?? null,
+        paradas: row.saves ?? null,
+        rojas: row.red_cards ?? null
+      };
+    }
+
+    return { jornadas, statsIndex };
+  }
+
+  // =========================
+  // CARGA INICIAL
+  // =========================
+  let jornadas = [];
+  let statsIndex = {};
+
+  try {
+    const data = await loadFromSupabase();
+    jornadas = data.jornadas;
+    statsIndex = data.statsIndex;
+  } catch (e) {
+    console.error('Error crítico cargando datos desde Supabase:', e);
+    root.innerHTML = `<p class="hint">No se han podido cargar los resultados desde la base de datos.</p>`;
+    return;
+  }
+
   if (!Array.isArray(jornadas) || !jornadas.length) {
     root.innerHTML = `<p class="hint">No hay jornadas configuradas todavía.</p>`;
     return;
@@ -133,7 +273,7 @@
 
   jornadas = [...jornadas].sort((a,b)=>(a.numero || 0) - (b.numero || 0));
 
-  // Buscar última jornada con al menos un resultado jugado
+  // Última jornada con al menos un resultado
   let lastPlayed = 0;
   jornadas.forEach(j => {
     if ((j.partidos || []).some(p => isNum(p.goles_local) && isNum(p.goles_visitante))) {
@@ -147,7 +287,7 @@
   const minJornada = Math.min(...jornadas.map(j => j.numero));
   const maxJornada = Math.max(...jornadas.map(j => j.numero));
 
-  // Índice meta de partidos por id (para el modal)
+  // Índice meta de partidos por id (para modal)
   const partidoMeta = {};
   jornadas.forEach(j => {
     (j.partidos || []).forEach((p, idx) => {
@@ -166,7 +306,9 @@
     });
   });
 
-  // Contenedor de navegación + bloque de jornada
+  // =========================
+  // CONTENEDOR NAV + JORNADA
+  // =========================
   const navWrap = document.createElement('div');
   navWrap.className = 'jornada-nav resultados-nav';
   navWrap.innerHTML = `
@@ -187,15 +329,9 @@
   const prevBtn = document.getElementById('res-prev');
   const nextBtn = document.getElementById('res-next');
 
-  // Cargar índice de stats (tolerante a errores)
-  let statsIndex = {};
-  try {
-    statsIndex = await loadJSON('data/partidos_stats.json');
-  } catch {
-    statsIndex = {};
-  }
-
-  // Render de tabla de estadísticas + cabecera
+  // =========================
+  // RENDER STATS (modal)
+  // =========================
   const renderStats = (statsObj, meta) => {
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
@@ -309,7 +445,9 @@
     `;
   };
 
-  // Render de una jornada concreta (async por meteo)
+  // =========================
+  // RENDER DE UNA JORNADA
+  // =========================
   const renderJornada = async (num) => {
     const j = jornadas.find(x => x.numero === num);
     if (!j) {
@@ -327,7 +465,6 @@
       return;
     }
 
-    // Pre-cargar meteo para cada "clave" (usamos p.local como clave del JSON)
     const meteoArr = await Promise.all(
       partidos.map(p => {
         const cityName = getCityForKey(p.local);
@@ -342,7 +479,6 @@
       const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
       const jugado = (gl !== null && gv !== null);
 
-      // Chip de resultado global del partido
       let chipText = '';
       let chipClass = '';
       if (jugado) {
@@ -378,7 +514,6 @@
 
       const hasStats = !!statsIndex[pid];
 
-      // Meteo
       const cityName   = getCityForKey(p.local);
       const meteo      = meteoArr[idx];
       const meteoHTML  = (meteo && cityName)
@@ -434,7 +569,9 @@
     `;
   };
 
-  // Navegación jornadas
+  // =========================
+  // NAV JORNADAS
+  // =========================
   let current = lastPlayed;
 
   const updateNav = () => {
@@ -458,7 +595,9 @@
     }
   });
 
-  // Delegación: click en tarjeta de partido para abrir stats
+  // =========================
+  // CLICK EN PARTIDO → MODAL
+  // =========================
   root.addEventListener('click', (e) => {
     const btn = e.target.closest?.('.partido-card');
     if (!btn) return;
@@ -480,7 +619,9 @@
     openModal();
   });
 
-  // Primera carga: última jornada jugada
+  // =========================
+  // PRIMERA CARGA
+  // =========================
   await renderJornada(current);
   updateNav();
 })();
