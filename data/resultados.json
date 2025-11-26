@@ -197,7 +197,7 @@
     "partidos": [
       { "id": "J7-P1",  "local": "Pablo",  "visitante": "Gimeno",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P2",  "local": "Hagen", "visitante": "Leandro",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
-      { "id": "J7-P3",  "local": "Franco",  "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
+      { "id": "J7-P3",  "local": "Franco",  "visitante": "Isaac",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": 0, "goles_visitante": 2 },
       { "id": "J7-P4",  "local": "Joel",    "visitante": "Ricard",  "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P5",  "local": "Eudald",  "visitante": "Erik",    "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
       { "id": "J7-P6",  "local": "Enric",   "visitante": "Josep",   "fecha": "2025-09-22", "hora": "20:00", "goles_local": null, "goles_visitante": null },
