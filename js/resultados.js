@@ -30,9 +30,7 @@
     // Config subida de imágenes a S3 (ajusta el endpoint)
   const MATCH_UPLOAD = {
     enabled: true,
-    // Endpoint que devuelve una presigned URL para subir la foto
-    // Implementado por ti en API Gateway / Lambda / lo que uses
-    presignEndpoint: 'https://TU_ENDPOINT/presign-match-upload'
+    presignEndpoint: 'https://d39ra5ecf4.execute-api.eu-west-1.amazonaws.com/prod/presign-match-upload'
   };
   // -----------------------------
   // Helpers modal
