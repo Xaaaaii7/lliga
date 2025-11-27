@@ -13,23 +13,24 @@
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#9fb3c8;padding:14px">${txt}</td></tr>`;
   };
 
-  const loadJSON = async (p) => (await fetch(p, { cache: 'no-store' })).json();
+  const { loadJSON, normalizeText, slugify } = window.AppUtils || {};
+  const fetchJSON = loadJSON || (async (p) => (await fetch(p, { cache: 'no-store' })).json());
 
   // ===== Helpers =====
   const isNum = v => typeof v === 'number' && Number.isFinite(v);
-  const norm = s => String(s||'').toLowerCase()
+  const norm = normalizeText || (s => String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s-]/g,'').trim();
-  const slug = s => norm(s).replace(/\s+/g,'-');
+    .replace(/[^a-z0-9\s-]/g,'').trim());
+  const slug = slugify || (s => norm(s).replace(/\s+/g,'-'));
   const dg = e => e.gf - e.gc;
 
   // ===== Carga datos =====
   let jornadas;
-  try { jornadas = await loadJSON('data/resultados.json'); } catch { jornadas = null; }
+  try { jornadas = await fetchJSON('data/resultados.json'); } catch { jornadas = null; }
   if (!Array.isArray(jornadas)) return showMsg('No se pudieron cargar los resultados.');
 
   let division;
-  try { division = await loadJSON(divisionPath); } catch { division = null; }
+  try { division = await fetchJSON(divisionPath); } catch { division = null; }
   if (!division?.equipos?.length) return showMsg('El archivo de división no contiene equipos.');
 
   const lista = division.equipos.map(n => String(n||'').trim());

@@ -1,8 +1,9 @@
 (async () => {
+  const { slugify } = window.AppUtils || {};
   const params = new URLSearchParams(location.search);
   const teamSlug = (params.get('team')||'').toLowerCase();
-  const slug = s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-                   .replace(/[^a-z0-9\\s-]/g,'').trim().replace(/\\s+/g,'-');
+  const slug = slugify || (s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                   .replace(/[^a-z0-9\\s-]/g,'').trim().replace(/\\s+/g,'-'));
 
   const data = await loadJSON('data/jugadores.json');
   const equipos = Array.isArray(data.equipos)?data.equipos:[{nombre:'General',jugadores:data.jugadores||[]}];

@@ -1,0 +1,131 @@
+:root{
+  /* Paleta un poco más “liga oficial” */
+  --bg:#050812;
+  --bg-elevated:#101522;
+  --card:#151a22;
+  --border-subtle:#202735;
+  --text:#e8eef9;
+  --muted:#9fb3c8;
+  --accent:#1fbf4a;      /* Verde más “futbolero” tipo marca de torneo */
+  --accent-soft:rgba(31,191,74,0.15);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#111a2b 0,#050812 55%);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+  font-size:16px;
+  line-height:1.5;
+}
+
+/* Jerarquía de títulos global, muy estilo web de liga */
+h1,h2,h3{
+  margin:0;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+h1{ font-size:2rem; }
+h2{ font-size:1.6rem; }
+h3{ font-size:1.25rem; }
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px 16px 32px;
+}
+
+/* HEADER tipo cabecera de competición */
+.site-header,
+.site-footer{
+  background:rgba(5,8,18,0.95);
+  border-bottom:1px solid var(--border-subtle);
+}
+
+.site-footer{
+  border-top:1px solid var(--border-subtle);
+  border-bottom:none;
+  padding:16px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.site-header{
+  padding:10px 16px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:20;
+  backdrop-filter:blur(12px);
+}
+
+/* Logo ligeramente más protagonista */
+.logo{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:#ffffff10;
+  padding:4px;
+}
+
+/* Título página en el header */
+.site-header h1{
+  font-size:1.5rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:800;
+}
+
+/* NAV */
+#main-nav{
+  margin-left:auto;
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+}
+
+#main-nav a{
+  color:var(--text);
+  text-decoration:none;
+  margin:0 4px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:.9rem;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  border:1px solid transparent;
+}
+
+#main-nav a:hover{
+  background:#111827;
+  border-color:#ffffff18;
+}
+
+#main-nav a.active{
+  background:var(--accent-soft);
+  border-color:var(--accent);
+}
+
+/* Botón hamburguesa */
+.menu-toggle{
+  display:none;
+  margin-left:auto;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  width:40px;
+  height:40px;
+  border-radius:8px;
+}
+.menu-toggle span{
+  display:block;
+  height:2px;
+  background:var(--text);
+  margin:7px 6px;
+}
+

@@ -1,9 +1,10 @@
 (async () => {
+  const { slugify } = window.AppUtils || {};
+  const slug = slugify || (s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\\u036f]/g,'')
+                .replace(/[^a-z0-9\\s-]/g,'').trim().replace(/\\s+/g,'-'));
   const data = await loadJSON('data/jugadores.json');
   const root = document.getElementById('equipos');
   let equipos=Array.isArray(data.equipos)?data.equipos:[{nombre:'General'}];
-  const slug=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\\u036f]/g,'')
-                .replace(/[^a-z0-9\\s-]/g,'').trim().replace(/\\s+/g,'-');
   root.innerHTML=`
     <section class="equipos-lista">
       <div class="team-grid">

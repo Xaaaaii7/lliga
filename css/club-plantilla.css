@@ -1,0 +1,203 @@
+/* ==========================
+   TEAM FORM (últimos 3)
+   ========================== */
+
+.club-form-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+  margin:4px 0 8px;
+}
+
+.form-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:.95rem;
+  letter-spacing:.02em;
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+
+.form-w{
+  background:rgba(34,197,94,0.18);
+  border-color:rgba(34,197,94,0.7);
+  color:#22c55e;
+}
+
+.form-d{
+  background:rgba(245,158,11,0.18);
+  border-color:rgba(245,158,11,0.7);
+  color:#f59e0b;
+}
+
+.form-l{
+  background:rgba(239,68,68,0.18);
+  border-color:rgba(239,68,68,0.75);
+  color:#ef4444;
+}
+
+.club-form-rating{
+  font-weight:900;
+  font-size:1.05rem;
+  letter-spacing:.03em;
+  padding-top:2px;
+}
+/* ==========================
+   PLANTILLA (club)
+   ========================== */
+
+.club-plantilla-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.coach-line{
+  margin-top:4px;
+  font-size:.95rem;
+  color:#d8e3f5;
+}
+
+.plantilla-group-title{
+  margin:0 0 10px;
+  font-size:1.05rem;
+  font-weight:800;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+
+.plantilla-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:10px;
+}
+
+.plantilla-card{
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  transition:transform .12s ease, border-color .12s ease;
+}
+.plantilla-card:hover{
+  transform:translateY(-2px);
+  border-color:var(--accent-soft);
+}
+
+.plantilla-name{
+  font-weight:800;
+  font-size:1rem;
+}
+.plantilla-pos{
+  font-size:.85rem;
+}
+
+.plantilla-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:2px;
+}
+
+.plantilla-card .pill{
+  font-size:.75rem;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#111827;
+  border:1px solid rgba(255,255,255,0.08);
+  color:#cde;
+}
+
+@media (max-width:640px){
+  .plantilla-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:420px){
+  .plantilla-grid{grid-template-columns:1fr;}
+}
+
+.match-weather { margin-top:6px; }
+
+.weather-pill{
+  display:inline-flex; gap:.35rem; align-items:center;
+  padding:4px 8px; border-radius:999px; font-size:.82rem;
+  background:rgba(255,255,255,.06);
+}
+
+.weather-lluvia{ background:rgba(80,140,255,.12); }
+.weather-nieve{ background:rgba(180,220,255,.12); }
+.weather-despejado{ background:rgba(255,210,80,.12); }
+.weather-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #eef2f8;
+}
+
+.weather-despejado {
+  background: #fff3c4;
+}
+
+.weather-lluvia {
+  background: #d0e7ff;
+}
+
+.weather-nieve {
+  background: #e8f0ff;
+}
+
+.match-weather {
+  font-size: 0.85rem;
+}
+.playlist-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.playlist-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  background:rgba(0,0,0,0.2);
+  cursor:pointer;
+  text-align:left;
+}
+
+.playlist-item.active{
+  outline:2px solid var(--accent, #6ee7ff);
+  background:rgba(110,231,255,0.08);
+}
+
+.playlist-thumb{
+  width:120px;
+  height:68px;
+  object-fit:cover;
+  border-radius:8px;
+  flex:0 0 auto;
+}
+
+.playlist-title{
+  font-weight:600;
+  line-height:1.2;
+  font-size:0.95rem;
+}
+
+.playlist-sub{
+  font-size:0.8rem;
+}
+
