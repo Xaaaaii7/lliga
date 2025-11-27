@@ -184,18 +184,38 @@
     return query; // devuelve { data, error }
   };
 
-  const fetchStats = async (matchIds=[]) => {
-    if (!matchIds.length) return { data: [] };
-    const supabase = await getSupabaseClient();
-    return supabase
-      .from('match_team_stats')
-      .select(`
-        match_id,league_team_id,possession,shots,shots_on_target,goals,fouls,offsides,corners,free_kicks,
-        passes,passes_completed,crosses,interceptions,tackles,saves,red_cards,
-        team:league_teams(id,nickname,display_name)
-      `)
-      .in('match_id', matchIds);
-  };
+ const fetchStats = async (matchIds = []) => {
+  if (!matchIds.length) return { data: [] };
+  const supabase = await getSupabaseClient();
+  return supabase
+    .from('match_team_stats')
+    .select(`
+      match_id,
+      league_team_id,
+      possession,
+      shots,
+      shots_on_target,
+      goals,
+      fouls,
+      offsides,
+      corners,
+      free_kicks,
+      passes,
+      passes_completed,
+      crosses,
+      interceptions,
+      tackles,
+      saves,
+      red_cards,
+      team:league_teams!match_team_stats_league_team_id_fkey (
+        id,
+        nickname,
+        display_name
+      )
+    `)
+    .in('match_id', matchIds);
+};
+
 
   root.innerHTML = `<p class="hint">Cargando resultados...</p>`;
 
