@@ -27,7 +27,13 @@
     .trim());
   const slug = slugify || (s => norm(s).replace(/\s+/g, '-'));
   const logoFor = logoPath || (name => `img/${slug(name)}.png`);
-
+    // Config subida de imágenes a S3 (ajusta el endpoint)
+  const MATCH_UPLOAD = {
+    enabled: true,
+    // Endpoint que devuelve una presigned URL para subir la foto
+    // Implementado por ti en API Gateway / Lambda / lo que uses
+    presignEndpoint: 'https://TU_ENDPOINT/presign-match-upload'
+  };
   // -----------------------------
   // Helpers modal
   // -----------------------------
