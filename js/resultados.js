@@ -274,6 +274,10 @@
     console.warn('No se pudieron cargar estadísticas de Supabase', e);
     statsRows = [];
   }
+  // DEBUG muy focalizado
+  console.log('statsRows[0]:', statsRows[0]);
+  console.log('statsRows[0].team:', statsRows[0]?.team);
+  console.log('typeof statsRows[0].league_team_id:', typeof statsRows[0]?.league_team_id);
 
   const statsIndex = {};
   statsRows.forEach(row => {
