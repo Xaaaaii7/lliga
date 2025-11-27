@@ -216,7 +216,6 @@
       `)
       .in('match_id', matchIds);
   };
-  console.log('RAW stats data from Supabase:', data?.slice?.(0, 3));
   root.innerHTML = `<p class="hint">Cargando resultados...</p>`;
 
   let matches = [];
@@ -229,10 +228,7 @@
     console.error(e);
     return;
   }
-  console.log('Ejemplo match:', matches[0]);
-  console.log('Ejemplo stat:', statsRows[0]);
-  console.log('typeof match.home_league_team_id:', typeof matches[0].home_league_team_id);
-  console.log('typeof stat.league_team_id:', typeof statsRows[0].league_team_id);
+
 
   // Construimos un índice de equipos (por id) usando los joins y, si falta alguno,
   // consultando directamente la tabla league_teams.
@@ -243,8 +239,7 @@
     if (m.home_league_team_id) idsFromMatches.add(m.home_league_team_id);
     if (m.away_league_team_id) idsFromMatches.add(m.away_league_team_id);
   });
-  console.log('teamMap keys:', Array.from(teamMap.keys()));
-  console.log('teamMap sample:', Array.from(teamMap.entries()).slice(0, 5));
+
 
   const missingIds = Array.from(idsFromMatches).filter(id => !teamMap.has(id));
   if (missingIds.length) {
@@ -262,7 +257,8 @@
       console.warn('No se pudieron completar datos de equipos', e);
     }
   }
-
+  console.log('teamMap keys:', Array.from(teamMap.keys()));
+  console.log('teamMap sample:', Array.from(teamMap.entries()).slice(0, 5));
   if (!matches.length) {
     root.innerHTML = `<p class="hint">No hay partidos registrados todavía.</p>`;
     return;
@@ -289,7 +285,11 @@
     statsIndex[matchId] ||= {};
     statsIndex[matchId][tName] = mapStatsRow(row);
   });
-
+  console.log('RAW stats data from Supabase:', data?.slice?.(0, 3));
+  console.log('Ejemplo match:', matches[0]);
+  console.log('Ejemplo stat:', statsRows[0]);
+  console.log('typeof match.home_league_team_id:', typeof matches[0].home_league_team_id);
+  console.log('typeof stat.league_team_id:', typeof statsRows[0].league_team_id);
   // Construir jornadas a partir de matches
   const jornadasMap = new Map();
   const partidoMeta = {};
