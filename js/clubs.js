@@ -2,20 +2,24 @@
   const grid = document.getElementById("clubs-grid");
   if (!grid) return;
 
-  const jornadas = await loadJSON("data/resultados.json").catch(() => []);
+  // Aseguramos que CoreStats esté cargado
+  if (!window.CoreStats) {
+    grid.innerHTML = `<p style="color:var(--muted)">No se pudo inicializar CoreStats.</p>`;
+    return;
+  }
+
+  const { norm, slug } = CoreStats;
+
+  // Cargamos jornadas desde CoreStats (Supabase + fallback JSON)
+  const jornadas = await CoreStats.getResultados().catch(() => []);
   if (!Array.isArray(jornadas) || jornadas.length === 0) {
     grid.innerHTML = `<p style="color:var(--muted)">No hay datos de equipos aún.</p>`;
     return;
   }
 
-  // helpers reutilizados
-  const norm = s => String(s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s-]/g,'').trim();
-  const slug = s => norm(s).replace(/\s+/g,'-');
   const logoPath = (name) => `img/${slug(name)}.png`;
 
-  // Saca equipos desde resultados.json
+  // Saca equipos desde las jornadas (igual que antes, pero usando datos del core)
   const set = new Map();
   for (const j of jornadas) {
     for (const p of (j.partidos || [])) {
@@ -32,17 +36,14 @@
     return;
   }
 
-  grid.innerHTML = equipos.map(eq => {
-    const s = slug(eq);
-    return `
-      <a class="club-card" href="club.html?team=${encodeURIComponent(eq)}" aria-label="Entrar a ${eq}">
-        <div class="club-badge-wrap">
-          <img class="club-badge" src="${logoPath(eq)}" alt="Escudo ${eq}"
-               onerror="this.style.visibility='hidden'">
-        </div>
-        <div class="club-name">${eq}</div>
-        <div class="club-cta">Ver club →</div>
-      </a>
-    `;
-  }).join("");
+  grid.innerHTML = equipos.map(eq => `
+    <a class="club-card" href="club.html?team=${encodeURIComponent(eq)}" aria-label="Entrar a ${eq}">
+      <div class="club-badge-wrap">
+        <img class="club-badge" src="${logoPath(eq)}" alt="Escudo ${eq}"
+             onerror="this.style.visibility='hidden'">
+      </div>
+      <div class="club-name">${eq}</div>
+      <div class="club-cta">Ver club →</div>
+    </a>
+  `).join("");
 })();
