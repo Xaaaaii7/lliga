@@ -145,7 +145,14 @@
     return;
   }
 
-  const teamNameFrom = (teamObj) => teamObj?.display_name?.trim() || teamObj?.nickname?.trim() || `Equipo ${teamObj?.id ?? ''}`.trim();
+  const teamMap = new Map();
+
+  const teamNameFrom = (teamObj, teamId) => {
+    const mapObj = teamId ? teamMap.get(teamId) : null;
+    const source  = teamObj || mapObj || {};
+    const { id, display_name, nickname } = source;
+    return display_name?.trim() || nickname?.trim() || `Equipo ${id ?? ''}`.trim();
+  };
 
   const mapStatsRow = (row) => ({
     goles: row?.goals ?? null,
@@ -171,6 +178,7 @@
       .from('matches')
       .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
+        home_league_team_id,away_league_team_id,
         home:league_teams!matches_home_league_team_id_fkey(id,nickname,display_name),
         away:league_teams!matches_away_league_team_id_fkey(id,nickname,display_name)
       `)
@@ -232,6 +240,33 @@ const fetchStats = async (matchIds = []) => {
     return;
   }
 
+  // Construimos un índice de equipos (por id) usando los joins y, si falta alguno,
+  // consultando directamente la tabla league_teams.
+  const idsFromMatches = new Set();
+  matches.forEach(m => {
+    if (m.home) teamMap.set(m.home.id, m.home);
+    if (m.away) teamMap.set(m.away.id, m.away);
+    if (m.home_league_team_id) idsFromMatches.add(m.home_league_team_id);
+    if (m.away_league_team_id) idsFromMatches.add(m.away_league_team_id);
+  });
+
+  const missingIds = Array.from(idsFromMatches).filter(id => !teamMap.has(id));
+  if (missingIds.length) {
+    try {
+      const supabase = await getSupabaseClient();
+      const { data, error } = await supabase
+        .from('league_teams')
+        .select('id,nickname,display_name')
+        .in('id', missingIds);
+      if (error) throw error;
+      (data || []).forEach(team => {
+        if (team?.id && !teamMap.has(team.id)) teamMap.set(team.id, team);
+      });
+    } catch (e) {
+      console.warn('No se pudieron completar datos de equipos', e);
+    }
+  }
+
   if (!matches.length) {
     root.innerHTML = `<p class="hint">No hay partidos registrados todavía.</p>`;
     return;
@@ -253,7 +288,7 @@ const fetchStats = async (matchIds = []) => {
   statsRows.forEach(row => {
     const matchId = row?.match_id;
     if (!matchId) return;
-    const tName = teamNameFrom(row?.team || {});
+    const tName = teamNameFrom(row?.team || {}, row?.league_team_id);
     if (!tName) return;
     statsIndex[matchId] ||= {};
     statsIndex[matchId][tName] = mapStatsRow(row);
@@ -268,8 +303,8 @@ const fetchStats = async (matchIds = []) => {
     const jornada = jornadasMap.get(numero) || { numero, fecha: m.match_date, partidos: [] };
     if (!jornada.fecha && m.match_date) jornada.fecha = m.match_date;
 
-    const localName = teamNameFrom(m.home || {});
-    const visitName = teamNameFrom(m.away || {});
+    const localName = teamNameFrom(m.home || {}, m.home_league_team_id);
+    const visitName = teamNameFrom(m.away || {}, m.away_league_team_id);
 
     const partido = {
       id: m.id || `J${numero}-P${idx+1}`,
