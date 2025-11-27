@@ -2,6 +2,18 @@
   const root = document.getElementById('jornada');
   if (!root) return;
 
+  // Helpers utilidades (loadJSON desde AppUtils)
+  const AppUtils = window.AppUtils || {};
+  const { loadJSON } = AppUtils;
+
+  if (typeof loadJSON !== 'function') {
+    root.innerHTML = `
+      <p style="text-align:center;color:#9fb3c8">
+        Error de configuración: falta AppUtils.loadJSON para cargar data/jornada.json
+      </p>`;
+    return;
+  }
+
   // Config de jornadas (vídeo + poll + winner)
   const jornadasCfg = await loadJSON('data/jornada.json').catch(() => null);
 
@@ -18,11 +30,9 @@
   // ==========================
   //   PRECALCULAR MVP JORNADA
   // ==========================
-  // Creamos un map { jornadaNum: bestTeam }
   const mvpPorJornada = Object.create(null);
 
   try {
-    // Solo calculamos para las jornadas que existan en cfg
     const nums = jornadasCfg
       .map(j => j.jornada)
       .filter(n => Number.isFinite(+n))
@@ -30,7 +40,6 @@
 
     const uniques = Array.from(new Set(nums));
 
-    // calcula en paralelo
     const results = await Promise.all(
       uniques.map(n => CoreStats.computeMvpPorJornada(n))
     );
