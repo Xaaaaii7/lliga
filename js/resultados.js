@@ -323,117 +323,123 @@
 
   // Render de tabla de estadísticas + cabecera
   const renderStats = (statsObj, meta) => {
-    const equipos = Object.keys(statsObj || {});
-    const hasStats = equipos.length === 2;
+  const equipos = Object.keys(statsObj || {});
+  const hasStats = equipos.length === 2;
 
-    const localName  = meta?.local || (equipos[0] || 'Local');
-    const visitName  = meta?.visitante || (equipos[1] || 'Visitante');
+  // Nombres bonitos para mostrar (los que ya vienen bien de matches)
+  const localName  = meta?.local || (equipos[0] || 'Local');
+  const visitName  = meta?.visitante || (equipos[1] || 'Visitante');
 
-    const gl = isNum(meta?.goles_local)     ? meta.goles_local     : null;
-    const gv = isNum(meta?.goles_visitante) ? meta.goles_visitante : null;
-    const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
+  const gl = isNum(meta?.goles_local)     ? meta.goles_local     : null;
+  const gv = isNum(meta?.goles_visitante) ? meta.goles_visitante : null;
+  const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
 
-    const fechaTexto = meta?.fecha ? fmtDate(meta.fecha) : (meta?.fechaJornada ? fmtDate(meta.fechaJornada) : '');
-    const horaTexto  = meta?.hora || '';
-    const jTexto     = meta?.jornada ? `Jornada ${meta.jornada}` : '';
+  const fechaTexto = meta?.fecha
+    ? fmtDate(meta.fecha)
+    : (meta?.fechaJornada ? fmtDate(meta.fechaJornada) : '');
+  const horaTexto  = meta?.hora || '';
+  const jTexto     = meta?.jornada ? `Jornada ${meta.jornada}` : '';
 
-    const metaLine = [fechaTexto, horaTexto, jTexto].filter(Boolean).join(' · ');
+  const metaLine = [fechaTexto, horaTexto, jTexto].filter(Boolean).join(' · ');
 
-    let tableHtml = '';
-    let summaryHtml = '';
+  let tableHtml = '';
+  let summaryHtml = '';
 
-    if (!hasStats) {
-      tableHtml = `<p class="hint">No hay estadísticas detalladas para este partido.</p>`;
-    } else {
-      const A = equipos[0];
-      const B = equipos[1];
-      const Adata = statsObj[A] || {};
-      const Bdata = statsObj[B] || {};
+  if (!hasStats) {
+    tableHtml = `<p class="hint">No hay estadísticas detalladas para este partido.</p>`;
+  } else {
+    // Claves internas del objeto stats (da igual el nombre real de la clave)
+    const keyA = equipos[0];
+    const keyB = equipos[1];
+    const Adata = statsObj[keyA] || {};
+    const Bdata = statsObj[keyB] || {};
 
-      const get = (data, k) => (data && Object.prototype.hasOwnProperty.call(data, k)) ? data[k] : null;
+    const get = (data, k) =>
+      (data && Object.prototype.hasOwnProperty.call(data, k)) ? data[k] : null;
 
-      const ataqueKeys = ['goles','tiros','tiros_a_puerta'];
-      const balonKeys  = ['posesion','pases','pases_completados','centros'];
+    const ataqueKeys = ['goles', 'tiros', 'tiros_a_puerta'];
+    const balonKeys  = ['posesion', 'pases', 'pases_completados', 'centros'];
 
-      const buildKvList = (keys) => keys
-        .filter(k => get(Adata,k) !== null || get(Bdata,k) !== null)
-        .map(k => `
-          <li>
-            <span>${k.replace(/_/g,' ')}</span>
-            <span>${get(Adata,k) ?? '—'} · ${get(Bdata,k) ?? '—'}</span>
-          </li>
-        `).join('');
+    const buildKvList = (keys) => keys
+      .filter(k => get(Adata, k) !== null || get(Bdata, k) !== null)
+      .map(k => `
+        <li>
+          <span>${k.replace(/_/g, ' ')}</span>
+          <span>${get(Adata, k) ?? '—'} · ${get(Bdata, k) ?? '—'}</span>
+        </li>
+      `).join('');
 
-      const ataqueHtml = buildKvList(ataqueKeys);
-      const balonHtml  = buildKvList(balonKeys);
+    const ataqueHtml = buildKvList(ataqueKeys);
+    const balonHtml  = buildKvList(balonKeys);
 
-      if (ataqueHtml || balonHtml) {
-        summaryHtml = `
-          <div class="stats-summary cards-2col">
-            ${ataqueHtml ? `
-              <div class="card">
-                <h3>Ataque</h3>
-                <ul class="kv">
-                  ${ataqueHtml}
-                </ul>
-              </div>
-            ` : ''}
-            ${balonHtml ? `
-              <div class="card">
-                <h3>Juego con balón</h3>
-                <ul class="kv">
-                  ${balonHtml}
-                </ul>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }
-
-      const orden = [
-        'goles','posesion','tiros','tiros_a_puerta','faltas',
-        'fueras_de_juego','corners','tiros_libres','pases',
-        'pases_completados','centros','pases_interceptados',
-        'entradas','paradas'
-      ];
-
-      const rows = orden
-        .filter(k => Adata.hasOwnProperty(k) || Bdata.hasOwnProperty(k))
-        .map(k => `
-          <tr>
-            <th>${k.replace(/_/g,' ')}</th>
-            <td>${Adata[k] ?? '—'}</td>
-            <td>${Bdata[k] ?? '—'}</td>
-          </tr>
-        `).join('');
-
-      tableHtml = `
-        <table class="stats-table stats-table-modern">
-          <thead>
-            <tr>
-              <th>Estadística</th>
-              <th>${A}</th>
-              <th>${B}</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
+    if (ataqueHtml || balonHtml) {
+      summaryHtml = `
+        <div class="stats-summary cards-2col">
+          ${ataqueHtml ? `
+            <div class="card">
+              <h3>Ataque</h3>
+              <ul class="kv">
+                ${ataqueHtml}
+              </ul>
+            </div>
+          ` : ''}
+          ${balonHtml ? `
+            <div class="card">
+              <h3>Juego con balón</h3>
+              <ul class="kv">
+                ${balonHtml}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
       `;
     }
 
-    return `
-      <div class="stats-header">
-        <div class="stats-teams">
-          <span class="stats-team-name">${localName}</span>
-          <span class="stats-score">${marcador}</span>
-          <span class="stats-team-name">${visitName}</span>
-        </div>
-        ${metaLine ? `<p class="stats-meta">${metaLine}</p>` : ''}
-      </div>
-      ${summaryHtml}
-      ${tableHtml}
+    const orden = [
+      'goles', 'posesion', 'tiros', 'tiros_a_puerta', 'faltas',
+      'fueras_de_juego', 'corners', 'tiros_libres', 'pases',
+      'pases_completados', 'centros', 'pases_interceptados',
+      'entradas', 'paradas', 'rojas'
+    ];
+
+    const rows = orden
+      .filter(k => Adata.hasOwnProperty(k) || Bdata.hasOwnProperty(k))
+      .map(k => `
+        <tr>
+          <th>${k.replace(/_/g, ' ')}</th>
+          <td>${Adata[k] ?? '—'}</td>
+          <td>${Bdata[k] ?? '—'}</td>
+        </tr>
+      `).join('');
+
+    // 👇 Aquí usamos siempre los nombres buenos, no las claves internas
+    tableHtml = `
+      <table class="stats-table stats-table-modern">
+        <thead>
+          <tr>
+            <th>Estadística</th>
+            <th>${localName}</th>
+            <th>${visitName}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     `;
-  };
+  }
+
+  return `
+    <div class="stats-header">
+      <div class="stats-teams">
+        <span class="stats-team-name">${localName}</span>
+        <span class="stats-score">${marcador}</span>
+        <span class="stats-team-name">${visitName}</span>
+      </div>
+      ${metaLine ? `<p class="stats-meta">${metaLine}</p>` : ''}
+    </div>
+    ${summaryHtml}
+    ${tableHtml}
+  `;
+};
 
   // Render de una jornada concreta (async por meteo)
   const renderJornada = async (num) => {
