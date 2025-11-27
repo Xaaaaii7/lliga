@@ -259,3 +259,27 @@
     font-size:.9rem;
   }
 }
+.result-upload {
+  margin-top: 0.5rem;
+}
+
+.upload-photo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: #f5f7fa;
+  cursor: pointer;
+}
+
+.upload-photo-btn:hover {
+  background: #e2e8f0;
+}
+
+.upload-photo-btn.upload-success {
+  border-color: #16a34a;
+  background: #dcfce7;
+}
