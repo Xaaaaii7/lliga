@@ -6,18 +6,21 @@
    - MVP por jornada y MVP temporada (media de puntos)
 */
 
+(function () {
+  const CoreStats = {};
+
   // Intentamos coger helpers de Supabase si existen
   const AppUtils = window.AppUtils || {};
   const {
     getSupabaseClient,
     getSupabaseConfig,
-    getActiveSeason
+    getActiveSeason,
+    loadJSON,        // <- para el fallback a JSON local
   } = AppUtils;
 
   const hasSupabase =
     typeof getSupabaseClient === 'function' &&
     typeof getSupabaseConfig === 'function';
-
 
   // --------------------------
   // Helpers base
@@ -55,7 +58,7 @@
 
   const dg = e => e.gf - e.gc;
 
-   // --------------------------
+  // --------------------------
   // Carga + caché de datos
   // --------------------------
   let _resultadosCache = null;
@@ -66,8 +69,9 @@
   let _teamMapCache = null;
 
   // Caché de clasificaciones por jornada / opciones
-  const _clasifCache = new Map(); // key: `${hasta||'ALL'}|${useH2H?1:0}`
-   // --------------------------
+  const _clasifCache = new Map(); // key: `${limit||'ALL'}|${useH2H?1:0}`
+
+  // --------------------------
   // Carga desde Supabase
   // --------------------------
 
@@ -255,7 +259,9 @@
     return index;
   };
 
-
+  // --------------------------
+  // APIs públicas de carga
+  // --------------------------
   CoreStats.getResultados = async () => {
     if (_resultadosCache) return _resultadosCache;
 
@@ -270,9 +276,13 @@
       }
     }
 
-    // Fallback a JSON local
-    const jornadas = await loadJSON("data/resultados.json").catch(() => []);
-    _resultadosCache = Array.isArray(jornadas) ? jornadas : [];
+    // Fallback a JSON local (si tienes AppUtils.loadJSON)
+    if (typeof loadJSON === 'function') {
+      const jornadas = await loadJSON("data/resultados.json").catch(() => []);
+      _resultadosCache = Array.isArray(jornadas) ? jornadas : [];
+    } else {
+      _resultadosCache = [];
+    }
     return _resultadosCache;
   };
 
@@ -291,11 +301,14 @@
     }
 
     // Fallback a JSON local
-    const stats = await loadJSON("data/partidos_stats.json").catch(() => ({}));
-    _statsIndexCache = stats && typeof stats === "object" ? stats : {};
+    if (typeof loadJSON === 'function') {
+      const stats = await loadJSON("data/partidos_stats.json").catch(() => ({}));
+      _statsIndexCache = stats && typeof stats === "object" ? stats : {};
+    } else {
+      _statsIndexCache = {};
+    }
     return _statsIndexCache;
   };
-
 
   // --------------------------
   // TSV Pichichi
@@ -364,11 +377,13 @@
     const limit = (hasta == null)
       ? jornadas.length
       : Math.max(0, Math.min(hasta, jornadas.length));
+
     // Cache simple en memoria para no recalcular siempre lo mismo
     const cacheKey = `${limit || 'ALL'}|${useH2H ? 1 : 0}`;
     if (_clasifCache.has(cacheKey)) {
       return _clasifCache.get(cacheKey);
     }
+
     const teams = new Map();
     const teamObj = (name) => {
       const k = norm(name);
@@ -421,7 +436,7 @@
     equipos.sort((A, B) => {
       if (B.pts !== A.pts) return B.pts - A.pts;
 
-      // 👇 Desempate H2H como en tu clasificacion.js
+      // Desempate H2H
       if (useH2H) {
         const a = norm(A.nombre), b = norm(B.nombre);
         const ha = h2h[a]?.[b], hb = h2h[b]?.[a];
@@ -438,6 +453,7 @@
       return A.nombre.localeCompare(B.nombre, "es", { sensitivity: "base" });
     });
 
+    _clasifCache.set(cacheKey, equipos);
     return equipos;
   };
 
