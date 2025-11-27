@@ -218,6 +218,33 @@
     return;
   }
 
+  // Construimos un índice de equipos (por id) usando los joins y, si falta alguno,
+  // consultando directamente la tabla league_teams.
+  const idsFromMatches = new Set();
+  matches.forEach(m => {
+    if (m.home) teamMap.set(m.home.id, m.home);
+    if (m.away) teamMap.set(m.away.id, m.away);
+    if (m.home_league_team_id) idsFromMatches.add(m.home_league_team_id);
+    if (m.away_league_team_id) idsFromMatches.add(m.away_league_team_id);
+  });
+
+  const missingIds = Array.from(idsFromMatches).filter(id => !teamMap.has(id));
+  if (missingIds.length) {
+    try {
+      const supabase = await getSupabaseClient();
+      const { data, error } = await supabase
+        .from('league_teams')
+        .select('id,nickname,display_name')
+        .in('id', missingIds);
+      if (error) throw error;
+      (data || []).forEach(team => {
+        if (team?.id && !teamMap.has(team.id)) teamMap.set(team.id, team);
+      });
+    } catch (e) {
+      console.warn('No se pudieron completar datos de equipos', e);
+    }
+  }
+
   if (!matches.length) {
     root.innerHTML = `<p class="hint">No hay partidos registrados todavía.</p>`;
     return;
@@ -239,7 +266,7 @@
   statsRows.forEach(row => {
     const matchId = row?.match_id;
     if (!matchId) return;
-    const tName = teamNameFrom(row?.team || {});
+    const tName = teamNameFrom(row?.team || {}, row?.league_team_id);
     if (!tName) return;
     statsIndex[matchId] ||= {};
     statsIndex[matchId][tName] = mapStatsRow(row);
@@ -254,8 +281,8 @@
     const jornada = jornadasMap.get(numero) || { numero, fecha: m.match_date, partidos: [] };
     if (!jornada.fecha && m.match_date) jornada.fecha = m.match_date;
 
-    const localName = teamNameFrom(m.home || {});
-    const visitName = teamNameFrom(m.away || {});
+    const localName = teamNameFrom(m.home || {}, m.home_league_team_id);
+    const visitName = teamNameFrom(m.away || {}, m.away_league_team_id);
 
     const partido = {
       id: m.id || `J${numero}-P${idx+1}`,
