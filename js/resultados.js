@@ -147,7 +147,7 @@
   }
 
   const teamNameFrom = (teamObj = {}, fallbackId = null) => {
-    let name = teamObj?.display_name || teamObj?.nickname || teamObj?.club?.name;
+    let name = teamObj?.nickname || teamObj?.display_name || teamObj?.club?.name;
 
     if (!name && fallbackId != null && teamMap.has(fallbackId)) {
       const fromMap = teamMap.get(fallbackId);
