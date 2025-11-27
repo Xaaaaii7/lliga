@@ -22,6 +22,33 @@
   const plantillaPath   = (team)   => `data/plantillas/${slug(team)}.json`;
 
   // --------------------------
+  // Helpers Supabase (users)
+  // --------------------------
+  const AppUtils = window.AppUtils || {};
+  const { getSupabaseClient } = AppUtils;
+  const hasSupabase = typeof getSupabaseClient === "function";
+
+  async function getUserRowByNickname(nickname) {
+    if (!hasSupabase || !nickname) return null;
+    try {
+      const supabase = await getSupabaseClient();
+      const { data, error } = await supabase
+        .from("users")
+        .select("id,nickname,youtube_playlist_id,twitch_channel")
+        .ilike("nickname", nickname); // case-insensitive
+
+      if (error) {
+        console.warn("Supabase users error:", error);
+        return null;
+      }
+      return (data && data[0]) || null;
+    } catch (e) {
+      console.warn("Supabase users exception:", e);
+      return null;
+    }
+  }
+
+  // --------------------------
   // HERO
   // --------------------------
   document.getElementById("club-title").textContent = CLUB;
@@ -380,8 +407,8 @@
        <p class="muted">Aquí conectaremos stats de equipo (desde CoreStats).</p>
      </div>`;
 
-    // --------------------------
-  // TAB VIDEOS (playlist lista + player)
+  // --------------------------
+  // TAB VIDEOS (playlist desde Supabase.users + fallback JSON)
   // --------------------------
   const videosMsgEl   = document.getElementById("videos-msg");
   const playlistEl    = document.getElementById("playlist-embed");
@@ -389,30 +416,29 @@
   const setVideosMsg = (t) => { if (videosMsgEl) videosMsgEl.textContent = t || ""; };
 
   async function resolvePlaylistIdForClub(clubName) {
-    const playlists = await loadJSON("data/playlists.json").catch(()=> ({}));
-    if (!playlists || typeof playlists !== "object") return null;
+    if (!clubName) return null;
 
-    const directKey = `Liga Voll Damm - ${clubName}`;
-    if (playlists[directKey]) return playlists[directKey];
-
-    const nkDirect = norm(directKey);
-    const foundDirect = Object.keys(playlists).find(k => norm(k) === nkDirect);
-    if (foundDirect) return playlists[foundDirect];
-
-    const owners = await loadJSON("data/equipos_duenos.json").catch(()=> null);
-    if (owners && typeof owners === "object") {
-      const ownerName =
-        owners[clubName] ||
-        owners[Object.keys(owners).find(k => norm(k)===norm(clubName))];
-
-      if (ownerName) {
-        const keyOwner = `Liga Voll Damm - ${ownerName}`;
-        if (playlists[keyOwner]) return playlists[keyOwner];
-
-        const nkOwner = norm(keyOwner);
-        const foundOwner = Object.keys(playlists).find(k => norm(k) === nkOwner);
-        if (foundOwner) return playlists[foundOwner];
+    // 1) Supabase: tabla users, nickname = CLUB
+    if (hasSupabase) {
+      const userRow = await getUserRowByNickname(clubName);
+      if (userRow && userRow.youtube_playlist_id) {
+        return userRow.youtube_playlist_id;
       }
+    }
+
+    // 2) Fallback opcional a playlists.json (por compat)
+    try {
+      const playlists = await loadJSON("data/playlists.json").catch(() => null);
+      if (playlists && typeof playlists === "object") {
+        const directKey = `Liga Voll Damm - ${clubName}`;
+        if (playlists[directKey]) return playlists[directKey];
+
+        const nkDirect = norm(directKey);
+        const foundDirect = Object.keys(playlists).find(k => norm(k) === nkDirect);
+        if (foundDirect) return playlists[foundDirect];
+      }
+    } catch (e) {
+      console.warn("Error leyendo playlists.json:", e);
     }
 
     return null;
@@ -431,7 +457,6 @@
     return entries.map(e => {
       const videoId = e.querySelector("yt\\:videoId, videoId")?.textContent?.trim();
       const title   = e.querySelector("title")?.textContent?.trim() || "Vídeo";
-      // thumbnails vienen como media:thumbnail
       const thumbEl = e.querySelector("media\\:thumbnail, thumbnail");
       const thumb   = thumbEl?.getAttribute("url") || "";
 
@@ -481,7 +506,6 @@
 
     playlistEl.innerHTML = playerHtml + listHtml;
 
-    // Click handler: cambia el player al vídeo seleccionado
     const player = document.getElementById("club-playlist-player");
     const buttons = playlistEl.querySelectorAll(".playlist-item");
 
@@ -510,7 +534,7 @@
 
     if (!playlistId) {
       playlistEl.innerHTML = "";
-      setVideosMsg("No hay playlist configurada para este club.");
+      setVideosMsg("No hay playlist configurada para este klub.");
       return;
     }
 
@@ -519,7 +543,6 @@
       renderVideosUI({ playlistId, items });
     } catch (e) {
       console.warn("Error cargando RSS playlist:", e);
-      // fallback: al menos el player normal
       playlistEl.innerHTML = `
         <div class="video-frame">
           <iframe
@@ -549,7 +572,6 @@
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
       document.getElementById("tab-" + t).classList.add("active");
 
-      // Si entra a vídeos y aún no cargó, reintenta (por si tab lazy)
       if (t === "videos") renderPlaylist();
     });
   });
