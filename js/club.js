@@ -25,7 +25,7 @@
   // Helpers Supabase (users)
   // --------------------------
   const AppUtils = window.AppUtils || {};
-  const { getSupabaseClient } = AppUtils;
+  const { getSupabaseClient, loadJSON } = AppUtils;
   const hasSupabase = typeof getSupabaseClient === "function";
 
   async function getUserRowByNickname(nickname) {
@@ -399,13 +399,164 @@
   }
 
   // --------------------------
-  // TAB STATS placeholder
+  // TAB STATS (usa CoreStats.computeRankingsPorEquipo)
   // --------------------------
-  document.getElementById("tab-stats").innerHTML =
-    `<div class="club-box" style="grid-column:span 12">
-       <h3>Estadísticas</h3>
-       <p class="muted">Aquí conectaremos stats de equipo (desde CoreStats).</p>
-     </div>`;
+  const tabStats = document.getElementById("tab-stats");
+
+  try {
+    const adv = await CoreStats.computeRankingsPorEquipo();
+    const totals = await CoreStats.computeTeamTotals();
+
+    const {
+      raw = [],
+      posMed,
+      fair,
+      passAcc,
+      precisionTiro,
+      conversionGol,
+      combinedShot,
+      efectRival,
+      posesionTop = [],
+      fairTop = [],
+      passTop = [],
+      shotTop = [],
+      efectTop = []
+    } = adv || {};
+
+    const teamAdv = raw.find(t => norm(t.nombre) === norm(CLUB));
+    const teamTot = totals.find(t => norm(t.nombre) === norm(CLUB)) || clubRow;
+
+    if (!teamAdv || !teamTot) {
+      tabStats.innerHTML = `
+        <div class="club-box" style="grid-column:span 12">
+          <h3>Estadísticas</h3>
+          <p class="muted">No hay estadísticas agregadas para este club todavía.</p>
+        </div>`;
+    } else {
+      const totalTeams = raw.length || fullClasif.length || 0;
+
+      const fmtPct = v =>
+        Number.isFinite(v) ? (v * 100).toFixed(1) + "%" : "—";
+      const fmtNum = v =>
+        Number.isFinite(v) ? v.toFixed(2) : "—";
+
+      const rankOf = (arr) => {
+        const idx = arr.findIndex(t => norm(t.nombre) === norm(CLUB));
+        return idx >= 0 ? idx + 1 : null;
+      };
+
+      const posesionMedia   = posMed(teamAdv);
+      const pasesTotales    = teamAdv.pases;
+      const pasesComp       = teamAdv.completados;
+      const accPase         = passAcc(teamAdv);
+      const tirosTotales    = teamAdv.tiros;
+      const tirosPuerta     = teamAdv.taPuerta;
+      const golesTotales    = teamAdv.goles;
+      const precTiro        = precisionTiro(teamAdv);
+      const convGol         = conversionGol(teamAdv);
+      const combShot        = combinedShot(teamAdv);
+      const fairScore       = fair(teamAdv);
+      const efectDef        = efectRival(teamAdv); // goles encajados / tiros a puerta rival
+
+      const posRank      = rankOf(posesionTop);
+      const passRank     = rankOf(passTop);
+      const shotRank     = rankOf(shotTop);
+      const fairRank     = rankOf(fairTop);
+      const efectRank    = rankOf(efectTop);
+
+      tabStats.innerHTML = `
+        <div class="club-grid club-stats-grid">
+          <div class="club-box">
+            <h3>Perfil general</h3>
+            <p class="muted">Datos agregados de todos los partidos con estadísticas.</p>
+            <ul class="kv kv-compact">
+              <li><span>Partidos analizados</span><span>${teamAdv.pj}</span></li>
+              <li><span>Goles a favor</span><span>${teamTot.gf}</span></li>
+              <li><span>Goles en contra</span><span>${teamTot.gc}</span></li>
+              <li><span>Diferencia de goles</span><span>${teamTot.gf - teamTot.gc}</span></li>
+            </ul>
+          </div>
+
+          <div class="club-box">
+            <h3>Posesión media</h3>
+            <div class="stat-main">${fmtPct(posesionMedia)}</div>
+            <p class="muted">
+              ${posRank
+                ? `Puesto ${posRank} de ${totalTeams} en posesión media.`
+                : `Sin ranking disponible.`}
+            </p>
+          </div>
+
+          <div class="club-box">
+            <h3>Juego de pase</h3>
+            <ul class="kv kv-compact">
+              <li><span>Pases totales</span><span>${pasesTotales}</span></li>
+              <li><span>Pases completados</span><span>${pasesComp}</span></li>
+              <li><span>Precisión de pase</span><span>${fmtPct(accPase)}</span></li>
+            </ul>
+            <p class="muted">
+              ${passRank
+                ? `Puesto ${passRank} de ${totalTeams} en precisión de pase.`
+                : `Sin ranking disponible.`}
+            </p>
+          </div>
+
+          <div class="club-box">
+            <h3>Peligro ofensivo</h3>
+            <ul class="kv kv-compact">
+              <li><span>Tiros totales</span><span>${tirosTotales}</span></li>
+              <li><span>Tiros a puerta</span><span>${tirosPuerta}</span></li>
+              <li><span>Goles</span><span>${golesTotales}</span></li>
+              <li><span>Precisión de tiro</span><span>${fmtPct(precTiro)}</span></li>
+              <li><span>Conversión a gol</span><span>${fmtPct(convGol)}</span></li>
+              <li><span>Índice combinado</span><span>${fmtPct(combShot)}</span></li>
+            </ul>
+            <p class="muted">
+              ${shotRank
+                ? `Puesto ${shotRank} de ${totalTeams} en calidad de tiro.`
+                : `Sin ranking disponible.`}
+            </p>
+          </div>
+
+          <div class="club-box">
+            <h3>Fair play</h3>
+            <ul class="kv kv-compact">
+              <li><span>Entradas</span><span>${teamAdv.entradas}</span></li>
+              <li><span>Faltas</span><span>${teamAdv.faltas}</span></li>
+              <li><span>Rojas</span><span>${teamAdv.rojas}</span></li>
+              <li><span>Índice fair play</span><span>${fmtNum(fairScore)}</span></li>
+            </ul>
+            <p class="muted">
+              ${fairRank
+                ? `Puesto ${fairRank} de ${totalTeams} en fair play (más alto = mejor).`
+                : `Sin ranking disponible.`}
+            </p>
+          </div>
+
+          <div class="club-box">
+            <h3>Eficacia defensiva</h3>
+            <ul class="kv kv-compact">
+              <li><span>Goles encajados</span><span>${teamAdv.golesEncajados}</span></li>
+              <li><span>Tiros a puerta rival</span><span>${teamAdv.tirosRival}</span></li>
+              <li><span>Goles / tiro rival</span><span>${fmtPct(efectDef)}</span></li>
+            </ul>
+            <p class="muted">
+              ${efectRank
+                ? `Puesto ${efectRank} de ${totalTeams} en solidez defensiva (más bajo = mejor).`
+                : `Sin ranking disponible.`}
+            </p>
+          </div>
+        </div>
+      `;
+    }
+  } catch (e) {
+    console.error("Error generando estadísticas de club:", e);
+    tabStats.innerHTML =
+      `<div class="club-box" style="grid-column:span 12">
+         <h3>Estadísticas</h3>
+         <p class="muted">No se pudieron calcular las estadísticas del club.</p>
+       </div>`;
+  }
 
   // --------------------------
   // TAB VIDEOS (playlist desde Supabase.users + fallback JSON)
