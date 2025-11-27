@@ -10,6 +10,28 @@ const normalizeText = (value) => String(value || '')
 const slugify = (value) => normalizeText(value).replace(/\s+/g,'-');
 const logoPath = (name, base='img') => `${base}/${slugify(name)}.png`;
 
+// Supabase config compartida
+const getSupabaseConfig = () => ({
+  url: window?.SUPABASE_URL || window?.SUPABASE_CONFIG?.url || '',
+  anonKey: window?.SUPABASE_ANON_KEY || window?.SUPABASE_CONFIG?.anonKey || '',
+  season: window?.ACTIVE_SEASON || window?.SUPABASE_CONFIG?.season || ''
+});
+
+let supabaseClient = null;
+async function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  const { url, anonKey } = getSupabaseConfig();
+  if (!url || !anonKey) throw new Error('Falta configuración de Supabase');
+  supabaseClient = createClient(url, anonKey);
+  return supabaseClient;
+}
+
+function getActiveSeason() {
+  const { season } = getSupabaseConfig();
+  return season;
+}
+
 async function loadJSON(path){
   const res = await fetch(path, { cache: 'no-store' });
   if(!res.ok) throw new Error('No se pudo cargar '+path);
@@ -41,6 +63,9 @@ Object.assign(AppUtils, {
   normalizeText,
   slugify,
   logoPath,
+  getSupabaseConfig,
+  getSupabaseClient,
+  getActiveSeason,
   genAlineacionFromEsquema
 });
 
