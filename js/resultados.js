@@ -145,13 +145,10 @@
     return;
   }
 
-  const teamMap = new Map();
-
-  const teamNameFrom = (teamObj, teamId) => {
-    const mapObj = teamId ? teamMap.get(teamId) : null;
-    const source  = teamObj || mapObj || {};
-    const { id, display_name, nickname } = source;
-    return display_name?.trim() || nickname?.trim() || `Equipo ${id ?? ''}`.trim();
+  const teamNameFrom = (teamObj) => {
+    const name = teamObj?.display_name || teamObj?.nickname || teamObj?.club?.name;
+    const fallbackId = teamObj?.id != null ? ` ${teamObj.id}` : '';
+    return (name || `Equipo${fallbackId}`).trim();
   };
 
   const mapStatsRow = (row) => ({
@@ -178,9 +175,12 @@
       .from('matches')
       .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
-        home_league_team_id,away_league_team_id,
-        home:league_teams!matches_home_league_team_id_fkey(id,nickname,display_name),
-        away:league_teams!matches_away_league_team_id_fkey(id,nickname,display_name)
+        home:league_teams!matches_home_league_team_id_fkey(
+          id,nickname,display_name,club:clubs(id,name)
+        ),
+        away:league_teams!matches_away_league_team_id_fkey(
+          id,nickname,display_name,club:clubs(id,name)
+        )
       `)
       .order('round_id', { ascending: true })
       .order('match_date', { ascending: true });
@@ -192,40 +192,18 @@
     return query; // devuelve { data, error }
   };
 
-const fetchStats = async (matchIds = []) => {
-  if (!matchIds.length) return { data: [] };
-  const supabase = await getSupabaseClient();
-
-  return supabase
-    .from('match_team_stats')
-    .select(`
-      match_id,
-      league_team_id,
-      possession,
-      shots,
-      shots_on_target,
-      goals,
-      fouls,
-      offsides,
-      corners,
-      free_kicks,
-      passes,
-      passes_completed,
-      crosses,
-      interceptions,
-      tackles,
-      saves,
-      red_cards,
-      team:league_teams!match_team_stats_league_team_id_fkey (
-        id,
-        nickname,
-        display_name
-      )
-    `)
-    .in('match_id', matchIds);
-};
-
-
+  const fetchStats = async (matchIds=[]) => {
+    if (!matchIds.length) return { data: [] };
+    const supabase = await getSupabaseClient();
+    return supabase
+      .from('match_team_stats')
+      .select(`
+        match_id,league_team_id,possession,shots,shots_on_target,goals,fouls,offsides,corners,free_kicks,
+        passes,passes_completed,crosses,interceptions,tackles,saves,red_cards,
+        team:league_teams(id,nickname,display_name,club:clubs(id,name))
+      `)
+      .in('match_id', matchIds);
+  };
 
   root.innerHTML = `<p class="hint">Cargando resultados...</p>`;
 
