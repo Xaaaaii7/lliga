@@ -1,3 +1,51 @@
+const AppUtils = window.AppUtils || {};
+
+// Helpers base reusables
+const normalizeText = (value) => String(value || '')
+  .toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z0-9\s-]/g,'')
+  .trim();
+
+const slugify = (value) => normalizeText(value).replace(/\s+/g,'-');
+const logoPath = (name, base='img') => `${base}/${slugify(name)}.png`;
+
+async function loadJSON(path){
+  const res = await fetch(path, { cache: 'no-store' });
+  if(!res.ok) throw new Error('No se pudo cargar '+path);
+  return res.json();
+}
+
+function fmtDate(iso){
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+// Alineación automática desde "4-4-2"
+function genAlineacionFromEsquema(esquema){
+  const [def, mid, fwd] = (esquema||'4-4-2').split('-').map(n=>parseInt(n,10)||0);
+  const fila = (n, row, pref) =>
+    Array.from({length:n},(_,i)=>({slot:`${pref}${i+1}`,posicion:pref==='POR'?'POR':pref,fila:row,col:i+1}));
+  return [
+    ...fila(fwd,2,'DEL'),
+    ...fila(mid,3,'MED'),
+    ...fila(def,4,'DEF'),
+    {slot:'POR1',posicion:'POR',fila:5,col:3}
+  ];
+}
+
+Object.assign(AppUtils, {
+  loadJSON,
+  fmtDate,
+  normalizeText,
+  slugify,
+  logoPath,
+  genAlineacionFromEsquema
+});
+
+window.AppUtils = AppUtils;
+
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('.site-header');
   const nav = document.getElementById('main-nav');
@@ -39,27 +87,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
-
-async function loadJSON(path){
-  const res = await fetch(path, { cache: 'no-store' });
-  if(!res.ok) throw new Error('No se pudo cargar '+path);
-  return res.json();
-}
-function fmtDate(iso){
-  const d = new Date(iso);
-  if (isNaN(d)) return '';
-  return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
-}
-
-// Alineación automática desde "4-4-2"
-function genAlineacionFromEsquema(esquema){
-  const [def, mid, fwd] = (esquema||'4-4-2').split('-').map(n=>parseInt(n,10)||0);
-  const fila = (n, row, pref) =>
-    Array.from({length:n},(_,i)=>({slot:`${pref}${i+1}`,posicion:pref==='POR'?'POR':pref,fila:row,col:i+1}));
-  return [
-    ...fila(fwd,2,'DEL'),
-    ...fila(mid,3,'MED'),
-    ...fila(def,4,'DEF'),
-    {slot:'POR1',posicion:'POR',fila:5,col:3}
-  ];
-}

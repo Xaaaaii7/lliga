@@ -8,21 +8,22 @@
   const showMsg = (t) => { if (msgEl) msgEl.textContent = t || ''; };
 
   // ---------- Helpers ----------
+  const { loadJSON, normalizeText } = window.AppUtils || {};
   const isNum = v => typeof v === 'number' && Number.isFinite(v);
-  const norm = s => String(s||'').toLowerCase()
+  const norm = normalizeText || (s => String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s-]/g,'').trim();
+    .replace(/[^a-z0-9\s-]/g,'').trim());
 
   const ppm = (pts, pj) => pj > 0 ? pts / pj : 0;
   const gdpm = (gf, gc, pj) => pj > 0 ? (gf - gc) / pj : 0;
 
-  const loadJSON = async (p) => (await fetch(p)).json();
+  const fetchJSON = loadJSON || (async (p) => (await fetch(p)).json());
 
   // ---------- Carga de datos ----------
   let jornadas, d1, d2;
-  try { jornadas = await loadJSON('data/resultados.json'); } catch { jornadas = null; }
-  try { d1 = await loadJSON('data/division-primera.json'); } catch { d1 = null; }
-  try { d2 = await loadJSON('data/division-segunda.json'); } catch { d2 = null; }
+  try { jornadas = await fetchJSON('data/resultados.json'); } catch { jornadas = null; }
+  try { d1 = await fetchJSON('data/division-primera.json'); } catch { d1 = null; }
+  try { d2 = await fetchJSON('data/division-segunda.json'); } catch { d2 = null; }
 
   if (!Array.isArray(jornadas)) { showMsg('No se pudieron cargar los resultados.'); return; }
 

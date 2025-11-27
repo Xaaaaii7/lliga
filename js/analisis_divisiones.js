@@ -15,14 +15,15 @@
   popup?.addEventListener("click", e=>{ if(e.target===popup) close(); });
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); });
 
-  const loadJSON = async p => (await fetch(p)).json();
+  const { loadJSON } = window.AppUtils || {};
+  const fetchJSON = loadJSON || (async p => (await fetch(p)).json());
   const isNum = v => typeof v==="number" && Number.isFinite(v);
 
   // ====== Carga ======
   let jornadas, div1, div2;
-  try { jornadas = await loadJSON("data/resultados.json"); } catch {}
-  try { div1 = await loadJSON("data/division-primera.json"); } catch {}
-  try { div2 = await loadJSON("data/division-segunda.json"); } catch {}
+  try { jornadas = await fetchJSON("data/resultados.json"); } catch {}
+  try { div1 = await fetchJSON("data/division-primera.json"); } catch {}
+  try { div2 = await fetchJSON("data/division-segunda.json"); } catch {}
 
   if (!Array.isArray(jornadas) || !div1 || !div2) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#9fb3c8;padding:12px">Error cargando datos.</td></tr>`;

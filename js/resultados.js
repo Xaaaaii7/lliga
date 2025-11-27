@@ -9,14 +9,15 @@
   const titleEl   = document.getElementById('stats-title');
 
   // Helpers comunes
+  const { loadJSON, fmtDate, normalizeText, slugify, logoPath } = window.AppUtils || {};
   const isNum = v => typeof v === 'number' && Number.isFinite(v);
-  const norm = s => String(s || '')
+  const norm = normalizeText || (s => String(s || '')
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9\s-]/g,'')
-    .trim();
-  const slug = s => norm(s).replace(/\s+/g,'-');
-  const logoPath = name => `img/${slug(name)}.png`;
+    .trim());
+  const slug = slugify || (s => norm(s).replace(/\s+/g,'-'));
+  const logoFor = logoPath || (name => `img/${slug(name)}.png`);
 
   // Helpers modal
   const openModal = () => {
@@ -395,14 +396,14 @@
                   aria-label="Ver estadísticas del partido">
             <div class="result-teams">
               <div class="result-team-block">
-                <img class="result-badge" src="${logoPath(p.local)}"
+                <img class="result-badge" src="${logoFor(p.local)}"
                      alt="Escudo ${p.local}"
                      onerror="this.style.visibility='hidden'">
                 <span class="team-name">${p.local}</span>
               </div>
               <span class="result-score">${marcador}</span>
               <div class="result-team-block">
-                <img class="result-badge" src="${logoPath(p.visitante)}"
+                <img class="result-badge" src="${logoFor(p.visitante)}"
                      alt="Escudo ${p.visitante}"
                      onerror="this.style.visibility='hidden'">
                 <span class="team-name">${p.visitante}</span>

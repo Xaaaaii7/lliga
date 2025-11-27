@@ -28,14 +28,15 @@ async function loadChannelTeamMap() {
   const jornadasRes = await loadJSON("data/resultados.json").catch(() => null);
 
   // ==== helpers de nombres / escudos ====
-  const norm = s => String(s || "")
+  const { normalizeText, slugify, logoPath } = window.AppUtils || {};
+  const norm = normalizeText || (s => String(s || "")
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s-]/g, "")
-    .trim();
+    .trim());
 
-  const slug = s => norm(s).replace(/\s+/g, "-");
-  const logoPath = eq => eq ? `img/${slug(eq)}.png` : null;
+  const slug = slugify || (s => norm(s).replace(/\s+/g, "-"));
+  const logoFor = logoPath || (eq => eq ? `img/${slug(eq)}.png` : null);
 
   // =========================
   //   Layout base
@@ -135,8 +136,8 @@ async function loadChannelTeamMap() {
     const match = findNextMatchForTeam(teamName);
     if (!match) return;
 
-    const logoLocal = logoPath(match.local);
-    const logoVisit = logoPath(match.visitante);
+    const logoLocal = logoFor(match.local);
+    const logoVisit = logoFor(match.visitante);
 
     const fechaTxt = match.fecha ? fmtDate(match.fecha) : "";
     const metaLine = (fechaTxt || match.hora)
