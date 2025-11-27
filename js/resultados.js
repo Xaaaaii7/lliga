@@ -426,7 +426,15 @@
              </a>
            </div>`
         : '';
-
+      const uploadHTML = (!jugado && MATCH_UPLOAD.enabled)
+        ? `<div class="result-upload">
+             <button type="button"
+                     class="upload-photo-btn"
+                     data-partido-id="${pid}">
+               Subir imagen
+             </button>
+           </div>`
+        : '';
       const hasStats = !!statsIndex[pid];
 
       const cityName   = getCityForKey(p.local);
@@ -471,6 +479,7 @@
             </div>
           </button>
           ${streamHTML}
+          ${uploadHTML}
         </article>
       `;
     }).join('');
@@ -483,7 +492,86 @@
       </section>
     `;
   };
+  // -----------------------------
+  // Subida de imagen del partido -> S3 vía presigned URL
+  // -----------------------------
+  const requestUploadUrl = async (matchId, file) => {
+    if (!MATCH_UPLOAD.enabled || !MATCH_UPLOAD.presignEndpoint) {
+      throw new Error('Subida de imágenes no configurada');
+    }
 
+    const payload = {
+      matchId,
+      filename: file.name,
+      contentType: file.type || 'image/jpeg'
+    };
+
+    const res = await fetch(MATCH_UPLOAD.presignEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error solicitando URL de subida: HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!data || !data.uploadUrl) {
+      throw new Error('Respuesta sin uploadUrl');
+    }
+
+    return data.uploadUrl;
+  };
+
+  const uploadMatchImage = async (matchId, file, buttonEl) => {
+    try {
+      buttonEl.disabled = true;
+      const originalLabel = buttonEl.textContent;
+      buttonEl.textContent = 'Subiendo...';
+
+      const uploadUrl = await requestUploadUrl(matchId, file);
+
+      const res = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'image/jpeg'
+        },
+        body: file
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error subiendo la imagen: HTTP ${res.status}`);
+      }
+
+      buttonEl.textContent = 'Imagen subida ✔';
+      buttonEl.classList.add('upload-success');
+    } catch (err) {
+      console.error('Error al subir la imagen del partido', err);
+      alert('No se ha podido subir la imagen. Inténtalo de nuevo.');
+      buttonEl.disabled = false;
+      buttonEl.textContent = 'Subir imagen';
+    }
+  };
+
+  const handleUploadClick = (btn) => {
+    const matchId = btn.getAttribute('data-partido-id');
+    if (!matchId) return;
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      uploadMatchImage(matchId, file, btn);
+    });
+
+    input.click();
+  };
   // -----------------------------
   // Navegación jornadas
   // -----------------------------
@@ -511,17 +599,29 @@
   });
 
   // Delegación: click en tarjeta de partido para abrir stats
+  // Delegación: click en tarjeta de partido (stats) o botón "Subir imagen"
   root.addEventListener('click', (e) => {
-    const btn = e.target.closest?.('.partido-card');
-    if (!btn) return;
+    const target = e.target;
 
-    const id = btn.getAttribute('data-partido-id');
+    // 1) Botón "Subir imagen"
+    const uploadBtn = target.closest?.('.upload-photo-btn');
+    if (uploadBtn) {
+      e.preventDefault();
+      handleUploadClick(uploadBtn);
+      return;
+    }
+
+    // 2) Tarjeta de partido -> abrir modal de stats
+    const cardBtn = target.closest?.('.partido-card');
+    if (!cardBtn) return;
+
+    const id = cardBtn.getAttribute('data-partido-id');
     if (!id) return;
 
     const meta  = partidoMeta[id];
     const stats = statsIndex[id];
 
-    if (!stats && btn.dataset.noStats === '1') {
+    if (!stats && cardBtn.dataset.noStats === '1') {
       return;
     }
 
@@ -531,6 +631,7 @@
     }
     openModal();
   });
+
 
   // Primera carga: última jornada jugada
   await renderJornada(current);
