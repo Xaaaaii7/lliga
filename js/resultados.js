@@ -27,6 +27,7 @@
     .trim());
   const slug = slugify || (s => norm(s).replace(/\s+/g,'-'));
   const logoFor = logoPath || (name => `img/${slug(name)}.png`);
+  const teamMap = new Map();
 
   // Helpers modal
   const openModal = () => {
@@ -145,10 +146,20 @@
     return;
   }
 
-  const teamNameFrom = (teamObj) => {
-    const name = teamObj?.display_name || teamObj?.nickname || teamObj?.club?.name;
-    const fallbackId = teamObj?.id != null ? ` ${teamObj.id}` : '';
-    return (name || `Equipo${fallbackId}`).trim();
+  const teamNameFrom = (teamObj = {}, fallbackId = null) => {
+    let name = teamObj?.display_name || teamObj?.nickname || teamObj?.club?.name;
+
+    if (!name && fallbackId != null && teamMap.has(fallbackId)) {
+      const fromMap = teamMap.get(fallbackId);
+      name = fromMap?.display_name || fromMap?.nickname || fromMap?.club?.name;
+    }
+
+    if (!name && fallbackId != null) {
+      console.warn('Nombre de equipo faltante, usando id como respaldo', { fallbackId, teamObj });
+    }
+
+    const fallbackLabel = fallbackId != null ? `Equipo ${fallbackId}` : 'Equipo';
+    return (name || fallbackLabel).toString().trim();
   };
 
   const mapStatsRow = (row) => ({
@@ -175,6 +186,7 @@
       .from('matches')
       .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
+        home_league_team_id,away_league_team_id,
         home:league_teams!matches_home_league_team_id_fkey(
           id,nickname,display_name,club:clubs(id,name)
         ),
