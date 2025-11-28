@@ -614,7 +614,7 @@
     if (idx !== -1) arr.splice(idx, 1);
   };
 
-  const saveScorersToSupabase = async (matchId) => {
+   const saveScorersToSupabase = async (matchId) => {
     const state = scorerState[matchId];
     if (!state) return { ok: false, msg: 'No hay datos de goleadores' };
 
@@ -675,62 +675,7 @@
       }
     }
 
-    // 3) recomputar totales de temporada de los jugadores que tocan y upsert en goleadores
-    const playerIds = new Set();
-    (state.local || []).forEach(p => playerIds.add(p.player_id));
-    (state.visitante || []).forEach(p => playerIds.add(p.player_id));
-    const playerIdList = Array.from(playerIds);
-
-    if (playerIdList.length) {
-      const { data: evs, error: errEvs } = await supa
-        .from('goal_events')
-        .select(`
-          player_id,
-          event_type,
-          match:matches(season)
-        `)
-        .eq('event_type', 'goal')
-        .in('player_id', playerIdList)
-        .eq('match.season', season);
-
-      if (errEvs) {
-        console.error('Error recalculando totales goleadores:', errEvs);
-      } else {
-        const totals = {};
-        (evs || []).forEach(ev => {
-          const pid = ev.player_id;
-          if (!pid) return;
-          totals[pid] = (totals[pid] || 0) + 1;
-        });
-
-        const upserts = [];
-
-        playerIdList.forEach(pid => {
-          const metaP = state.playerMeta[pid] || { name: `Jugador ${pid}`, clubName: '' };
-          const goles = totals[pid] || 0;
-          upserts.push({
-            season,
-            player_id: pid,
-            jugador: metaP.name,
-            club: metaP.clubName,
-            manager: '', // si quieres, aquí podemos meter el manager de league_teams
-            goles
-          });
-        });
-
-        if (upserts.length) {
-          const { error: errUp } = await supa
-            .from('goleadores')
-            // asumiendo índice único en (season, player_id)
-            .upsert(upserts, { onConflict: 'season,player_id' });
-
-          if (errUp) {
-            console.error('Error upsert goleadores:', errUp);
-          }
-        }
-      }
-    }
-
+    // A partir de aquí, tu vista `goleadores` / pichichi se encarga
     return { ok: true, msg: 'Goleadores guardados correctamente' };
   };
 
