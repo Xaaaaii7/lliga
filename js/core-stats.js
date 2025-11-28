@@ -310,8 +310,8 @@
     return _statsIndexCache;
   };
 
-  // --------------------------
-  // TSV Pichichi
+    // --------------------------
+  // Pichichi desde Supabase (con fallback a TSV)
   // --------------------------
   const SHEET_TSV_URL =
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vSg3OTDxmqj6wcbH8N7CUcXVexk9ZahUURCgtSS9JXSEsFPG15rUchwvI2zRulRr0hHSmGZOo_TAXRL/pub?gid=0&single=true&output=tsv";
@@ -329,23 +329,165 @@
     return { headers, rows };
   }
 
+  // Carga pichichi desde Supabase:
+  // - base de jugadores en tabla "goleadores"
+  // - goles / partidos desde "goal_events"
+  const loadPichichiFromSupabase = async () => {
+    if (!hasSupabase) return [];
+
+    const supaCfg = typeof getSupabaseConfig === 'function'
+      ? getSupabaseConfig()
+      : { season: '' };
+
+    const seasonFromCfg = supaCfg.season || '';
+    const activeSeason =
+      (typeof getActiveSeason === 'function' && getActiveSeason()) ||
+      seasonFromCfg ||
+      '';
+
+    const supabase = await getSupabaseClient();
+
+    // 1) Jugadores base (nombre, club, etc.)
+    let baseQuery = supabase
+      .from('goleadores')
+      .select('season, player_id, jugador, manager, club');
+
+    if (activeSeason) {
+      baseQuery = baseQuery.eq('season', activeSeason);
+    }
+
+    const { data: basePlayers, error: errBase } = await baseQuery;
+    if (errBase) {
+      console.warn('Error cargando goleadores (tabla goleadores):', errBase);
+      return [];
+    }
+
+    if (!basePlayers || !basePlayers.length) return [];
+
+    const baseMap = new Map();
+    basePlayers.forEach(p => {
+      if (!p.player_id) return;
+      baseMap.set(p.player_id, p);
+    });
+
+    // 2) Eventos de gol por jugador para esa temporada
+    let eventsQuery = supabase
+      .from('goal_events')
+      .select(`
+        match_id,
+        player_id,
+        event_type,
+        match:matches(season)
+      `)
+      // ajusta este filtro si usas otro valor para los goles (por ejemplo "goal", "gol", etc.)
+      .eq('event_type', 'goal');
+
+    if (activeSeason) {
+      eventsQuery = eventsQuery.eq('match.season', activeSeason);
+    }
+
+    const { data: events, error: errEvents } = await eventsQuery;
+    if (errEvents) {
+      console.warn('Error cargando eventos de gol (tabla goal_events):', errEvents);
+      return [];
+    }
+
+    if (!events || !events.length) return [];
+
+    // 3) Agregamos por player_id: goles + partidos (distintos match_id)
+    const statsByPlayer = new Map();
+
+    for (const ev of events) {
+      const pid = ev.player_id;
+      if (!pid) continue;
+
+      let rec = statsByPlayer.get(pid);
+      if (!rec) {
+        rec = {
+          goles: 0,
+          matchIds: new Set()
+        };
+        statsByPlayer.set(pid, rec);
+      }
+
+      rec.goles += 1;
+      if (ev.match_id) rec.matchIds.add(ev.match_id);
+    }
+
+    // 4) Construimos "rows" con el mismo formato que venía del TSV:
+    //    { "Jugador", "Equipo", "Partidos", "Goles" }
+    const rows = [];
+
+    // Primero los que existen en la tabla "goleadores"
+    for (const [pid, base] of baseMap.entries()) {
+      const rec = statsByPlayer.get(pid);
+      if (!rec) continue; // sin goles -> fuera del top
+
+      const pj = rec.matchIds.size;
+      const goles = rec.goles;
+
+      rows.push({
+        "Jugador": base.jugador || `Jugador ${pid}`,
+        "Equipo": base.club || '',
+        "Partidos": String(pj),
+        "Goles": String(goles),
+        // por si más adelante quieres usarlo en otro sitio
+        "_player_id": pid,
+        "_manager": base.manager || ''
+      });
+    }
+
+    // Opcional: jugadores que tienen goles pero NO están en la tabla "goleadores"
+    for (const [pid, rec] of statsByPlayer.entries()) {
+      if (baseMap.has(pid)) continue;
+
+      const pj = rec.matchIds.size;
+      const goles = rec.goles;
+
+      rows.push({
+        "Jugador": `Jugador ${pid}`,
+        "Equipo": '',
+        "Partidos": String(pj),
+        "Goles": String(goles),
+        "_player_id": pid
+      });
+    }
+
+    return rows;
+  };
+
   CoreStats.getPichichiRows = async () => {
     if (_pichichiRowsCache) return _pichichiRowsCache;
+
+    // 1) Intentamos Supabase
+    if (hasSupabase) {
+      try {
+        const rowsDb = await loadPichichiFromSupabase();
+        if (Array.isArray(rowsDb) && rowsDb.length) {
+          _pichichiRowsCache = rowsDb;
+          return _pichichiRowsCache;
+        }
+      } catch (e) {
+        console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);
+      }
+    }
+
+    // 2) Fallback al TSV antiguo (por si acaso)
     try {
-      const res = await fetch(SHEET_TSV_URL, { cache: "no-store" });
+      const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const txt = await res.text();
       const { rows } = parseTSV(txt);
-      _pichichiRowsCache = rows;
-      return rows;
+      _pichichiRowsCache = Array.isArray(rows) ? rows : [];
+      return _pichichiRowsCache;
     } catch (e) {
-      console.warn("No se pudo cargar TSV pichichi:", e);
+      console.warn('No se pudo cargar TSV pichichi:', e);
       _pichichiRowsCache = [];
-      return [];
+      return _pichichiRowsCache;
     }
   };
 
-  // Devuelve lista normalizada de goleadores (para pichichi.html o clubs)
+  // Se mantiene computePichichiPlayers igual que lo tienes:
   CoreStats.computePichichiPlayers = (rows) => {
     const fullData = (rows || []).map(r => ({
       jugador: r["Jugador"] || "",
