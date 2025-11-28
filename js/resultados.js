@@ -9,16 +9,42 @@
   const titleEl   = document.getElementById('stats-title');
 
   // Helpers comunes
-  const {
+    const {
     loadJSON,
     fmtDate,
     normalizeText,
     slugify,
     logoPath,
+    getSupabaseClient,
+    getSupabaseConfig,
+    getActiveSeason
   } = window.AppUtils || {};
 
   const CoreStats = window.CoreStats || {};
   const isNum = CoreStats.isNum || (v => typeof v === 'number' && Number.isFinite(v));
+
+  const hasSupabase =
+    typeof getSupabaseClient === 'function' &&
+    typeof getSupabaseConfig === 'function';
+
+  let _supaClient = null;
+  const getSupa = async () => {
+    if (!hasSupabase) return null;
+    if (_supaClient) return _supaClient;
+    _supaClient = await getSupabaseClient();
+    return _supaClient;
+  };
+
+  const getActiveSeasonSafe = () => {
+    const cfg = (typeof getSupabaseConfig === 'function') ? getSupabaseConfig() : {};
+    const seasonCfg = cfg.season || '';
+    const seasonFromFn = (typeof getActiveSeason === 'function') ? getActiveSeason() : '';
+    return seasonFromFn || seasonCfg || '';
+  };
+
+  // Estado en memoria de goleadores por partido
+  const scorerState = {}; // matchId -> { meta, local:[], visitante:[], playersLocal:[], playersVisitante:[], playerMeta:{} }
+
 
   const norm = normalizeText || (s => String(s || '')
     .toLowerCase()
@@ -185,7 +211,14 @@
         visitante: p.visitante,
         goles_local: isNum(p.goles_local) ? p.goles_local : null,
         goles_visitante: isNum(p.goles_visitante) ? p.goles_visitante : null,
-        stream: p.stream || ''
+        stream: p.stream || '',
+
+        // 👇 campos extra que vienen de CoreStats
+        local_team_id: p.local_team_id || null,
+        visitante_team_id: p.visitante_team_id || null,
+        local_club_id: p.local_club_id || null,
+        visitante_club_id: p.visitante_club_id || null,
+        round_id: p.round_id || numero
       };
 
       jornada.partidos.push(partido);
@@ -199,8 +232,16 @@
         local: partido.local,
         visitante: partido.visitante,
         goles_local: partido.goles_local,
-        goles_visitante: partido.goles_visitante
+        goles_visitante: partido.goles_visitante,
+
+        // 👇 también aquí
+        local_team_id: partido.local_team_id,
+        visitante_team_id: partido.visitante_team_id,
+        local_club_id: partido.local_club_id,
+        visitante_club_id: partido.visitante_club_id,
+        round_id: partido.round_id
       };
+
     });
 
     jornadasMap.set(numero, jornada);
@@ -243,6 +284,490 @@
   const labelEl = document.getElementById('res-label');
   const prevBtn = document.getElementById('res-prev');
   const nextBtn = document.getElementById('res-next');
+  // -----------------------------
+  // Goleadores: carga datos para un partido
+  // -----------------------------
+  const loadScorerStateForMatch = async (matchMeta) => {
+    const matchId = matchMeta.id;
+    if (!hasSupabase || !matchId) return null;
+
+    if (scorerState[matchId]) return scorerState[matchId];
+
+    const supa = await getSupa();
+    if (!supa) return null;
+
+    const season = getActiveSeasonSafe();
+    const round = matchMeta.round_id || matchMeta.jornada || null;
+    const localClubId = matchMeta.local_club_id;
+    const visitClubId = matchMeta.visitante_club_id;
+
+    if (!season || !localClubId || !visitClubId) {
+      console.warn('Scorers: faltan season o club_ids', { season, localClubId, visitClubId });
+      return null;
+    }
+
+    // 1) Sacar membresías de jugadores de ambos clubes en esta temporada
+    const { data: memberships, error: errMem } = await supa
+      .from('player_club_membership')
+      .select(`
+        player_id,
+        club_id,
+        season,
+        from_round,
+        to_round,
+        is_current,
+        player:players(id, name, position),
+        club:clubs(id, name)
+      `)
+      .eq('season', season)
+      .in('club_id', [localClubId, visitClubId]);
+
+    if (errMem) {
+      console.warn('Error cargando memberships jugadores:', errMem);
+      return null;
+    }
+
+    const inRound = (m) => {
+      if (!round) return true;
+      if (m.is_current) return true;
+      const fr = m.from_round;
+      const tr = m.to_round;
+      if (fr != null && fr > round) return false;
+      if (tr != null && tr < round) return false;
+      return true;
+    };
+
+    const filteredMem = (memberships || []).filter(inRound);
+
+    const playerMeta = {};
+    const allPlayerIds = new Set();
+
+    filteredMem.forEach(m => {
+      const pid = m.player_id;
+      if (!pid) return;
+      allPlayerIds.add(pid);
+      if (!playerMeta[pid]) {
+        playerMeta[pid] = {
+          id: pid,
+          name: (m.player && m.player.name) || `Jugador ${pid}`,
+          position: (m.player && m.player.position) || '',
+          clubId: m.club_id,
+          clubName: (m.club && m.club.name) || ''
+        };
+      }
+    });
+
+    const playerIdList = Array.from(allPlayerIds);
+    const goalsByPlayerSeason = {};
+
+    if (playerIdList.length) {
+      // 2) Total de goles por jugador en la temporada (para ordenar el select)
+      const { data: evs, error: errEvs } = await supa
+        .from('goal_events')
+        .select(`
+          player_id,
+          event_type,
+          match:matches(season)
+        `)
+        .eq('event_type', 'goal')
+        .in('player_id', playerIdList)
+        .eq('match.season', season);
+
+      if (!errEvs && evs) {
+        evs.forEach(ev => {
+          const pid = ev.player_id;
+          if (!pid) return;
+          goalsByPlayerSeason[pid] = (goalsByPlayerSeason[pid] || 0) + 1;
+        });
+      }
+    }
+
+    const localPlayers = [];
+    const visitPlayers = [];
+
+    filteredMem.forEach(m => {
+      const pid = m.player_id;
+      if (!pid) return;
+      const meta = playerMeta[pid];
+      const base = {
+        player_id: pid,
+        name: meta.name,
+        position: meta.position,
+        clubName: meta.clubName,
+        totalGoals: goalsByPlayerSeason[pid] || 0
+      };
+      if (m.club_id === localClubId) {
+        localPlayers.push(base);
+      } else if (m.club_id === visitClubId) {
+        visitPlayers.push(base);
+      }
+    });
+
+    const sortPlayers = (arr) => arr.sort((a, b) =>
+      (b.totalGoals - a.totalGoals) ||
+      a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+    );
+
+    sortPlayers(localPlayers);
+    sortPlayers(visitPlayers);
+
+    // 3) Eventos de este partido para precargar goleadores
+    const { data: matchEvents, error: errMatchEv } = await supa
+      .from('goal_events')
+      .select(`
+        id,
+        match_id,
+        league_team_id,
+        player_id,
+        minute,
+        event_type
+      `)
+      .eq('match_id', matchId)
+      .eq('event_type', 'goal');
+
+    if (errMatchEv) {
+      console.warn('Error cargando goal_events del partido:', errMatchEv);
+    }
+
+    const aggSide = { local: {}, visitante: {} };
+
+    (matchEvents || []).forEach(ev => {
+      const pid = ev.player_id;
+      if (!pid) return;
+      const side = (ev.league_team_id === matchMeta.local_team_id)
+        ? 'local'
+        : (ev.league_team_id === matchMeta.visitante_team_id ? 'visitante' : null);
+      if (!side) return;
+      aggSide[side][pid] = (aggSide[side][pid] || 0) + 1;
+    });
+
+    const buildSideArr = (side, playersArr) => {
+      const out = [];
+      const counts = aggSide[side];
+      Object.keys(counts).forEach(pidStr => {
+        const pid = Number(pidStr);
+        const goals = counts[pidStr];
+        const meta = playerMeta[pid] || { name: `Jugador ${pid}`, clubName: '' };
+        out.push({
+          player_id: pid,
+          name: meta.name,
+          goals
+        });
+      });
+      // si quieres, podrías ordenar también aquí por goles desc, luego nombre
+      out.sort((a, b) =>
+        (b.goals - a.goals) ||
+        a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+      );
+      return out;
+    };
+
+    const state = {
+      meta: matchMeta,
+      local: buildSideArr('local', localPlayers),
+      visitante: buildSideArr('visitante', visitPlayers),
+      playersLocal: localPlayers,
+      playersVisitante: visitPlayers,
+      playerMeta,
+      goalsByPlayerSeason
+    };
+
+    scorerState[matchId] = state;
+    return state;
+  };
+  // -----------------------------
+  // Goleadores: helpers de UI
+  // -----------------------------
+  const renderSideScorersList = (sectionEl, side, state) => {
+    if (!sectionEl || !state) return;
+    const listEl = sectionEl.querySelector(`.scorers-list[data-side="${side}"]`);
+    if (!listEl) return;
+
+    const arr = state[side] || [];
+    if (!arr.length) {
+      listEl.innerHTML = `<li class="scorer-empty">Ningún goleador registrado.</li>`;
+      return;
+    }
+
+    listEl.innerHTML = arr.map(p => `
+      <li class="scorer-item" data-player-id="${p.player_id}">
+        <span class="scorer-name">${p.name}</span>
+        <div class="scorer-controls">
+          <button type="button" class="btn-minus-goal" data-player-id="${p.player_id}" data-side="${side}">−</button>
+          <span class="scorer-goals">${p.goals}</span>
+          <button type="button" class="btn-plus-goal" data-player-id="${p.player_id}" data-side="${side}">＋</button>
+          <button type="button" class="btn-remove-scorer" data-player-id="${p.player_id}" data-side="${side}">✕</button>
+        </div>
+      </li>
+    `).join('');
+  };
+
+  const fillScorersSelects = (sectionEl, state) => {
+    if (!sectionEl || !state) return;
+
+    const fill = (side, players) => {
+      const sel = sectionEl.querySelector(`select[data-side="${side}"]`);
+      if (!sel) return;
+      sel.innerHTML = `
+        <option value="">Añadir goleador…</option>
+        ${players.map(p => `
+          <option value="${p.player_id}">
+            ${p.name} (${p.totalGoals} gol${p.totalGoals === 1 ? '' : 'es'})
+          </option>
+        `).join('')}
+      `;
+    };
+
+    fill('local', state.playersLocal || []);
+    fill('visitante', state.playersVisitante || []);
+  };
+
+  const addGoalToState = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = state[side] || (state[side] = []);
+    const pid = Number(playerId);
+    let item = arr.find(x => x.player_id === pid);
+    if (!item) {
+      const meta = state.playerMeta[pid] || { name: `Jugador ${pid}` };
+      item = { player_id: pid, name: meta.name, goals: 0 };
+      arr.push(item);
+    }
+    item.goals += 1;
+    arr.sort((a, b) =>
+      (b.goals - a.goals) ||
+      a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+    );
+  };
+
+  const changeGoalCount = (matchId, side, playerId, delta) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = state[side] || (state[side] = []);
+    const pid = Number(playerId);
+    const idx = arr.findIndex(x => x.player_id === pid);
+    if (idx === -1) return;
+    arr[idx].goals += delta;
+    if (arr[idx].goals <= 0) {
+      arr.splice(idx, 1);
+    } else {
+      arr.sort((a, b) =>
+        (b.goals - a.goals) ||
+        a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+      );
+    }
+  };
+
+  const removeScorer = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = state[side] || (state[side] = []);
+    const pid = Number(playerId);
+    const idx = arr.findIndex(x => x.player_id === pid);
+    if (idx !== -1) arr.splice(idx, 1);
+  };
+
+  const saveScorersToSupabase = async (matchId) => {
+    const state = scorerState[matchId];
+    if (!state) return { ok: false, msg: 'No hay datos de goleadores' };
+
+    const supa = await getSupa();
+    if (!supa) return { ok: false, msg: 'Supabase no configurado' };
+
+    const season = getActiveSeasonSafe();
+    if (!season) return { ok: false, msg: 'Temporada activa no definida' };
+
+    const meta = state.meta;
+    const localTeamId = meta.local_team_id;
+    const visitTeamId = meta.visitante_team_id;
+
+    if (!localTeamId || !visitTeamId) {
+      return { ok: false, msg: 'Faltan league_team_id en el partido' };
+    }
+
+    // 1) borrar eventos de gol existentes del partido
+    const { error: errDel } = await supa
+      .from('goal_events')
+      .delete()
+      .eq('match_id', matchId)
+      .eq('event_type', 'goal');
+
+    if (errDel) {
+      console.error('Error borrando goal_events:', errDel);
+      return { ok: false, msg: 'No se pudieron borrar los eventos antiguos' };
+    }
+
+    // 2) preparar nuevos goal_events (uno por gol)
+    const rows = [];
+
+    const pushSide = (sideName, leagueTeamId) => {
+      (state[sideName] || []).forEach(p => {
+        for (let i = 0; i < p.goals; i++) {
+          rows.push({
+            match_id: matchId,
+            league_team_id: leagueTeamId,
+            player_id: p.player_id,
+            minute: null,
+            event_type: 'goal'
+          });
+        }
+      });
+    };
+
+    pushSide('local', localTeamId);
+    pushSide('visitante', visitTeamId);
+
+    if (rows.length) {
+      const { error: errIns } = await supa
+        .from('goal_events')
+        .insert(rows);
+
+      if (errIns) {
+        console.error('Error insertando goal_events:', errIns);
+        return { ok: false, msg: 'No se pudieron guardar los goles del partido' };
+      }
+    }
+
+    // 3) recomputar totales de temporada de los jugadores que tocan y upsert en goleadores
+    const playerIds = new Set();
+    (state.local || []).forEach(p => playerIds.add(p.player_id));
+    (state.visitante || []).forEach(p => playerIds.add(p.player_id));
+    const playerIdList = Array.from(playerIds);
+
+    if (playerIdList.length) {
+      const { data: evs, error: errEvs } = await supa
+        .from('goal_events')
+        .select(`
+          player_id,
+          event_type,
+          match:matches(season)
+        `)
+        .eq('event_type', 'goal')
+        .in('player_id', playerIdList)
+        .eq('match.season', season);
+
+      if (errEvs) {
+        console.error('Error recalculando totales goleadores:', errEvs);
+      } else {
+        const totals = {};
+        (evs || []).forEach(ev => {
+          const pid = ev.player_id;
+          if (!pid) return;
+          totals[pid] = (totals[pid] || 0) + 1;
+        });
+
+        const upserts = [];
+
+        playerIdList.forEach(pid => {
+          const metaP = state.playerMeta[pid] || { name: `Jugador ${pid}`, clubName: '' };
+          const goles = totals[pid] || 0;
+          upserts.push({
+            season,
+            player_id: pid,
+            jugador: metaP.name,
+            club: metaP.clubName,
+            manager: '', // si quieres, aquí podemos meter el manager de league_teams
+            goles
+          });
+        });
+
+        if (upserts.length) {
+          const { error: errUp } = await supa
+            .from('goleadores')
+            // asumiendo índice único en (season, player_id)
+            .upsert(upserts, { onConflict: 'season,player_id' });
+
+          if (errUp) {
+            console.error('Error upsert goleadores:', errUp);
+          }
+        }
+      }
+    }
+
+    return { ok: true, msg: 'Goleadores guardados correctamente' };
+  };
+
+  const initScorersEditor = async (matchId, meta) => {
+    if (!hasSupabase || !matchId || !meta) return;
+    if (!bodyEl) return;
+
+    const section = bodyEl.querySelector('.scorers-editor');
+    if (!section) return;
+
+    const statusEl = section.querySelector('.scorers-status');
+    const saveBtn  = section.querySelector('.btn-save-scorers');
+
+    if (statusEl) statusEl.textContent = 'Cargando goleadores...';
+
+    const state = await loadScorerStateForMatch(meta);
+    if (!state) {
+      if (statusEl) statusEl.textContent = 'No se pudo cargar el editor de goleadores.';
+      return;
+    }
+
+    fillScorersSelects(section, state);
+    renderSideScorersList(section, 'local', state);
+    renderSideScorersList(section, 'visitante', state);
+
+    if (statusEl) statusEl.textContent = '';
+
+    // Botones + (añadir desde select)
+    section.querySelectorAll('.btn-add-goal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const side = btn.getAttribute('data-side');
+        const sel = section.querySelector(`select[data-side="${side}"]`);
+        if (!sel) return;
+        const value = sel.value;
+        if (!value) return;
+        addGoalToState(matchId, side, value);
+        renderSideScorersList(section, side, scorerState[matchId]);
+      });
+    });
+
+    // Delegación en listas para + / - / eliminar
+    section.addEventListener('click', (e) => {
+      const target = e.target;
+      const matchState = scorerState[matchId];
+      if (!matchState) return;
+
+      const btnPlus  = target.closest && target.closest('.btn-plus-goal');
+      const btnMinus = target.closest && target.closest('.btn-minus-goal');
+      const btnRem   = target.closest && target.closest('.btn-remove-scorer');
+
+      if (btnPlus || btnMinus || btnRem) {
+        e.preventDefault();
+        const side = target.getAttribute('data-side') ||
+          (target.closest('.scorers-col') && target.closest('.scorers-col').getAttribute('data-side'));
+        const pid  = target.getAttribute('data-player-id');
+        if (!side || !pid) return;
+
+        if (btnPlus) {
+          changeGoalCount(matchId, side, pid, +1);
+        } else if (btnMinus) {
+          changeGoalCount(matchId, side, pid, -1);
+        } else if (btnRem) {
+          removeScorer(matchId, side, pid);
+        }
+
+        renderSideScorersList(section, 'local', matchState);
+        renderSideScorersList(section, 'visitante', matchState);
+      }
+    });
+
+    // Guardar goleadores
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        if (statusEl) statusEl.textContent = 'Guardando goleadores...';
+        saveBtn.disabled = true;
+        try {
+          const res = await saveScorersToSupabase(matchId);
+          if (statusEl) statusEl.textContent = res.msg || '';
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    }
+  };
 
   // -----------------------------
   // Render de tabla de estadísticas + cabecera
@@ -350,6 +875,48 @@
       `;
     }
 
+       const matchId = meta?.id || '';
+
+    const scorersEditorHtml =
+      (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
+        ? `
+      <hr class="stats-divider" />
+      <section class="scorers-editor" data-match-id="${matchId}">
+        <h3>Goleadores del partido</h3>
+        <p class="hint">
+          Selecciona los goleadores de cada equipo y pulsa <strong>Guardar goleadores</strong>
+          para actualizar el registro de goles.
+        </p>
+        <div class="scorers-columns">
+          <div class="scorers-col" data-side="local">
+            <h4>${localName}</h4>
+            <ul class="scorers-list" data-role="list" data-side="local"></ul>
+            <div class="scorers-add">
+              <select data-role="select" data-side="local">
+                <option value="">Añadir goleador…</option>
+              </select>
+              <button type="button" class="btn-add-goal" data-side="local">＋</button>
+            </div>
+          </div>
+          <div class="scorers-col" data-side="visitante">
+            <h4>${visitName}</h4>
+            <ul class="scorers-list" data-role="list" data-side="visitante"></ul>
+            <div class="scorers-add">
+              <select data-role="select" data-side="visitante">
+                <option value="">Añadir goleador…</option>
+              </select>
+              <button type="button" class="btn-add-goal" data-side="visitante">＋</button>
+            </div>
+          </div>
+        </div>
+        <div class="scorers-actions">
+          <button type="button" class="btn-save-scorers">Guardar goleadores</button>
+          <span class="scorers-status" aria-live="polite"></span>
+        </div>
+      </section>
+      `
+        : '';
+
     return `
       <div class="stats-header">
         <div class="stats-teams">
@@ -361,6 +928,7 @@
       </div>
       ${summaryHtml}
       ${tableHtml}
+      ${scorersEditorHtml}
     `;
   };
 
@@ -633,7 +1201,14 @@
     if (titleEl && meta) {
       titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
     }
+
+    // 👇 Inicializar editor de goleadores (async, no bloquea el modal)
+    if (meta && meta.id) {
+      void initScorersEditor(meta.id, meta);
+    }
+
     openModal();
+
   });
 
 
