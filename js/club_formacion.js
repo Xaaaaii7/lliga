@@ -6,7 +6,7 @@
   if (!CLUB || !root) return;
 
   const AppUtils = window.AppUtils || {};
-  const { getSupabaseClient, getSupabaseConfig } = AppUtils;
+  const { getSupabaseClient, getSupabaseConfig } = AppUtils || {};
 
   if (typeof getSupabaseClient !== "function") {
     root.innerHTML = `
@@ -20,90 +20,58 @@
   // ==========================
   //  PLANTILLAS DE SISTEMAS
   // ==========================
-  // Cada sistema tiene 11 slots con: index, line (POR/DEF/MC/DEL), x%, y%
   const FORMATION_TEMPLATES = {
     "4-4-2": [
-      // Portero
       { index: 0, line: "POR", x: 50, y: 90 },
-
-      // Defensas (4)
       { index: 1, line: "DEF", x: 20, y: 72 },
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-
-      // Mediocampo (4)
-      { index: 5, line: "MC", x: 25, y: 55 },
-      { index: 6, line: "MC", x: 45, y: 50 },
-      { index: 7, line: "MC", x: 65, y: 50 },
-      { index: 8, line: "MC", x: 75, y: 55 },
-
-      // Delanteros (2)
-      { index: 9,  line: "DEL", x: 40, y: 30 },
-      { index: 10, line: "DEL", x: 60, y: 30 }
+      { index: 5, line: "MC",  x: 25, y: 55 },
+      { index: 6, line: "MC",  x: 45, y: 50 },
+      { index: 7, line: "MC",  x: 65, y: 50 },
+      { index: 8, line: "MC",  x: 75, y: 55 },
+      { index: 9, line: "DEL", x: 40, y: 30 },
+      { index: 10,line: "DEL", x: 60, y: 30 }
     ],
-
     "4-3-3": [
-      // Portero
       { index: 0, line: "POR", x: 50, y: 90 },
-
-      // Defensas (4)
       { index: 1, line: "DEF", x: 20, y: 72 },
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-
-      // Mediocampo (3)
-      { index: 5, line: "MC", x: 30, y: 55 },
-      { index: 6, line: "MC", x: 50, y: 50 },
-      { index: 7, line: "MC", x: 70, y: 55 },
-
-      // Delanteros (3)
-      { index: 8,  line: "DEL", x: 25, y: 30 },
-      { index: 9,  line: "DEL", x: 50, y: 25 },
-      { index: 10, line: "DEL", x: 75, y: 30 }
+      { index: 5, line: "MC",  x: 30, y: 55 },
+      { index: 6, line: "MC",  x: 50, y: 50 },
+      { index: 7, line: "MC",  x: 70, y: 55 },
+      { index: 8, line: "DEL", x: 25, y: 30 },
+      { index: 9, line: "DEL", x: 50, y: 25 },
+      { index: 10,line: "DEL", x: 75, y: 30 }
     ],
-
     "4-5-1": [
-      // Portero
       { index: 0, line: "POR", x: 50, y: 90 },
-
-      // Defensas (4)
       { index: 1, line: "DEF", x: 20, y: 72 },
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-
-      // Mediocampo (5)
-      { index: 5, line: "MC", x: 20, y: 55 },
-      { index: 6, line: "MC", x: 35, y: 50 },
-      { index: 7, line: "MC", x: 50, y: 45 },
-      { index: 8, line: "MC", x: 65, y: 50 },
-      { index: 9, line: "MC", x: 80, y: 55 },
-
-      // Delantero (1)
-      { index: 10, line: "DEL", x: 50, y: 25 }
+      { index: 5, line: "MC",  x: 20, y: 55 },
+      { index: 6, line: "MC",  x: 35, y: 50 },
+      { index: 7, line: "MC",  x: 50, y: 45 },
+      { index: 8, line: "MC",  x: 65, y: 50 },
+      { index: 9, line: "MC",  x: 80, y: 55 },
+      { index: 10,line: "DEL", x: 50, y: 25 }
     ],
-
     "3-5-2": [
-      // Portero
       { index: 0, line: "POR", x: 50, y: 90 },
-
-      // Defensas (3)
       { index: 1, line: "DEF", x: 30, y: 75 },
       { index: 2, line: "DEF", x: 50, y: 72 },
       { index: 3, line: "DEF", x: 70, y: 75 },
-
-      // Mediocampo (5)
-      { index: 4, line: "MC", x: 20, y: 55 },
-      { index: 5, line: "MC", x: 35, y: 50 },
-      { index: 6, line: "MC", x: 50, y: 45 },
-      { index: 7, line: "MC", x: 65, y: 50 },
-      { index: 8, line: "MC", x: 80, y: 55 },
-
-      // Delanteros (2)
-      { index: 9,  line: "DEL", x: 40, y: 30 },
-      { index: 10, line: "DEL", x: 60, y: 30 }
+      { index: 4, line: "MC",  x: 20, y: 55 },
+      { index: 5, line: "MC",  x: 35, y: 50 },
+      { index: 6, line: "MC",  x: 50, y: 45 },
+      { index: 7, line: "MC",  x: 65, y: 50 },
+      { index: 8, line: "MC",  x: 80, y: 55 },
+      { index: 9, line: "DEL", x: 40, y: 30 },
+      { index: 10,line: "DEL", x: 60, y: 30 }
     ]
   };
 
@@ -136,6 +104,24 @@
     return row?.club_id || null;
   }
 
+  // Clasificación de posición -> línea
+  function groupFromPosition(pos) {
+    const p = (pos || "").toLowerCase();
+    if (p.includes("goalkeeper") || p.includes("portero") || p === "gk") return "POR";
+    if (
+      p.includes("defence") || p.includes("back") ||
+      p.includes("centre-back") || p.includes("defensa") ||
+      p === "cb" || p === "lb" || p === "rb"
+    ) return "DEF";
+    if (p.includes("midfield") || p.includes("medio") || p.includes("mid")) return "MC";
+    if (
+      p.includes("offence") || p.includes("forward") ||
+      p.includes("wing") || p.includes("striker") ||
+      p.includes("delantero")
+    ) return "DEL";
+    return null; // otros
+  }
+
   async function loadSquadForClub(clubId) {
     if (!clubId) return [];
 
@@ -163,7 +149,12 @@
     for (const row of data || []) {
       const p = row.player;
       if (!p || !p.id) continue;
-      if (!map.has(p.id)) map.set(p.id, p);
+      if (!map.has(p.id)) {
+        map.set(p.id, {
+          ...p,
+          line: groupFromPosition(p.position)
+        });
+      }
     }
     return Array.from(map.values());
   }
@@ -207,6 +198,72 @@
     };
   }
 
+  async function saveFormationToDb() {
+    if (!state.clubId) return;
+
+    const system = state.system || DEFAULT_SYSTEM;
+    const template = FORMATION_TEMPLATES[system];
+    if (!template) {
+      alert("Sistema de juego no válido.");
+      return;
+    }
+
+    // 1) Upsert de formations
+    let formationId = state.formationId || null;
+
+    if (!formationId) {
+      let ins = supabase.from("formations").insert({
+        club_id: state.clubId,
+        season: season,
+        system: system
+      }).select("id").single();
+
+      const { data, error } = await ins;
+      if (error) {
+        console.error("Error insert formations:", error);
+        alert("No se pudo guardar la formación (insert).");
+        return;
+      }
+      formationId = data.id;
+    } else {
+      let upd = supabase.from("formations").update({
+        system: system,
+        season: season
+      }).eq("id", formationId).select("id").single();
+
+      const { data, error } = await upd;
+      if (error) {
+        console.error("Error update formations:", error);
+        alert("No se pudo guardar la formación (update).");
+        return;
+      }
+      formationId = data.id;
+    }
+
+    // 2) Upsert de slots
+    const rows = template.map(slot => ({
+      formation_id: formationId,
+      slot_index: slot.index,
+      player_id: state.slots.get(slot.index) || null
+    }));
+
+    const { error: slotsError } = await supabase
+      .from("formation_slots")
+      .upsert(rows, { onConflict: "formation_id,slot_index" });
+
+    if (slotsError) {
+      console.error("Error upsert formation_slots:", slotsError);
+      alert("La formación se guardó parcialmente (error en slots).");
+      return;
+    }
+
+    // OK
+    state.formationId = formationId;
+    state.editMode = false;
+    alert("Formación guardada.");
+    renderFormationView();
+  }
+
   // ==========================
   //  ESTADO EN MEMORIA
   // ==========================
@@ -226,7 +283,7 @@
   }
 
   // ==========================
-  //  RENDER UI (modo lectura)
+  //  RENDER: VISTA NORMAL
   // ==========================
   function renderFormationView() {
     const system = state.system || DEFAULT_SYSTEM;
@@ -235,7 +292,7 @@
     const slotsHtml = template.map(slot => {
       const playerId = state.slots.get(slot.index);
       const name = findPlayerName(playerId) || "";
-      const label = name || slot.line; // si no hay jugador, se ve POR/DEF/MC/DEL
+      const label = name || slot.line;
 
       return `
         <button
@@ -247,10 +304,6 @@
         </button>
       `;
     }).join("");
-
-    const systemsOptions = Object.keys(FORMATION_TEMPLATES)
-      .map(sys => `<option value="${sys}" ${sys === system ? "selected" : ""}>${sys}</option>`)
-      .join("");
 
     root.innerHTML = `
       <div class="club-box" style="grid-column:span 12">
@@ -275,7 +328,7 @@
             </div>
             <div class="club-formation-meta-row">
               <span class="club-formation-hint">
-                Vista actual basada en la plantilla guardada para este equipo.
+                Vista de la formación actual del equipo.
               </span>
             </div>
           </div>
@@ -283,16 +336,195 @@
       </div>
     `;
 
-    // De momento sólo conectamos el botón de editar (modo lectura)
     const editBtn = document.getElementById("formation-edit-btn");
     const fieldEl = document.getElementById("formation-field");
     if (editBtn && fieldEl) {
       editBtn.addEventListener("click", () => {
-        // Aquí en el siguiente paso activaremos el modo edición
-        // (select de sistema + asignar jugadores + guardar)
-        fieldEl.classList.add("club-formation-edit");
-        // Por ahora solo cambiamos el texto del botón para que veas que engancha
-        editBtn.textContent = "Modo edición (pendiente implementar guardar)";
+        state.editMode = true;
+        renderFormationEdit();
+      });
+    }
+  }
+
+  // ==========================
+  //  RENDER: MODO EDICIÓN
+  // ==========================
+  function renderFormationEdit() {
+    const system = state.system || DEFAULT_SYSTEM;
+    const template = FORMATION_TEMPLATES[system] || FORMATION_TEMPLATES[DEFAULT_SYSTEM];
+
+    // Campo (igual que en vista normal)
+    const slotsHtml = template.map(slot => {
+      const playerId = state.slots.get(slot.index);
+      const name = findPlayerName(playerId) || "";
+      const label = name || slot.line;
+
+      return `
+        <button
+          class="club-formation-slot"
+          data-slot="${slot.index}"
+          style="top:${slot.y}%;left:${slot.x}%"
+        >
+          <div>${label}</div>
+        </button>
+      `;
+    }).join("");
+
+    // Options de sistemas
+    const systemsOptions = Object.keys(FORMATION_TEMPLATES)
+      .map(sys => `<option value="${sys}" ${sys === system ? "selected" : ""}>${sys}</option>`)
+      .join("");
+
+    // Preparamos selects por línea (POR / DEF / MC / DEL)
+    const groupsOrder = ["POR", "DEF", "MC", "DEL"];
+    const groupLabels = {
+      POR: "Portero",
+      DEF: "Defensas",
+      MC:  "Mediocampo",
+      DEL: "Delanteros"
+    };
+
+    const editorGroupsHtml = groupsOrder.map(line => {
+      // slots de esa línea
+      const lineSlots = template.filter(s => s.line === line);
+      if (!lineSlots.length) return "";
+
+      // jugadores de esa línea; si alguno no tiene línea, lo dejamos disponible en todos
+      const eligiblePlayers = state.squad.filter(p => !p.line || p.line === line);
+
+      const slotsHtml = lineSlots.map(slot => {
+        const currentId = state.slots.get(slot.index) || "";
+        const options = [
+          `<option value="">(vacío)</option>`,
+          ...eligiblePlayers.map(p => `
+            <option value="${p.id}" ${String(p.id) === String(currentId) ? "selected" : ""}>
+              ${p.name}
+            </option>
+          `)
+        ].join("");
+
+        return `
+          <div class="club-formation-editor-slot">
+            <span>${slot.line}</span>
+            <select data-slot-index="${slot.index}">
+              ${options}
+            </select>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="club-formation-editor-group">
+          <div class="club-formation-editor-group-title">${groupLabels[line] || line}</div>
+          ${slotsHtml}
+        </div>
+      `;
+    }).join("");
+
+    root.innerHTML = `
+      <div class="club-box" style="grid-column:span 12">
+        <h3>Formación</h3>
+
+        <div class="club-formation-wrapper">
+          <div class="club-formation-field club-formation-edit" id="formation-field">
+            <img src="img/campo-vertical.png" alt="Campo" class="club-formation-bg">
+            ${slotsHtml}
+          </div>
+
+          <div class="club-formation-editor">
+            <div>
+              <label for="formation-system-select">Sistema de juego</label>
+              <select id="formation-system-select">
+                ${systemsOptions}
+              </select>
+            </div>
+
+            <div class="club-formation-editor-groups">
+              ${editorGroupsHtml}
+            </div>
+
+            <div class="club-formation-actions">
+              <button type="button" id="formation-cancel-btn">Cancelar</button>
+              <button type="button" id="formation-save-btn">Guardar</button>
+            </div>
+
+            <p class="club-formation-hint">
+              En móvil: selecciona el sistema arriba y asigna jugadores en los desplegables. El campo muestra una vista previa.
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Eventos: cambio de sistema
+    const systemSelect = document.getElementById("formation-system-select");
+    if (systemSelect) {
+      systemSelect.addEventListener("change", () => {
+        const newSystem = systemSelect.value;
+        if (!FORMATION_TEMPLATES[newSystem]) return;
+        state.system = newSystem;
+        // al cambiar sistema, reseteamos asignaciones (más simple)
+        state.slots = new Map();
+        renderFormationEdit();
+      });
+    }
+
+    // Eventos: cambio de jugador en slot
+    root.querySelectorAll("select[data-slot-index]").forEach(sel => {
+      sel.addEventListener("change", () => {
+        const slotIndex = Number(sel.getAttribute("data-slot-index"));
+        const val = sel.value;
+        if (!Number.isFinite(slotIndex)) return;
+        if (!val) {
+          state.slots.delete(slotIndex);
+        } else {
+          const playerId = Number(val);
+          state.slots.set(slotIndex, playerId);
+        }
+        // solo actualizamos la vista de campo, para no perder focus de selects
+        const fieldEl = document.getElementById("formation-field");
+        if (fieldEl) {
+          const system = state.system || DEFAULT_SYSTEM;
+          const template = FORMATION_TEMPLATES[system] || FORMATION_TEMPLATES[DEFAULT_SYSTEM];
+          const newSlotsHtml = template.map(slot => {
+            const playerId = state.slots.get(slot.index);
+            const name = findPlayerName(playerId) || "";
+            const label = name || slot.line;
+            return `
+              <button
+                class="club-formation-slot"
+                data-slot="${slot.index}"
+                style="top:${slot.y}%;left:${slot.x}%"
+              >
+                <div>${label}</div>
+              </button>
+            `;
+          }).join("");
+          fieldEl.innerHTML = `
+            <img src="img/campo-vertical.png" alt="Campo" class="club-formation-bg">
+            ${newSlotsHtml}
+          `;
+        }
+      });
+    });
+
+    // Botones Guardar / Cancelar
+    const cancelBtn = document.getElementById("formation-cancel-btn");
+    const saveBtn   = document.getElementById("formation-save-btn");
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        state.editMode = false;
+        renderFormationView();
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        saveFormationToDb().catch(err => {
+          console.error("Error guardando formación:", err);
+          alert("Error inesperado guardando la formación.");
+        });
       });
     }
   }
@@ -327,16 +559,15 @@
     ]);
 
     state.clubId = clubId;
-    state.squad = squad;
+    state.squad  = squad;
 
     if (formation) {
-      state.system = formation.system || DEFAULT_SYSTEM;
-      state.slots = formation.slots || new Map();
+      state.system      = formation.system || DEFAULT_SYSTEM;
+      state.slots       = formation.slots || new Map();
       state.formationId = formation.id;
     } else {
-      // Si no hay nada en BD, arrancamos con sistema por defecto
-      state.system = DEFAULT_SYSTEM;
-      state.slots = new Map();
+      state.system      = DEFAULT_SYSTEM;
+      state.slots       = new Map();
       state.formationId = null;
     }
 
