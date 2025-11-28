@@ -391,3 +391,121 @@
   font-size: 0.8rem;
   color: var(--muted, #7c8da0);
 }
+/* ===== Formación (campo + editor) ===== */
+
+.club-formation-wrapper {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.club-formation-field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+}
+
+.club-formation-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.club-formation-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  min-width: 56px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  cursor: default;
+  pointer-events: none; /* en modo lectura */
+}
+
+.club-formation-edit .club-formation-slot {
+  cursor: pointer;
+  pointer-events: auto; /* en modo edición podríamos usar click si queremos */
+}
+
+.club-formation-meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.club-formation-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.club-formation-system {
+  font-weight: 600;
+}
+
+.club-formation-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.club-formation-actions button {
+  flex: 1;
+}
+
+.club-formation-hint {
+  font-size: 0.8rem;
+  color: var(--muted, #7c8da0);
+}
+
+/* Editor debajo del campo */
+.club-formation-editor {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.club-formation-editor label {
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.club-formation-editor select {
+  width: 100%;
+}
+
+.club-formation-editor-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.club-formation-editor-group-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.club-formation-editor-slot {
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.club-formation-editor-slot span {
+  display: inline-block;
+  min-width: 60px;
+}
