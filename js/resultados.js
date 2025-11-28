@@ -1075,13 +1075,12 @@
         ? `<span class="result-chip ${chipClass}">${chipText}</span>`
         : '';
 
-      const fechaHora = (p.fecha || j.fecha || p.hora)
-        ? `<div class="fecha-hora">
-             ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
-             ${p.hora ? \` · \${p.hora}\` : ''}
-           </div>`
-        : '';
-
+    const fechaHora = (p.fecha || j.fecha || p.hora)
+      ? `<div class="fecha-hora">
+           ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
+           ${p.hora ? ` · ${p.hora}` : ''}
+         </div>`
+      : '';
       const streamHTML = p.stream
         ? `<div class="result-stream">
              <a href="${p.stream}" target="_blank" rel="noopener noreferrer">
