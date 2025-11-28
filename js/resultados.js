@@ -732,23 +732,40 @@
     const section = bodyEl.querySelector('.scorers-editor');
     if (!section) return;
 
-    const statusEl = section.querySelector('.scorers-status');
-    const saveBtn  = section.querySelector('.btn-save-scorers');
+    const statusEl   = section.querySelector('.scorers-status');
+    const saveBtn    = section.querySelector('.btn-save-scorers');
+    const editPanel  = section.querySelector('.scorers-edit-panel');
+    const toggleBtn  = section.querySelector('.btn-toggle-scorers-edit');
 
     if (statusEl) statusEl.textContent = 'Cargando goleadores...';
 
-    const state = await loadScorerStateForMatch(meta);
+    const state = await loadScorersStateSafe(matchId, meta);
     if (!state) {
       if (statusEl) statusEl.textContent = 'No se pudo cargar el editor de goleadores.';
       return;
     }
 
+    // Rellenar selects, listas de edición y resumen "bonito"
     fillScorersSelects(section, state);
     renderSideScorersList(section, 'local', state);
     renderSideScorersList(section, 'visitante', state);
     renderScorersSummary(section, state);
 
     if (statusEl) statusEl.textContent = '';
+
+    // Aseguramos que el panel de edición empieza oculto
+    if (editPanel) {
+      editPanel.hidden = true;
+    }
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Editar goleadores';
+      toggleBtn.addEventListener('click', () => {
+        if (!editPanel) return;
+        const isHidden = editPanel.hidden;
+        editPanel.hidden = !isHidden;
+        toggleBtn.textContent = isHidden ? 'Cerrar edición' : 'Editar goleadores';
+      });
+    }
 
     // Botones + (añadir desde select)
     section.querySelectorAll('.btn-add-goal').forEach(btn => {
@@ -804,11 +821,22 @@
         try {
           const res = await saveScorersToSupabase(matchId);
           if (statusEl) statusEl.textContent = res.msg || '';
+          const st = scorerState[matchId];
+          renderScorersSummary(section, st);
+          if (editPanel && toggleBtn) {
+            editPanel.hidden = true;
+            toggleBtn.textContent = 'Editar goleadores';
+          }
         } finally {
           saveBtn.disabled = false;
         }
       });
     }
+  };
+
+  // Wrapper para mantener compatibilidad si necesitas
+  const loadScorersStateSafe = (matchId, meta) => {
+    return loadScorerStateForMatch(meta);
   };
 
   // -----------------------------
@@ -925,13 +953,8 @@
       <hr class="stats-divider" />
       <section class="scorers-editor" data-match-id="${matchId}">
         <h3>Goleadores del partido</h3>
-        <p class="hint">
-          Selecciona los goleadores de cada equipo y pulsa <strong>Guardar goleadores</strong>
-          para actualizar el registro de goles.
-        </p>
 
         <div class="scorers-summary-block">
-          <h4>Resumen de goles</h4>
           <div class="scorers-summary-columns">
             <div class="scorers-summary-side">
               <h5>${localName}</h5>
@@ -944,31 +967,42 @@
           </div>
         </div>
 
-        <div class="scorers-columns">
-          <div class="scorers-col" data-side="local">
-            <h4>${localName}</h4>
-            <ul class="scorers-list" data-role="list" data-side="local"></ul>
-            <div class="scorers-add">
-              <select data-role="select" data-side="local">
-                <option value="">Añadir goleador…</option>
-              </select>
-              <button type="button" class="btn-add-goal" data-side="local">＋</button>
-            </div>
-          </div>
-          <div class="scorers-col" data-side="visitante">
-            <h4>${visitName}</h4>
-            <ul class="scorers-list" data-role="list" data-side="visitante"></ul>
-            <div class="scorers-add">
-              <select data-role="select" data-side="visitante">
-                <option value="">Añadir goleador…</option>
-              </select>
-              <button type="button" class="btn-add-goal" data-side="visitante">＋</button>
-            </div>
-          </div>
-        </div>
-        <div class="scorers-actions">
-          <button type="button" class="btn-save-scorers">Guardar goleadores</button>
+        <div class="scorers-edit-toggle">
+          <button type="button" class="btn-toggle-scorers-edit">
+            Editar goleadores
+          </button>
           <span class="scorers-status" aria-live="polite"></span>
+        </div>
+
+        <div class="scorers-edit-panel" hidden>
+          <p class="hint small">
+            Usa los selectores para añadir o ajustar los goles de cada jugador.
+          </p>
+          <div class="scorers-columns">
+            <div class="scorers-col" data-side="local">
+              <h4>${localName}</h4>
+              <ul class="scorers-list" data-role="list" data-side="local"></ul>
+              <div class="scorers-add">
+                <select data-role="select" data-side="local">
+                  <option value="">Añadir goleador…</option>
+                </select>
+                <button type="button" class="btn-add-goal" data-side="local">＋</button>
+              </div>
+            </div>
+            <div class="scorers-col" data-side="visitante">
+              <h4>${visitName}</h4>
+              <ul class="scorers-list" data-role="list" data-side="visitante"></ul>
+              <div class="scorers-add">
+                <select data-role="select" data-side="visitante">
+                  <option value="">Añadir goleador…</option>
+                </select>
+                <button type="button" class="btn-add-goal" data-side="visitante">＋</button>
+              </div>
+            </div>
+          </div>
+          <div class="scorers-actions">
+            <button type="button" class="btn-save-scorers">Guardar goleadores</button>
+          </div>
         </div>
       </section>
       `
@@ -1044,7 +1078,7 @@
       const fechaHora = (p.fecha || j.fecha || p.hora)
         ? `<div class="fecha-hora">
              ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
-             ${p.hora ? ` · ${p.hora}` : ''}
+             ${p.hora ? \` · \${p.hora}\` : ''}
            </div>`
         : '';
 
@@ -1159,7 +1193,6 @@
   const uploadMatchImage = async (matchId, file, buttonEl) => {
     try {
       buttonEl.disabled = true;
-      const originalLabel = buttonEl.textContent;
       buttonEl.textContent = 'Subiendo...';
 
       const uploadUrl = await requestUploadUrl(matchId, file);
@@ -1229,7 +1262,6 @@
     }
   });
 
-  // Delegación: click en tarjeta de partido para abrir stats
   // Delegación: click en tarjeta de partido (stats) o botón "Subir imagen"
   root.addEventListener('click', (e) => {
     const target = e.target;
