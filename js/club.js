@@ -25,7 +25,7 @@
   // Helpers Supabase (users)
   // --------------------------
   const AppUtils = window.AppUtils || {};
-  const { getSupabaseClient, loadJSON } = AppUtils;
+  const { getSupabaseClient, loadJSON, getSupabaseConfig } = AppUtils;
   const hasSupabase = typeof getSupabaseClient === "function";
 
   async function getUserRowByNickname(nickname) {
@@ -281,9 +281,118 @@
       ${goleadorHTML}
     </div>
   `;
+  // --------------------------
+  // PLANTILLA desde Supabase
+  // --------------------------
+  async function loadPlantillaFromDb(clubNickname) {
+    if (!hasSupabase || !clubNickname) return null;
+
+    const supabase = await getSupabaseClient();
+    const cfg     = (typeof getSupabaseConfig === "function") ? getSupabaseConfig() : {};
+    const season  = cfg?.season || null;
+
+    // 1) Resolver club_id a partir de league_teams.nickname (y season)
+    let ltQuery = supabase
+      .from("league_teams")
+      .select("club_id, season, nickname")
+      .ilike("nickname", clubNickname)      // case-insensitive
+      .limit(1);
+
+    if (season) ltQuery = ltQuery.eq("season", season);
+
+    const { data: ltRows, error: ltError } = await ltQuery;
+    if (ltError) {
+      console.warn("Supabase league_teams error:", ltError);
+      return null;
+    }
+
+    const lt = ltRows && ltRows[0];
+    if (!lt || !lt.club_id) {
+      console.warn("No se encontró league_team para", clubNickname, "season:", season);
+      return null;
+    }
+
+    const clubId = lt.club_id;
+
+    // 2) Leer memberships + players para ese club_id
+    const baseSelect = `
+      id,
+      season,
+      from_round,
+      to_round,
+      is_current,
+      club:clubs (
+        id,
+        name,
+        short_name,
+        crest_url,
+        country,
+        venue
+      ),
+      player:players (
+        id,
+        name,
+        position,
+        date_of_birth,
+        nationality
+      )
+    `;
+
+    // Preferimos is_current = true; si no hay, tiramos de fallback
+    let membQuery = supabase
+      .from("player_club_memberships")
+      .select(baseSelect)
+      .eq("club_id", clubId)
+      .eq("is_current", true);
+
+    if (season) membQuery = membQuery.eq("season", season);
+
+    let { data: membs, error: membErr } = await membQuery;
+    if (membErr) {
+      console.warn("Supabase memberships error:", membErr);
+      return null;
+    }
+
+    if (!membs || !membs.length) {
+      // Fallback: cualquier membership de ese club en la season
+      let fbQuery = supabase
+        .from("player_club_memberships")
+        .select(baseSelect)
+        .eq("club_id", clubId);
+
+      if (season) fbQuery = fbQuery.eq("season", season);
+
+      const { data: fbData, error: fbErr } = await fbQuery;
+      if (fbErr) {
+        console.warn("Supabase memberships fallback error:", fbErr);
+        return null;
+      }
+      membs = fbData || [];
+    }
+
+    if (!membs.length) {
+      console.warn("Sin memberships para club_id", clubId, "season", season);
+      return null;
+    }
+
+    const club = membs[0].club || null;
+
+    return {
+      club,
+      squad: membs
+        .filter(m => m.player) // por si acaso
+        .map(m => ({
+          id:           m.player.id,
+          name:         m.player.name,
+          position:     m.player.position,
+          dateOfBirth:  m.player.date_of_birth,
+          nationality:  m.player.nationality
+        }))
+    };
+  }
 
   // --------------------------
-  // TAB PLANTILLA (JSON local)
+  // TAB PLANTILLA (Supabase + fallback JSON)
   // --------------------------
   const plantillaEl = document.getElementById("tab-plantilla");
 
@@ -317,7 +426,7 @@
       plantillaEl.innerHTML = `
         <div class="club-box" style="grid-column:span 12">
           <h3>Plantilla</h3>
-          <p class="muted">No hay jugadores en el JSON de plantilla.</p>
+          <p class="muted">No hay jugadores configurados para este club.</p>
         </div>`;
       return;
     }
@@ -353,7 +462,7 @@
             <h4 class="plantilla-group-title">${k} <span class="muted">(${players.length})</span></h4>
             <div class="plantilla-grid">
               ${players.map(pl=>{
-                const age = calcAge(pl.dateOfBirth);
+                const age = calcAge(pl.dateOfBirth || pl.date_of_birth);
                 return `
                   <div class="plantilla-card">
                     <div class="plantilla-card-top">
@@ -374,29 +483,56 @@
     `;
   };
 
-  try {
-    const teamData = await loadJSON(plantillaPath(CLUB)).catch(()=>null);
+  async function loadAndRenderPlantilla() {
+    try {
+      let teamData = null;
 
-    if (!teamData) {
+      // 1) Intentar Supabase
+      try {
+        const plantillaDb = await loadPlantillaFromDb(CLUB);
+        if (plantillaDb && Array.isArray(plantillaDb.squad) && plantillaDb.squad.length) {
+          teamData = {
+            coach: null,              // ahora mismo no lo tenemos en BD
+            squad: plantillaDb.squad  // misma estructura que antes usa renderPlantilla
+          };
+        }
+      } catch (e) {
+        console.warn("Error cargando plantilla desde Supabase:", e);
+      }
+
+      // 2) Fallback al JSON antiguo (por compat)
+      if (!teamData) {
+        const jsonData = await loadJSON(plantillaPath(CLUB)).catch(()=>null);
+        if (jsonData) {
+          teamData = jsonData;
+        }
+      }
+
+      if (!teamData) {
+        plantillaEl.innerHTML = `
+          <div class="club-box" style="grid-column:span 12">
+            <h3>Plantilla</h3>
+            <p class="muted">
+              No hay datos de plantilla ni en BD ni en <code>${plantillaPath(CLUB)}</code>.
+            </p>
+          </div>`;
+        return;
+      }
+
+      renderPlantilla(teamData);
+    } catch (e) {
+      console.error("Error cargando plantilla:", e);
       plantillaEl.innerHTML = `
         <div class="club-box" style="grid-column:span 12">
           <h3>Plantilla</h3>
-          <p class="muted">
-            No se encontró <code>${plantillaPath(CLUB)}</code>.
-            Revisa nombre o ruta del JSON.
-          </p>
+          <p class="muted">Error cargando la plantilla.</p>
         </div>`;
-    } else {
-      renderPlantilla(teamData);
     }
-  } catch (e) {
-    console.error("Error cargando plantilla:", e);
-    plantillaEl.innerHTML = `
-      <div class="club-box" style="grid-column:span 12">
-        <h3>Plantilla</h3>
-        <p class="muted">Error cargando la plantilla.</p>
-      </div>`;
   }
+
+  // Ejecutar carga de plantilla
+  loadAndRenderPlantilla();
+
 
   // --------------------------
   // TAB STATS (usa CoreStats.computeRankingsPorEquipo)
