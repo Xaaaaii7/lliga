@@ -350,20 +350,21 @@
     }
 
     // 1) Sacar membresías de jugadores de ambos clubes en esta temporada
-    const { data: memberships, error: errMem } = await supa
-      .from('player_club_membership')
-      .select(`
-        player_id,
-        club_id,
-        season,
-        from_round,
-        to_round,
-        is_current,
-        player:players(id, name, position),
-        club:clubs(id, name)
-      `)
-      .eq('season', season)
-      .in('club_id', [localClubId, visitClubId]);
+  const { data: memberships, error: errMem } = await supa
+    .from('player_club_memberships')   // 👈 OJO, ahora en plural
+    .select(`
+      player_id,
+      club_id,
+      season,
+      from_round,
+      to_round,
+      is_current,
+      player:players(id, name, position),
+      club:clubs(id, name)
+    `)
+    .eq('season', season)
+    .in('club_id', [localClubId, visitClubId]);
+
 
     if (errMem) {
       console.warn('Error cargando memberships jugadores:', errMem);
