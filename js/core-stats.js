@@ -187,7 +187,12 @@
         visitante: visitName,
         goles_local: isNum(m.home_goals) ? m.home_goals : null,
         goles_visitante: isNum(m.away_goals) ? m.away_goals : null,
-        stream: m.stream_url || ''
+        stream: m.stream_url || '',
+        local_team_id: m.home_league_team_id,
+        visitante_team_id: m.away_league_team_id,
+        local_club_id: (m.home && m.home.club && m.home.club.id) || null,
+        visitante_club_id: (m.away && m.away.club && m.away.club.id) || null,
+        round_id: m.round_id
       };
 
       jornada.partidos.push(partido);
