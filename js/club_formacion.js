@@ -384,42 +384,42 @@
       DEL: "Delanteros"
     };
 
-    const editorGroupsHtml = groupsOrder.map(line => {
-      // slots de esa línea
-      const lineSlots = template.filter(s => s.line === line);
-      if (!lineSlots.length) return "";
+const editorGroupsHtml = groupsOrder.map(line => {
+  const lineSlots = template.filter(s => s.line === line);
+  if (!lineSlots.length) return "";
 
-      // jugadores de esa línea; si alguno no tiene línea, lo dejamos disponible en todos
-      const eligiblePlayers = state.squad.filter(p => !p.line || p.line === line);
+  // 🔥 NUEVO: Todos los jugadores disponibles en todos los slots
+  const eligiblePlayers = state.squad;
 
-      const slotsHtml = lineSlots.map(slot => {
-        const currentId = state.slots.get(slot.index) || "";
-        const options = [
-          `<option value="">(vacío)</option>`,
-          ...eligiblePlayers.map(p => `
-            <option value="${p.id}" ${String(p.id) === String(currentId) ? "selected" : ""}>
-              ${p.name}
-            </option>
-          `)
-        ].join("");
+  const slotsHtml = lineSlots.map(slot => {
+    const currentId = state.slots.get(slot.index) || "";
+    const options = [
+      `<option value="">(vacío)</option>`,
+      ...eligiblePlayers.map(p => `
+        <option value="${p.id}" ${String(p.id) === String(currentId) ? "selected" : ""}>
+          ${p.name}
+        </option>
+      `)
+    ].join("");
 
-        return `
-          <div class="club-formation-editor-slot">
-            <span>${slot.line}</span>
-            <select data-slot-index="${slot.index}">
-              ${options}
-            </select>
-          </div>
-        `;
-      }).join("");
+    return `
+      <div class="club-formation-editor-slot">
+        <span>${slot.line}</span>
+        <select data-slot-index="${slot.index}">
+          ${options}
+        </select>
+      </div>
+    `;
+  }).join("");
 
-      return `
-        <div class="club-formation-editor-group">
-          <div class="club-formation-editor-group-title">${groupLabels[line] || line}</div>
-          ${slotsHtml}
-        </div>
-      `;
-    }).join("");
+  return `
+    <div class="club-formation-editor-group">
+      <div class="club-formation-editor-group-title">${groupLabels[line] || line}</div>
+      ${slotsHtml}
+    </div>
+  `;
+}).join("");
+
 
     root.innerHTML = `
       <div class="club-box" style="grid-column:span 12">
