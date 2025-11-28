@@ -9,7 +9,7 @@
   const titleEl   = document.getElementById('stats-title');
 
   // Helpers comunes
-    const {
+  const {
     loadJSON,
     fmtDate,
     normalizeText,
@@ -43,8 +43,8 @@
   };
 
   // Estado en memoria de goleadores por partido
-  const scorerState = {}; // matchId -> { meta, local:[], visitante:[], playersLocal:[], playersVisitante:[], playerMeta:{} }
-
+  // matchId -> { meta, local:[], visitante:[], playersLocal:[], playersVisitante:[], playerMeta:{}, localManagerNick, visitManagerNick }
+  const scorerState = {};
 
   const norm = normalizeText || (s => String(s || '')
     .toLowerCase()
@@ -53,11 +53,13 @@
     .trim());
   const slug = slugify || (s => norm(s).replace(/\s+/g, '-'));
   const logoFor = logoPath || (name => `img/${slug(name)}.png`);
-    // Config subida de imágenes a S3 (ajusta el endpoint)
+
+  // Config subida de imágenes a S3 (ajusta el endpoint)
   const MATCH_UPLOAD = {
     enabled: true,
     presignEndpoint: 'https://d39ra5ecf4.execute-api.eu-west-1.amazonaws.com/prod/presign-match-upload'
   };
+
   // -----------------------------
   // Helpers modal
   // -----------------------------
@@ -213,7 +215,7 @@
         goles_visitante: isNum(p.goles_visitante) ? p.goles_visitante : null,
         stream: p.stream || '',
 
-        // 👇 campos extra que vienen de CoreStats
+        // campos extra que vienen de CoreStats
         local_team_id: p.local_team_id || null,
         visitante_team_id: p.visitante_team_id || null,
         local_club_id: p.local_club_id || null,
@@ -233,15 +235,12 @@
         visitante: partido.visitante,
         goles_local: partido.goles_local,
         goles_visitante: partido.goles_visitante,
-
-        // 👇 también aquí
         local_team_id: partido.local_team_id,
         visitante_team_id: partido.visitante_team_id,
         local_club_id: partido.local_club_id,
         visitante_club_id: partido.visitante_club_id,
         round_id: partido.round_id
       };
-
     });
 
     jornadasMap.set(numero, jornada);
@@ -284,7 +283,8 @@
   const labelEl = document.getElementById('res-label');
   const prevBtn = document.getElementById('res-prev');
   const nextBtn = document.getElementById('res-next');
-    // -----------------------------
+
+  // -----------------------------
   // Goleadores: carga datos para un partido
   // -----------------------------
   const loadScorerStateForMatch = async (matchMeta) => {
@@ -307,6 +307,10 @@
     let localClubId    = matchMeta.local_club_id;
     let visitClubId    = matchMeta.visitante_club_id;
 
+    // Nicknames (managers) por lado
+    let localManagerNick = '';
+    let visitManagerNick = '';
+
     // Si no hay season o no tenemos league_team_id, no podemos seguir
     if (!season || !localTeamId || !visitTeamId) {
       console.warn('Scorers: faltan season o league_team_id', {
@@ -315,29 +319,32 @@
       return null;
     }
 
-    // Si faltan club_ids, los buscamos en league_teams
-    if (!localClubId || !visitClubId) {
-      const { data: teams, error: errTeams } = await supa
-        .from('league_teams')
-        .select('id, club_id, nickname, display_name')
-        .eq('season', season)
-        .in('id', [localTeamId, visitTeamId]);
+    // Siempre consultamos league_teams para nicknames y club_id
+    const { data: teams, error: errTeams } = await supa
+      .from('league_teams')
+      .select('id, club_id, nickname')
+      .eq('season', season)
+      .in('id', [localTeamId, visitTeamId]);
 
-      if (errTeams) {
-        console.warn('Scorers: error cargando league_teams para deducir club_id', errTeams);
-        return null;
-      }
+    if (errTeams) {
+      console.warn('Scorers: error cargando league_teams', errTeams);
+      return null;
+    }
 
-      if (teams && teams.length) {
-        for (const t of teams) {
-          if (t.id === localTeamId) {
+    if (teams && teams.length) {
+      for (const t of teams) {
+        if (t.id === localTeamId) {
+          if (!localClubId) {
             localClubId = t.club_id;
-            // Opcional: guardamos en meta por si se reutiliza
             matchMeta.local_club_id = localClubId;
-          } else if (t.id === visitTeamId) {
+          }
+          localManagerNick = t.nickname || '';
+        } else if (t.id === visitTeamId) {
+          if (!visitClubId) {
             visitClubId = t.club_id;
             matchMeta.visitante_club_id = visitClubId;
           }
+          visitManagerNick = t.nickname || '';
         }
       }
     }
@@ -350,21 +357,20 @@
     }
 
     // 1) Sacar membresías de jugadores de ambos clubes en esta temporada
-  const { data: memberships, error: errMem } = await supa
-    .from('player_club_memberships')   // 👈 OJO, ahora en plural
-    .select(`
-      player_id,
-      club_id,
-      season,
-      from_round,
-      to_round,
-      is_current,
-      player:players(id, name, position),
-      club:clubs(id, name)
-    `)
-    .eq('season', season)
-    .in('club_id', [localClubId, visitClubId]);
-
+    const { data: memberships, error: errMem } = await supa
+      .from('player_club_memberships')
+      .select(`
+        player_id,
+        club_id,
+        season,
+        from_round,
+        to_round,
+        is_current,
+        player:players(id, name, position),
+        club:clubs(id, name)
+      `)
+      .eq('season', season)
+      .in('club_id', [localClubId, visitClubId]);
 
     if (errMem) {
       console.warn('Error cargando memberships jugadores:', errMem);
@@ -491,7 +497,7 @@
       Object.keys(counts).forEach(pidStr => {
         const pid = Number(pidStr);
         const goals = counts[pidStr];
-        const meta = playerMeta[pid] || { name: `Jugador ${pid}`, clubName: '' };
+        const meta = playerMeta[pid] || { name: `Jugador ${pid}` };
         out.push({
           player_id: pid,
           name: meta.name,
@@ -516,7 +522,9 @@
       playersLocal: localPlayers,
       playersVisitante: visitPlayers,
       playerMeta,
-      goalsByPlayerSeason
+      goalsByPlayerSeason,
+      localManagerNick,
+      visitManagerNick
     };
 
     scorerState[matchId] = state;
@@ -548,6 +556,43 @@
         </div>
       </li>
     `).join('');
+  };
+
+  const renderScorersSummary = (sectionEl, state) => {
+    if (!sectionEl || !state) return;
+
+    const toBalls = (goals) => {
+      const g = Number(goals) || 0;
+      if (g <= 0) return '';
+      if (g === 1) return '⚽';
+      return `⚽ x${g}`;
+    };
+
+    const renderSide = (side) => {
+      const listEl = sectionEl.querySelector(`.scorers-summary-list[data-side="${side}"]`);
+      if (!listEl) return;
+
+      const arr = state[side] || [];
+      if (!arr.length) {
+        listEl.innerHTML = `<li class="scorer-summary-empty">Sin goles registrados.</li>`;
+        return;
+      }
+
+      const managerNick = side === 'local'
+        ? (state.localManagerNick || '')
+        : (state.visitManagerNick || '');
+
+      listEl.innerHTML = arr.map(p => `
+        <li class="scorer-summary-item">
+          <span class="scorer-summary-balls">${toBalls(p.goals)}</span>
+          <span class="scorer-summary-name">${p.name}</span>
+          ${managerNick ? `<span class="scorer-summary-club">(${managerNick})</span>` : ''}
+        </li>
+      `).join('');
+    };
+
+    renderSide('local');
+    renderSide('visitante');
   };
 
   const fillScorersSelects = (sectionEl, state) => {
@@ -615,7 +660,7 @@
     if (idx !== -1) arr.splice(idx, 1);
   };
 
-   const saveScorersToSupabase = async (matchId) => {
+  const saveScorersToSupabase = async (matchId) => {
     const state = scorerState[matchId];
     if (!state) return { ok: false, msg: 'No hay datos de goleadores' };
 
@@ -676,7 +721,7 @@
       }
     }
 
-    // A partir de aquí, tu vista `goleadores` / pichichi se encarga
+    // A partir de aquí, la vista goleadores/pichichi se recalcula sola
     return { ok: true, msg: 'Goleadores guardados correctamente' };
   };
 
@@ -701,6 +746,7 @@
     fillScorersSelects(section, state);
     renderSideScorersList(section, 'local', state);
     renderSideScorersList(section, 'visitante', state);
+    renderScorersSummary(section, state);
 
     if (statusEl) statusEl.textContent = '';
 
@@ -713,7 +759,9 @@
         const value = sel.value;
         if (!value) return;
         addGoalToState(matchId, side, value);
-        renderSideScorersList(section, side, scorerState[matchId]);
+        const st = scorerState[matchId];
+        renderSideScorersList(section, side, st);
+        renderScorersSummary(section, st);
       });
     });
 
@@ -744,6 +792,7 @@
 
         renderSideScorersList(section, 'local', matchState);
         renderSideScorersList(section, 'visitante', matchState);
+        renderScorersSummary(section, matchState);
       }
     });
 
@@ -868,7 +917,7 @@
       `;
     }
 
-       const matchId = meta?.id || '';
+    const matchId = meta?.id || '';
 
     const scorersEditorHtml =
       (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
@@ -880,6 +929,21 @@
           Selecciona los goleadores de cada equipo y pulsa <strong>Guardar goleadores</strong>
           para actualizar el registro de goles.
         </p>
+
+        <div class="scorers-summary-block">
+          <h4>Resumen de goles</h4>
+          <div class="scorers-summary-columns">
+            <div class="scorers-summary-side">
+              <h5>${localName}</h5>
+              <ul class="scorers-summary-list" data-side="local"></ul>
+            </div>
+            <div class="scorers-summary-side">
+              <h5>${visitName}</h5>
+              <ul class="scorers-summary-list" data-side="visitante"></ul>
+            </div>
+          </div>
+        </div>
+
         <div class="scorers-columns">
           <div class="scorers-col" data-side="local">
             <h4>${localName}</h4>
@@ -1057,6 +1121,7 @@
       </section>
     `;
   };
+
   // -----------------------------
   // Subida de imagen del partido -> S3 vía presigned URL
   // -----------------------------
@@ -1137,6 +1202,7 @@
 
     input.click();
   };
+
   // -----------------------------
   // Navegación jornadas
   // -----------------------------
@@ -1195,15 +1261,13 @@
       titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
     }
 
-    // 👇 Inicializar editor de goleadores (async, no bloquea el modal)
+    // Inicializar editor de goleadores (async, no bloquea el modal)
     if (meta && meta.id) {
       void initScorersEditor(meta.id, meta);
     }
 
     openModal();
-
   });
-
 
   // Primera carga: última jornada jugada
   await renderJornada(current);
