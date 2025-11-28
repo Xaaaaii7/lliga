@@ -29,14 +29,27 @@
   <div class="tabs club-tabs">
     <button data-tab="resumen" class="active">Resumen</button>
     <button data-tab="plantilla">Plantilla</button>
+    <button data-tab="formacion">Formación</button>
     <button data-tab="stats">Estadísticas</button>
     <button data-tab="videos">Vídeos</button>
   </div>
 
-  <!-- Paneles -->
-  <section id="tab-resumen" class="tab-panel active"></section>
-  <section id="tab-plantilla" class="tab-panel"></section>
-  <section id="tab-stats" class="tab-panel"></section>
+<!-- Paneles -->
+<section id="tab-resumen" class="tab-panel active"></section>
+<section id="tab-plantilla" class="tab-panel"></section>
+
+<!-- 🔥 Nueva pestaña Formación -->
+<section id="tab-formacion" class="tab-panel"></section>
+
+<section id="tab-stats" class="tab-panel"></section>
+
+<!-- ✅ Pestaña Vídeos con contenedor -->
+<section id="tab-videos" class="tab-panel">
+  <div id="videos-wrap" class="videos-wrap">
+    <div id="videos-msg" style="color:var(--muted)"></div>
+    <div id="playlist-embed"></div>
+  </div>
+</section>
 
   <!-- ✅ Pestaña Vídeos con contenedor -->
   <section id="tab-videos" class="tab-panel">
