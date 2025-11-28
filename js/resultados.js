@@ -284,7 +284,7 @@
   const labelEl = document.getElementById('res-label');
   const prevBtn = document.getElementById('res-prev');
   const nextBtn = document.getElementById('res-next');
-  // -----------------------------
+    // -----------------------------
   // Goleadores: carga datos para un partido
   // -----------------------------
   const loadScorerStateForMatch = async (matchMeta) => {
@@ -298,11 +298,54 @@
 
     const season = getActiveSeasonSafe();
     const round = matchMeta.round_id || matchMeta.jornada || null;
-    const localClubId = matchMeta.local_club_id;
-    const visitClubId = matchMeta.visitante_club_id;
 
-    if (!season || !localClubId || !visitClubId) {
-      console.warn('Scorers: faltan season o club_ids', { season, localClubId, visitClubId });
+    // IDs de equipo en la liga (league_teams.id)
+    const localTeamId  = matchMeta.local_team_id;
+    const visitTeamId  = matchMeta.visitante_team_id;
+
+    // IDs de club (clubs.id) – puede que vengan de CoreStats o no
+    let localClubId    = matchMeta.local_club_id;
+    let visitClubId    = matchMeta.visitante_club_id;
+
+    // Si no hay season o no tenemos league_team_id, no podemos seguir
+    if (!season || !localTeamId || !visitTeamId) {
+      console.warn('Scorers: faltan season o league_team_id', {
+        season, localTeamId, visitTeamId, localClubId, visitClubId, matchMeta
+      });
+      return null;
+    }
+
+    // Si faltan club_ids, los buscamos en league_teams
+    if (!localClubId || !visitClubId) {
+      const { data: teams, error: errTeams } = await supa
+        .from('league_teams')
+        .select('id, club_id, nickname, display_name')
+        .eq('season', season)
+        .in('id', [localTeamId, visitTeamId]);
+
+      if (errTeams) {
+        console.warn('Scorers: error cargando league_teams para deducir club_id', errTeams);
+        return null;
+      }
+
+      if (teams && teams.length) {
+        for (const t of teams) {
+          if (t.id === localTeamId) {
+            localClubId = t.club_id;
+            // Opcional: guardamos en meta por si se reutiliza
+            matchMeta.local_club_id = localClubId;
+          } else if (t.id === visitTeamId) {
+            visitClubId = t.club_id;
+            matchMeta.visitante_club_id = visitClubId;
+          }
+        }
+      }
+    }
+
+    if (!localClubId || !visitClubId) {
+      console.warn('Scorers: no se pudieron resolver club_ids', {
+        season, localTeamId, visitTeamId, localClubId, visitClubId
+      });
       return null;
     }
 
@@ -434,16 +477,16 @@
     (matchEvents || []).forEach(ev => {
       const pid = ev.player_id;
       if (!pid) return;
-      const side = (ev.league_team_id === matchMeta.local_team_id)
+      const side = (ev.league_team_id === localTeamId)
         ? 'local'
-        : (ev.league_team_id === matchMeta.visitante_team_id ? 'visitante' : null);
+        : (ev.league_team_id === visitTeamId ? 'visitante' : null);
       if (!side) return;
       aggSide[side][pid] = (aggSide[side][pid] || 0) + 1;
     });
 
-    const buildSideArr = (side, playersArr) => {
+    const buildSideArr = (side) => {
       const out = [];
-      const counts = aggSide[side];
+      const counts = aggSide[side] || {};
       Object.keys(counts).forEach(pidStr => {
         const pid = Number(pidStr);
         const goals = counts[pidStr];
@@ -454,7 +497,6 @@
           goals
         });
       });
-      // si quieres, podrías ordenar también aquí por goles desc, luego nombre
       out.sort((a, b) =>
         (b.goals - a.goals) ||
         a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
@@ -463,9 +505,13 @@
     };
 
     const state = {
-      meta: matchMeta,
-      local: buildSideArr('local', localPlayers),
-      visitante: buildSideArr('visitante', visitPlayers),
+      meta: {
+        ...matchMeta,
+        local_club_id: localClubId,
+        visitante_club_id: visitClubId
+      },
+      local: buildSideArr('local'),
+      visitante: buildSideArr('visitante'),
       playersLocal: localPlayers,
       playersVisitante: visitPlayers,
       playerMeta,
@@ -475,6 +521,7 @@
     scorerState[matchId] = state;
     return state;
   };
+
   // -----------------------------
   // Goleadores: helpers de UI
   // -----------------------------
