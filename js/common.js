@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (nav && header) {
     // Menú
     const links = [
-      ['index.html','Noticias'],
+      ['noticias.html','Noticias'],
       ['clasificacion.html','Clasificación'],
       ['resultados.html','Resultados'],
       ['jugadores.html','Jugadores'],
