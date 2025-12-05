@@ -171,6 +171,29 @@
 
   let jornadas = [];
   let statsIndex = {};
+  let statsIndexReady = false;
+  let statsIndexPromise = null;
+  
+  const ensureStatsIndex = async () => {
+    if (statsIndexReady) return statsIndex;
+  
+    if (!statsIndexPromise) {
+      statsIndexPromise = CoreStats.getStatsIndex()
+        .then(idx => {
+          statsIndex = idx || {};
+          statsIndexReady = true;
+          return statsIndex;
+        })
+        .catch(e => {
+          console.warn('Error getStatsIndex (lazy):', e);
+          statsIndex = {};
+          statsIndexReady = true;
+          return statsIndex;
+        });
+    }
+  
+    return statsIndexPromise;
+  };
 
   try {
     jornadas = await CoreStats.getResultados();
@@ -182,13 +205,6 @@
   if (!Array.isArray(jornadas) || !jornadas.length) {
     root.innerHTML = `<p class="hint">No se pudieron cargar los partidos.</p>`;
     return;
-  }
-
-  try {
-    statsIndex = await CoreStats.getStatsIndex();
-  } catch (e) {
-    console.warn('Error getStatsIndex:', e);
-    statsIndex = {};
   }
 
   // Construir meta de partidos (para el modal)
@@ -1097,7 +1113,7 @@
              </button>
            </div>`
         : '';
-      const hasStats = !!statsIndex[pid];
+      const hasStats = true;
 
       const cityName   = getCityForKey(p.local);
       const meteo      = meteoArr[idx];
@@ -1262,43 +1278,50 @@
   });
 
   // Delegación: click en tarjeta de partido (stats) o botón "Subir imagen"
-  root.addEventListener('click', (e) => {
-    const target = e.target;
+  root.addEventListener('click', async (e) => {
+  const target = e.target;
 
-    // 1) Botón "Subir imagen"
-    const uploadBtn = target.closest?.('.upload-photo-btn');
-    if (uploadBtn) {
-      e.preventDefault();
-      handleUploadClick(uploadBtn);
-      return;
-    }
+  // 1) Botón "Subir imagen"
+  const uploadBtn = target.closest?.('.upload-photo-btn');
+  if (uploadBtn) {
+    e.preventDefault();
+    handleUploadClick(uploadBtn);
+    return;
+  }
 
-    // 2) Tarjeta de partido -> abrir modal de stats
-    const cardBtn = target.closest?.('.partido-card');
-    if (!cardBtn) return;
+  // 2) Tarjeta de partido
+  const cardBtn = target.closest?.('.partido-card');
+  if (!cardBtn) return;
 
-    const id = cardBtn.getAttribute('data-partido-id');
-    if (!id) return;
+  const id = cardBtn.getAttribute('data-partido-id');
+  if (!id) return;
 
-    const meta  = partidoMeta[id];
-    const stats = statsIndex[id];
+  const meta = partidoMeta[id];
+  if (!meta || !bodyEl) return;
 
-    if (!stats && cardBtn.dataset.noStats === '1') {
-      return;
-    }
+  // Pintamos algo rápido mientras se cargan las stats
+  bodyEl.innerHTML = `<p class="hint">Cargando estadísticas...</p>`;
+  if (titleEl) {
+    titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
+  }
+  openModal();
 
-    if (bodyEl) bodyEl.innerHTML = renderStats(stats, meta);
-    if (titleEl && meta) {
-      titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
-    }
+  // Lazy: cargamos statsIndex sólo ahora
+  let stats = {};
+  try {
+    const idx = await ensureStatsIndex();
+    stats = idx[id] || {};
+  } catch (err) {
+    console.warn('Error cargando stats para partido', id, err);
+  }
 
-    // Inicializar editor de goleadores (async, no bloquea el modal)
-    if (meta && meta.id) {
-      void initScorersEditor(meta.id, meta);
-    }
+  bodyEl.innerHTML = renderStats(stats, meta);
 
-    openModal();
-  });
+  if (meta.id) {
+    void initScorersEditor(meta.id, meta);
+  }
+});
+
 
   // Primera carga: última jornada jugada
   await renderJornada(current);
