@@ -28,7 +28,7 @@ const getSupabaseConfig = () => ({
 let supabaseClient = null;
 async function getSupabaseClient() {
   if (supabaseClient) return supabaseClient;
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm');
   const { url, anonKey } = getSupabaseConfig();
   if (!url || !anonKey) throw new Error('Falta configuración de Supabase');
   supabaseClient = createClient(url, anonKey);
