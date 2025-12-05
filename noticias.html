@@ -1,24 +1,21 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Voll Damm Returns — Inicio</title>
+  <title>Torneo — Noticias</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="page-home">
-
+<body class="page-noticias">
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Voll Damm</h1>
+  <h1>Noticias</h1>
   <nav id="main-nav"></nav>
 </header>
 
-<main id="home-root" class="container home-layout">
-  <!-- HERO NOTICIAS DESTACADAS (mismo carrusel que en noticias.html) -->
-  <section class="home-hero">
-    <h2>Destacadas</h2>
+<main class="container">
+  <!-- Hero carrusel destacadas -->
+  <section>
     <div class="hero-carousel" id="hero-carousel">
       <div class="hero-track" id="hero-track"></div>
       <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
@@ -27,93 +24,14 @@
     </div>
   </section>
 
-  <div class="home-grid">
-    <!-- COLUMNA PRINCIPAL -->
-    <div class="home-main">
-      <!-- CLASIFICACIÓN TOP 10 -->
-      <section class="home-box" id="home-table-top10">
-        <h2>Clasificación (Top 10)</h2>
-        <div class="box-body">
-          <p class="muted">Cargando clasificación…</p>
-        </div>
-      </section>
-
-      <!-- TEAM OF THE MOMENT (3 EQUIPOS) -->
-      <section class="home-box" id="home-team-form">
-        <h2>Teams of the moment</h2>
-        <div class="box-body">
-          <p class="muted">Calculando forma de los equipos…</p>
-        </div>
-      </section>
-
-      <!-- GOLEADOR DEL MOMENTO -->
-      <section class="home-box" id="home-goleador-momento">
-        <h2>Goleador del momento</h2>
-        <div class="box-body">
-          <!-- Se rellenará desde js/index.js usando goal_events -->
-          <p class="muted">
-            Pendiente de conectar con la tabla de eventos de gol (goal_events)
-            para poder calcular los goles de los últimos 3 partidos.
-          </p>
-        </div>
-      </section>
-
-      <!-- MINI TABLA PICHICHI (TOP 6) -->
-      <section class="home-box" id="home-pichichi-mini">
-        <h2>Pichichi (Top 6)</h2>
-        <div class="box-body">
-          <p class="muted">Cargando pichichi…</p>
-        </div>
-      </section>
-    </div>
-
-    <!-- COLUMNA LATERAL -->
-    <aside class="home-aside">
-      <!-- MVP DE LA JORNADA ACTUAL -->
-      <section class="home-box" id="home-mvp-jornada">
-        <h2>MVP de la jornada</h2>
-        <div class="box-body">
-          <p class="muted">Buscando última jornada disputada…</p>
-        </div>
-      </section>
-
-      <!-- MVPs DE LA TEMPORADA (TOP 3) -->
-      <section class="home-box" id="home-mvp-temporada">
-        <h2>MVPs de la temporada</h2>
-        <div class="box-body">
-          <p class="muted">Calculando ranking MVP temporada…</p>
-        </div>
-      </section>
-
-      <!-- CURIOSIDAD DEL DÍA -->
-      <section class="home-box" id="home-curiosidad">
-        <h2>Curiosidad del día</h2>
-        <div class="box-body">
-          <p class="muted">Cargando curiosidad…</p>
-        </div>
-      </section>
-
-      <!-- DIRECTOS -->
-      <section class="home-box" id="home-directos">
-        <h2>Directos</h2>
-        <div class="box-body">
-          <p>Consulta los partidos en directo y próximos streams.</p>
-          <a href="directos.html" class="btn btn-primary">Ir a Directos</a>
-        </div>
-      </section>
-
-      <!-- FORMACIÓN DEL DÍA -->
-      <section class="home-box" id="home-formacion-dia">
-        <h2>Formación del día</h2>
-        <div class="box-body">
-          <p class="muted">Cargando formación aleatoria…</p>
-        </div>
-      </section>
-    </aside>
-  </div>
+  <!-- Histórico -->
+  <section>
+    <h2>Histórico</h2>
+    <div class="news-grid" id="news-grid"></div>
+  </section>
 </main>
 
-<!-- Modal noticia (reutilizado de noticias.html) -->
+<!-- Modal noticia -->
 <div id="news-backdrop" class="modal-backdrop" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
     <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
@@ -123,13 +41,8 @@
   </div>
 </div>
 
-<footer class="site-footer">
-  <p>&copy; Voll Damm Returns</p>
-</footer>
-
+<footer class="site-footer">© Torneo entre amigos</footer>
 <script src="js/common.js"></script>
-<script src="js/core-stats.js"></script>
-<script src="js/noticias.js"></script> <!-- rellena carrusel + modal -->
-<script src="js/index.js"></script>    <!-- widgets de la home -->
+<script src="js/noticias.js"></script>
 </body>
 </html>
