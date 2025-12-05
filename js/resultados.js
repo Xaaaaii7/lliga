@@ -1040,7 +1040,7 @@
   };
 
   // -----------------------------
-  // Render de una jornada concreta (async por meteo)
+  // Render de una jornada concreta (meteo no bloqueante)
   // -----------------------------
   const renderJornada = async (num) => {
     const j = jornadas.find(x => x.numero === num);
@@ -1059,13 +1059,7 @@
       return;
     }
 
-    const meteoArr = await Promise.all(
-      partidos.map(p => {
-        const cityName = getCityForKey(p.local);
-        return cityName ? fetchWeatherForCity(cityName) : Promise.resolve(null);
-      })
-    );
-
+    // 1) Pintamos las tarjetas SIN esperar a la meteo
     const cardsHtml = partidos.map((p, idx) => {
       const pid = p.id || `J${j.numero}-P${idx+1}`;
       const gl = isNum(p.goles_local)     ? p.goles_local     : null;
@@ -1091,12 +1085,13 @@
         ? `<span class="result-chip ${chipClass}">${chipText}</span>`
         : '';
 
-    const fechaHora = (p.fecha || j.fecha || p.hora)
-      ? `<div class="fecha-hora">
-           ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
-           ${p.hora ? ` · ${p.hora}` : ''}
-         </div>`
-      : '';
+      const fechaHora = (p.fecha || j.fecha || p.hora)
+        ? `<div class="fecha-hora">
+             ${p.fecha ? fmtDate(p.fecha) : (j.fecha ? fmtDate(j.fecha) : '')}
+             ${p.hora ? ` · ${p.hora}` : ''}
+           </div>`
+        : '';
+
       const streamHTML = p.stream
         ? `<div class="result-stream">
              <a href="${p.stream}" target="_blank" rel="noopener noreferrer">
@@ -1104,6 +1099,7 @@
              </a>
            </div>`
         : '';
+
       const uploadHTML = (!jugado && MATCH_UPLOAD.enabled)
         ? `<div class="result-upload">
              <button type="button"
@@ -1113,21 +1109,22 @@
              </button>
            </div>`
         : '';
+
       const hasStats = true;
 
-      const cityName   = getCityForKey(p.local);
-      const meteo      = meteoArr[idx];
-      const meteoHTML  = (meteo && cityName)
-        ? `<div class="result-meteo muted">Meteo hoy en ${cityName}: ${meteo.emoji} ${meteo.label}</div>`
-        : (meteo
-            ? `<div class="result-meteo muted">Meteo hoy: ${meteo.emoji} ${meteo.label}</div>`
-            : '');
+      // Placeholder meteo: texto neutro + data-city para actualizar luego
+      const cityName = getCityForKey(p.local);
+      const meteoPlaceholder = cityName
+        ? `<div class="result-meteo muted"
+                 data-city="${cityName}">
+             Meteo cargando...
+           </div>`
+        : '';
 
       return `
         <article class="result-card ${jugado ? 'result-played' : 'result-pending'}">
           <button class="result-main partido-card"
                   data-partido-id="${pid}"
-                  ${hasStats ? '' : 'data-no-stats="1"'}
                   aria-label="Ver estadísticas del partido">
             <div class="result-teams">
               <div class="result-team-block">
@@ -1145,7 +1142,7 @@
               </div>
             </div>
             ${fechaHora}
-            ${meteoHTML}
+            ${meteoPlaceholder}
             <div class="result-status-line">
               <div class="result-status-left">
                 <span class="result-status ${jugado ? 'played' : 'pending'}">
@@ -1169,7 +1166,38 @@
         </div>
       </section>
     `;
+
+    // 2) Ahora sí, lanzamos las peticiones de meteo en segundo plano
+    partidos.forEach((p, idx) => {
+      const cityName = getCityForKey(p.local);
+      if (!cityName) return;
+
+      const pid = p.id || `J${j.numero}-P${idx+1}`;
+      const cardBtn = jornadaWrap.querySelector(`.partido-card[data-partido-id="${pid}"]`);
+      if (!cardBtn) return;
+
+      const meteoEl = cardBtn.querySelector('.result-meteo[data-city]');
+      if (!meteoEl) return;
+
+      fetchWeatherForCity(cityName)
+        .then(cat => {
+          // Si el usuario ha cambiado de jornada mientras tanto, no tocamos nada
+          if (current !== num) return;
+
+          if (!cat) {
+            // Si no hay datos útiles, quitamos el bloque o lo dejamos vacío
+            meteoEl.textContent = '';
+            return;
+          }
+
+          meteoEl.textContent = `Meteo hoy en ${cityName}: ${cat.emoji} ${cat.label}`;
+        })
+        .catch(() => {
+          // En error, simplemente dejamos el placeholder o lo vaciamos
+        });
+    });
   };
+
 
   // -----------------------------
   // Subida de imagen del partido -> S3 vía presigned URL
