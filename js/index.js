@@ -604,59 +604,124 @@
   }
 
   // ==========================
-  // CURIOSIDAD DEL DÍA (via Lambda)
+  // CURIOSIDAD DEL DÍA (via Supabase: daily_curiosities)
   // ==========================
   async function renderCuriosidad() {
     const box = document.querySelector('#home-curiosidad .box-body');
     if (!box) return;
 
+    if (typeof getSupabaseClient !== 'function') {
+      box.innerHTML = '<p class="muted">Supabase no está configurado para curiosidades.</p>';
+      return;
+    }
+
     box.innerHTML = '<p class="muted">Cargando curiosidad…</p>';
 
     try {
-      // 👉 Sustituye por tu URL real de API Gateway
-      const res = await fetch('https://TU_API.execute-api.eu-west-1.amazonaws.com/prod/curiosidad', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
+      const supabase = await getSupabaseClient();
+      const cfg = typeof getSupabaseConfig === 'function' ? getSupabaseConfig() : {};
+      const season = cfg?.season || null;
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      const hoyStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+      // 1) intento coger curiosidad de HOY para la season activa
+      let query = supabase
+        .from('daily_curiosities')
+        .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at')
+        .eq('fecha', hoyStr)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (season) {
+        query = query.eq('season', season);
       }
 
-      const data = await res.json();
+      let { data, error } = await query;
+      if (error) {
+        console.error('Error Supabase daily_curiosities (hoy):', error);
+        throw error;
+      }
 
-      if (!data.ok || !data.curiosity) {
+      let row = (data && data[0]) || null;
+
+      // 2) si hoy no hay, cojo la última curiosidad de la season
+      if (!row) {
+        let q2 = supabase
+          .from('daily_curiosities')
+          .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at');
+
+        if (season) {
+          q2 = q2.eq('season', season);
+        }
+
+        const res2 = await q2
+          .order('fecha', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (res2.error) {
+          console.error('Error Supabase daily_curiosities (fallback):', res2.error);
+          throw res2.error;
+        }
+
+        row = res2.data && res2.data[0] ? res2.data[0] : null;
+      }
+
+      if (!row) {
         box.innerHTML = `
           <p class="muted">
-            No hay curiosidad disponible por ahora. Cuando haya más datos de la liga se generarán automáticamente.
+            Todavía no hay curiosidades generadas en <code>daily_curiosities</code>.
+            Cuando la Lambda diaria empiece a insertar filas, aparecerán aquí.
           </p>`;
         return;
       }
 
-      const c = data.curiosity;
-      const { tipo, categoria, titulo, descripcion, payload = {} } = c;
+      const {
+        tipo,
+        titulo,
+        descripcion
+      } = row;
 
-      // Badge de equipo si viene en el payload (las curiosidades de equipos ya lo llevan)
-      const maybeBadge = payload.badge
+      const payload = row.payload || {};
+
+      // nickname / display_name del equipo
+      const nickname    = payload.nickname || payload.teamNickname || '';
+      const displayName = payload.display_name || payload.teamLabel || nickname || '';
+
+      // la imagen ideal es nickname.png
+      let badge = payload.badge || '';
+      if (!badge && nickname) {
+        badge = `img/${slug(nickname)}.png`;
+      }
+
+      // Derivar "categoría" a partir de tipo o payload.category
+      const rawCategory =
+        payload.category ||
+        (typeof tipo === 'string' ? tipo.split('_')[0] : '');
+
+      const categoriaLabel = (() => {
+        const c = (rawCategory || '').toLowerCase();
+        if (c === 'equipos' || c === 'equipo') return 'Equipos';
+        if (c === 'partidos' || c === 'partido') return 'Partidos';
+        if (c === 'jugadores' || c === 'jugador') return 'Jugadores';
+        if (c === 'estadisticas' || c === 'stats') return 'Estadísticas';
+        return 'Curiosidad';
+      })();
+
+      const categoriaClass =
+        (rawCategory && rawCategory.toLowerCase()) || 'generica';
+
+      // Badge (escudo) si lo tenemos
+      const maybeBadge = badge
         ? `<div class="curio-badge-wrap">
-             <img src="${payload.badge}"
-                  alt="${payload.teamLabel || ''}"
+             <img src="${badge}"
+                  alt="${displayName}"
                   onerror="this.style.visibility='hidden'">
            </div>`
         : '';
 
-      // Etiqueta bonita de categoría
-      const categoriaLabel = (() => {
-        if (categoria === 'equipos') return 'Equipos';
-        if (categoria === 'partidos') return 'Partidos';
-        if (categoria === 'jugadores') return 'Jugadores';
-        return 'Curiosidad';
-      })();
-
       box.innerHTML = `
-        <article class="curio-card curio-${categoria}">
+        <article class="curio-card curio-${categoriaClass}">
           <header class="curio-header">
             ${maybeBadge}
             <div class="curio-header-text">
@@ -671,7 +736,8 @@
       console.error('Error cargando curiosidad del día:', err);
       box.innerHTML = `
         <p class="muted">
-          No se ha podido cargar la curiosidad del día. Intenta refrescar la página más tarde.
+          No se ha podido cargar la curiosidad del día.  
+          Revisa que la Lambda esté insertando datos en <code>daily_curiosities</code>.
         </p>`;
     }
   }
