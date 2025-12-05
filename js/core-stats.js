@@ -352,7 +352,7 @@
 
     const supabase = await getSupabaseClient();
 
-    // 1) Jugadores base (nombre, club, etc.)
+    // 1) Jugadores base (nombre, club, manager)
     let baseQuery = supabase
       .from('goleadores')
       .select('season, player_id, jugador, manager, club');
@@ -375,16 +375,69 @@
       baseMap.set(p.player_id, p);
     });
 
-    // 2) Eventos de gol por jugador para esa temporada
+    // 2) Mapa manager -> league_team_id y league_team_id -> manager
+    const managerTeamMap = new Map();  // nickname -> league_team_id
+    const teamManagerMap = new Map();  // league_team_id -> nickname
+
+    let ltQuery = supabase
+      .from('league_teams')
+      .select('id, season, nickname');
+
+    if (activeSeason) {
+      ltQuery = ltQuery.eq('season', activeSeason);
+    }
+
+    const { data: leagueTeams, error: errLT } = await ltQuery;
+    if (errLT) {
+      console.warn('Error cargando league_teams para Pichichi:', errLT);
+    } else if (leagueTeams) {
+      leagueTeams.forEach(t => {
+        if (t.nickname) {
+          managerTeamMap.set(t.nickname, t.id);
+        }
+        if (t.id != null) {
+          teamManagerMap.set(t.id, t.nickname || '');
+        }
+      });
+    }
+
+    // 3) Número de partidos jugados por cada league_team_id (matches)
+    const matchesByTeam = new Map(); // league_team_id -> PJ
+
+    let mQuery = supabase
+      .from('matches')
+      .select('season, home_league_team_id, away_league_team_id');
+
+    if (activeSeason) {
+      mQuery = mQuery.eq('season', activeSeason);
+    }
+
+    const { data: allMatches, error: errMatches } = await mQuery;
+    if (errMatches) {
+      console.warn('Error cargando matches para Pichichi:', errMatches);
+    } else if (allMatches) {
+      for (const m of allMatches) {
+        const h = m.home_league_team_id;
+        const a = m.away_league_team_id;
+        if (h != null) {
+          matchesByTeam.set(h, (matchesByTeam.get(h) || 0) + 1);
+        }
+        if (a != null) {
+          matchesByTeam.set(a, (matchesByTeam.get(a) || 0) + 1);
+        }
+      }
+    }
+
+    // 4) Eventos de gol por jugador para esa temporada
     let eventsQuery = supabase
       .from('goal_events')
       .select(`
         match_id,
         player_id,
+        league_team_id,
         event_type,
         match:matches(season)
       `)
-      // ajusta este filtro si usas otro valor para los goles (por ejemplo "goal", "gol", etc.)
       .eq('event_type', 'goal');
 
     if (activeSeason) {
@@ -399,7 +452,7 @@
 
     if (!events || !events.length) return [];
 
-    // 3) Agregamos por player_id: goles + partidos (distintos match_id)
+    // 5) Agregamos por player_id: goles + matchIds (por si hay fallback) + teamIds
     const statsByPlayer = new Map();
 
     for (const ev of events) {
@@ -410,16 +463,18 @@
       if (!rec) {
         rec = {
           goles: 0,
-          matchIds: new Set()
+          matchIds: new Set(),
+          teamIds: new Set()
         };
         statsByPlayer.set(pid, rec);
       }
 
       rec.goles += 1;
       if (ev.match_id) rec.matchIds.add(ev.match_id);
+      if (ev.league_team_id != null) rec.teamIds.add(ev.league_team_id);
     }
 
-    // 4) Construimos "rows" con el mismo formato que venía del TSV:
+    // 6) Construimos "rows" con formato:
     //    { "Jugador", "Equipo", "Partidos", "Goles" }
     const rows = [];
 
@@ -428,38 +483,86 @@
       const rec = statsByPlayer.get(pid);
       if (!rec) continue; // sin goles -> fuera del top
 
-      const pj = rec.matchIds.size;
       const goles = rec.goles;
+
+      // TeamId principal: primero por manager, si no, deducido de eventos
+      let teamId = null;
+      if (base.manager) {
+        teamId = managerTeamMap.get(base.manager) ?? null;
+      }
+      if (!teamId && rec.teamIds && rec.teamIds.size === 1) {
+        // Si solo ha marcado con un equipo, usamos ese como fallback
+        teamId = Array.from(rec.teamIds)[0];
+      }
+
+      // Partidos = partidos jugados por el equipo del manager (matchesByTeam)
+      // Fallback: si no tenemos teamId, usamos nº de partidos en los que ha marcado
+      let pj = 0;
+      if (teamId != null && matchesByTeam.size) {
+        pj = matchesByTeam.get(teamId) || 0;
+      } else {
+        pj = rec.matchIds.size;
+      }
+
+      // Etiqueta de equipo: manager (nickname). Si no, club. Si no, equipo X.
+      const managerNick = base.manager || (teamId != null ? teamManagerMap.get(teamId) : '') || '';
+      const clubName    = base.club || '';
+      const teamLabel   =
+        managerNick ||
+        clubName ||
+        (teamId != null ? `Equipo ${teamId}` : '');
 
       rows.push({
         "Jugador": base.jugador || `Jugador ${pid}`,
-        "Equipo": base.club || '',
+        "Equipo": teamLabel,
         "Partidos": String(pj),
         "Goles": String(goles),
-        // por si más adelante quieres usarlo en otro sitio
-        "_player_id": pid,
-        "_manager": base.manager || ''
+        _player_id: pid,
+        _manager: managerNick,
+        _club: clubName,
+        _team_id: teamId
       });
     }
 
-    // Opcional: jugadores que tienen goles pero NO están en la tabla "goleadores"
+    // Jugadores que tienen goles pero NO están en la tabla "goleadores"
     for (const [pid, rec] of statsByPlayer.entries()) {
       if (baseMap.has(pid)) continue;
 
-      const pj = rec.matchIds.size;
       const goles = rec.goles;
+
+      let teamId = null;
+      if (rec.teamIds && rec.teamIds.size === 1) {
+        teamId = Array.from(rec.teamIds)[0];
+      }
+
+      let pj = 0;
+      let managerNick = '';
+      if (teamId != null) {
+        pj = matchesByTeam.get(teamId) || rec.matchIds.size;
+        managerNick = teamManagerMap.get(teamId) || '';
+      } else {
+        pj = rec.matchIds.size;
+      }
+
+      const teamLabel =
+        managerNick ||
+        (teamId != null ? `Equipo ${teamId}` : '');
 
       rows.push({
         "Jugador": `Jugador ${pid}`,
-        "Equipo": '',
+        "Equipo": teamLabel,
         "Partidos": String(pj),
         "Goles": String(goles),
-        "_player_id": pid
+        _player_id: pid,
+        _manager: managerNick,
+        _club: '',
+        _team_id: teamId
       });
     }
 
     return rows;
   };
+
 
   CoreStats.getPichichiRows = async () => {
     if (_pichichiRowsCache) return _pichichiRowsCache;
