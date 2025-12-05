@@ -110,7 +110,7 @@
     pases_interceptados: row?.interceptions ?? null,
     entradas: row?.tackles ?? null,
     paradas: row?.saves ?? null,
-    rojas: row?.red_cards ?? null
+    rojas: row?.red_cards ?? 0
   });
 
   // Carga jornadas desde Supabase.matches + league_teams
