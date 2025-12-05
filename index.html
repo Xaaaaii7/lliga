@@ -11,17 +11,19 @@
 
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Voll Damm Returns</h1>
+  <h1>Voll Damm</h1>
   <nav id="main-nav"></nav>
 </header>
 
 <main id="home-root" class="container home-layout">
-  <!-- HERO NOTICIAS DESTACADAS -->
+  <!-- HERO NOTICIAS DESTACADAS (mismo carrusel que en noticias.html) -->
   <section class="home-hero">
     <h2>Destacadas</h2>
-    <div id="home-hero-slider" class="hero-slider">
-      <!-- Se rellena desde js/index.js -->
-      <p class="muted">Cargando noticias destacadas…</p>
+    <div class="hero-carousel" id="hero-carousel">
+      <div class="hero-track" id="hero-track"></div>
+      <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
+      <button class="hero-nav next" id="hero-next" aria-label="Siguiente">›</button>
+      <div class="hero-dots" id="hero-dots"></div>
     </div>
   </section>
 
@@ -48,7 +50,7 @@
       <section class="home-box" id="home-goleador-momento">
         <h2>Goleador del momento</h2>
         <div class="box-body">
-          <!-- TODO: requiere tabla de eventos de gol por partido -->
+          <!-- Se rellenará desde js/index.js usando goal_events -->
           <p class="muted">
             Pendiente de conectar con la tabla de eventos de gol (goal_events)
             para poder calcular los goles de los últimos 3 partidos.
@@ -111,12 +113,23 @@
   </div>
 </main>
 
+<!-- Modal noticia (reutilizado de noticias.html) -->
+<div id="news-backdrop" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
+    <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
+    <h2 id="news-title"></h2>
+    <div class="meta" id="news-meta"></div>
+    <div id="news-content"></div>
+  </div>
+</div>
+
 <footer class="site-footer">
   <p>&copy; Voll Damm Returns</p>
 </footer>
 
 <script src="js/common.js"></script>
 <script src="js/core-stats.js"></script>
-<script src="js/index.js"></script>
+<script src="js/noticias.js"></script> <!-- rellena carrusel + modal -->
+<script src="js/index.js"></script>    <!-- widgets de la home -->
 </body>
 </html>
