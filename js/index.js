@@ -725,7 +725,7 @@
       // la imagen ideal es nickname.png
       let badge = payload.badge || '';
       if (!badge && nickname) {
-        badge = `img/${slug(nickname)}.png`;
+        badge = `img/${slug(nickname.toLowerCase())}.png`;
       }
 
       // Derivar "categoría" a partir de tipo o payload.category
