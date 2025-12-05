@@ -382,35 +382,35 @@ const loadPichichiFromSupabase = async () => {
 
 
   CoreStats.getPichichiRows = async () => {
-    if (_pichichiRowsCache) return _pichichiRowsCache;
+  if (_pichichiRowsCache) return _pichichiRowsCache;
 
-    // 1) Intentamos Supabase
-    if (hasSupabase) {
-      try {
-        const rowsDb = await loadPichichiFromSupabase();
-        if (Array.isArray(rowsDb) && rowsDb.length) {
-          _pichichiRowsCache = rowsDb;
-          return _pichichiRowsCache;
-        }
-      } catch (e) {
-        console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);
-      }
-    }
-
-    // 2) Fallback al TSV antiguo (por si acaso)
+  // 1) Intentamos Supabase
+  if (hasSupabase) {
     try {
-      const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const txt = await res.text();
-      const { rows } = parseTSV(txt);
-      _pichichiRowsCache = Array.isArray(rows) ? rows : [];
-      return _pichichiRowsCache;
+      const rowsDb = await loadPichichiFromSupabase();
+      if (Array.isArray(rowsDb) && rowsDb.length) {
+        _pichichiRowsCache = rowsDb;
+        return _pichichiRowsCache;
+      }
     } catch (e) {
-      console.warn('No se pudo cargar TSV pichichi:', e);
-      _pichichiRowsCache = [];
-      return _pichichiRowsCache;
+      console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);
     }
-  };
+  }
+
+  // 2) Fallback al TSV antiguo (por si acaso)
+  try {
+    const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const txt = await res.text();
+    const { rows } = parseTSV(txt);
+    _pichichiRowsCache = Array.isArray(rows) ? rows : [];
+    return _pichichiRowsCache;
+  } catch (e) {
+    console.warn('No se pudo cargar TSV pichichi:', e);
+    _pichichiRowsCache = [];
+    return _pichichiRowsCache;
+  }
+};
 
   // Se mantiene computePichichiPlayers igual que lo tienes:
   CoreStats.computePichichiPlayers = (rows) => {
