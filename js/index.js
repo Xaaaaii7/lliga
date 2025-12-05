@@ -121,10 +121,6 @@
 
   // ==========================
   // TEAM OF THE MOMENT (3 equipos)
-  // Basado en MVP por jornada:
-  // - miramos todas las jornadas
-  // - para cada equipo, cogemos sus últimas 3 apariciones
-  // - ordenamos por media de mvpScore, y como desempate: más PJ en esos 3 partidos
   // ==========================
   async function computeTeamsFormTop(limit = 3) {
     const jornadas = await CoreStats.getResultados();
@@ -220,11 +216,9 @@
       box.innerHTML = '<p class="muted">Error calculando el team form.</p>';
     }
   }
+
   // ==========================
   // GOLEADOR DEL MOMENTO
-  // - buscamos los ÚLTIMOS 3 PARTIDOS DE LIGA DISPUTADOS (con resultado)
-  // - contamos los goles de goal_events en esos partidos
-  // - goleador del momento = jugador con más goles en esos 3 partidos
   // ==========================
   async function renderGoleadorMomento() {
     const box = document.querySelector('#home-goleador-momento .box-body');
@@ -304,9 +298,6 @@
         `)
         .in('match_id', matchIds)
         .eq('event_type', 'goal');
-
-      // (No hace falta filtrar por season aquí porque match_id ya filtra
-      // a la temporada actual a través de matches / getResultados)
 
       const { data, error } = await q;
       if (error) {
@@ -613,50 +604,80 @@
   }
 
   // ==========================
-  // CURIOSIDAD DEL DÍA
-  // - lee data/curiosidades.json (array de { id?, texto })
-  // - si no existe, muestra un texto por defecto
+  // CURIOSIDAD DEL DÍA (via Lambda)
   // ==========================
   async function renderCuriosidad() {
     const box = document.querySelector('#home-curiosidad .box-body');
     if (!box) return;
 
-    if (typeof loadJSON !== 'function') {
-      box.innerHTML = '<p class="muted">Configura AppUtils.loadJSON para curiosidades.</p>';
-      return;
-    }
+    box.innerHTML = '<p class="muted">Cargando curiosidad…</p>';
 
     try {
-      const data = await loadJSON('data/curiosidades.json').catch(() => []);
-      const lista = Array.isArray(data) ? data : [];
+      // 👉 Sustituye por tu URL real de API Gateway
+      const res = await fetch('https://TU_API.execute-api.eu-west-1.amazonaws.com/prod/curiosidad', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
 
-      if (!lista.length) {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      if (!data.ok || !data.curiosity) {
         box.innerHTML = `
-          <p>
-            Añade curiosidades en <code>data/curiosidades.json</code> con un array
-            de objetos <code>{ "texto": "..." }</code>.
-          </p>
-        `;
+          <p class="muted">
+            No hay curiosidad disponible por ahora. Cuando haya más datos de la liga se generarán automáticamente.
+          </p>`;
         return;
       }
 
-      // selección por día (estable) usando la fecha
-      const hoy = new Date();
-      const idx = hoy.getDate() % lista.length;
-      const item = lista[idx];
-      const texto = item.texto || item.text || 'Curiosidad no disponible.';
+      const c = data.curiosity;
+      const { tipo, categoria, titulo, descripcion, payload = {} } = c;
 
-      box.innerHTML = `<p>${texto}</p>`;
-    } catch (e) {
-      console.error('Error curiosidad:', e);
-      box.innerHTML = '<p class="muted">No se pudo cargar la curiosidad.</p>';
+      // Badge de equipo si viene en el payload (las curiosidades de equipos ya lo llevan)
+      const maybeBadge = payload.badge
+        ? `<div class="curio-badge-wrap">
+             <img src="${payload.badge}"
+                  alt="${payload.teamLabel || ''}"
+                  onerror="this.style.visibility='hidden'">
+           </div>`
+        : '';
+
+      // Etiqueta bonita de categoría
+      const categoriaLabel = (() => {
+        if (categoria === 'equipos') return 'Equipos';
+        if (categoria === 'partidos') return 'Partidos';
+        if (categoria === 'jugadores') return 'Jugadores';
+        return 'Curiosidad';
+      })();
+
+      box.innerHTML = `
+        <article class="curio-card curio-${categoria}">
+          <header class="curio-header">
+            ${maybeBadge}
+            <div class="curio-header-text">
+              <span class="chip curio-chip">${categoriaLabel}</span>
+              <h3 class="curio-title">${titulo}</h3>
+            </div>
+          </header>
+          <p class="curio-desc">${descripcion}</p>
+        </article>
+      `;
+    } catch (err) {
+      console.error('Error cargando curiosidad del día:', err);
+      box.innerHTML = `
+        <p class="muted">
+          No se ha podido cargar la curiosidad del día. Intenta refrescar la página más tarde.
+        </p>`;
     }
   }
 
   // ==========================
   // FORMACIÓN DEL DÍA (solo vista)
-  // - elige un equipo aleatorio de la clasificación
-  // - carga su formación desde Supabase (igual lógica que club_formacion pero read-only)
   // ==========================
   const FORMATION_TEMPLATES = {
     "4-4-2": [
