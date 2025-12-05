@@ -1,14 +1,17 @@
 // ─────────────────────────────
-// CONFIGURACIÓN SUPABASE (parte superior del script)
+// CONFIGURACIÓN SUPABASE
 // ─────────────────────────────
 window.SUPABASE_CONFIG = {
   url: "https://jdbjgrkvwawdibntngpk.supabase.co",
   anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkYmpncmt2d2F3ZGlibnRuZ3BrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTQ4NTQsImV4cCI6MjA3OTU5MDg1NH0.t8KkjGmcCwriKfcG8pzZfCwqgddyG2jmYFxuAHH4NfA",
   season: "2025-26"
 };
+
 const AppUtils = window.AppUtils || {};
 
-// Helpers base reusables
+// ─────────────────────────────
+// HELPERS BASE
+// ─────────────────────────────
 const normalizeText = (value) => String(value || '')
   .toLowerCase()
   .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -18,7 +21,6 @@ const normalizeText = (value) => String(value || '')
 const slugify = (value) => normalizeText(value).replace(/\s+/g,'-');
 const logoPath = (name, base='img') => `${base}/${slugify(name)}.png`;
 
-// Supabase config compartida
 const getSupabaseConfig = () => ({
   url: window?.SUPABASE_URL || window?.SUPABASE_CONFIG?.url || '',
   anonKey: window?.SUPABASE_ANON_KEY || window?.SUPABASE_CONFIG?.anonKey || '',
@@ -26,6 +28,7 @@ const getSupabaseConfig = () => ({
 });
 
 let supabaseClient = null;
+
 async function getSupabaseClient() {
   if (supabaseClient) return supabaseClient;
   const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm');
@@ -52,16 +55,23 @@ function fmtDate(iso){
   return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
 
-// Alineación automática desde "4-4-2"
+// Generar alineación automáticamente desde "4-4-2"
 function genAlineacionFromEsquema(esquema){
   const [def, mid, fwd] = (esquema||'4-4-2').split('-').map(n=>parseInt(n,10)||0);
+
   const fila = (n, row, pref) =>
-    Array.from({length:n},(_,i)=>({slot:`${pref}${i+1}`,posicion:pref==='POR'?'POR':pref,fila:row,col:i+1}));
+    Array.from({length:n},(_,i)=>({
+      slot:`${pref}${i+1}`,
+      posicion: pref === 'POR' ? 'POR' : pref,
+      fila: row,
+      col: i+1
+    }));
+
   return [
     ...fila(fwd,2,'DEL'),
     ...fila(mid,3,'MED'),
     ...fila(def,4,'DEF'),
-    {slot:'POR1',posicion:'POR',fila:5,col:3}
+    { slot:'POR1', posicion:'POR', fila:5, col:3 }
   ];
 }
 
@@ -79,12 +89,28 @@ Object.assign(AppUtils, {
 
 window.AppUtils = AppUtils;
 
+// ─────────────────────────────
+// HEADER + NAV AUTOMÁTICO
+// ─────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ✔ Convertir automáticamente el LOGO del header en enlace a index.html
+  const headerLogo = document.querySelector('.site-header .logo');
+  if (headerLogo && !headerLogo.closest('a')) {
+    const wrapper = document.createElement('a');
+    wrapper.href = 'index.html';
+    wrapper.style.display = 'inline-block';
+    headerLogo.parentNode.insertBefore(wrapper, headerLogo);
+    wrapper.appendChild(headerLogo);
+  }
+
   const header = document.querySelector('.site-header');
   const nav = document.getElementById('main-nav');
   if (nav && header) {
-    // Menú
+
+    // Menú principal
     const links = [
+      ['index.html','Inicio'],
       ['noticias.html','Noticias'],
       ['clasificacion.html','Clasificación'],
       ['resultados.html','Resultados'],
@@ -93,18 +119,22 @@ document.addEventListener('DOMContentLoaded', () => {
       ['clubs.html','Clubs'],
       ['jornada.html','Jornada'],
       ['reglas.html','Reglas'],
-      ['directos.html','Directos']// 👈 añadido
+      ['directos.html','Directos']
     ];
-    nav.innerHTML = links.map(([href,label]) =>
-      `<a href="${href}" data-href="${href}">${label}</a>`).join('');
 
-    // Activo
+    nav.innerHTML = links
+      .map(([href,label]) => `<a href="${href}" data-href="${href}">${label}</a>`)
+      .join('');
+
+    // Activar link
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     nav.querySelectorAll('a').forEach(a => {
-      if ((a.getAttribute('data-href')||'').toLowerCase() === here) a.classList.add('active');
+      if ((a.getAttribute('data-href')||'').toLowerCase() === here) {
+        a.classList.add('active');
+      }
     });
 
-    // Botón hamburguesa (insertado si no existe)
+    // Botón hamburguesa si no existe
     if (!document.getElementById('menu-toggle')) {
       const btn = document.createElement('button');
       btn.id = 'menu-toggle';
@@ -113,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.setAttribute('aria-expanded','false');
       btn.innerHTML = '<span></span><span></span><span></span>';
       header.insertBefore(btn, nav);
+
       btn.addEventListener('click', () => {
         const open = header.classList.toggle('open');
         btn.setAttribute('aria-expanded', String(open));
