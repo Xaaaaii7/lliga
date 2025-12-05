@@ -217,76 +217,81 @@
     }
   }
 
-   // ==========================
+  // ==========================
   // GOLEADOR DEL MOMENTO
   // ==========================
   async function renderGoleadorMomento() {
     const box = document.querySelector('#home-goleador-momento .box-body');
     if (!box) return;
 
-    // Necesitamos Supabase para leer goal_events + players
     if (typeof getSupabaseClient !== 'function') {
       box.innerHTML = '<p class="muted">Supabase no está configurado para calcular el goleador del momento.</p>';
       return;
     }
 
-    box.innerHTML = '<p class="muted">Buscando últimos partidos…</p>';
+    box.innerHTML = '<p class="muted">Buscando jornadas recientes…</p>';
 
     try {
       const jornadas = await CoreStats.getResultados();
-      const partidosJugados = [];
+      if (!Array.isArray(jornadas) || !jornadas.length) {
+        box.innerHTML = '<p class="muted">Todavía no hay jornadas.</p>';
+        return;
+      }
 
-      // Helper para sacar el ID que realmente usa Supabase en goal_events.match_id
-      const getMatchId = (p) =>
-        p.match_id ?? p.supabase_id ?? p.id ?? null;
-
-      for (const j of (jornadas || [])) {
-        for (const p of (j.partidos || [])) {
-          if (!isNum(p.goles_local) || !isNum(p.goles_visitante)) continue;
-
-          const matchId = getMatchId(p);
-          if (!matchId) continue;
-
-          const fecha = p.fecha || p.match_date || null;
-          const hora  = p.hora  || p.match_time || '00:00';
-
-          let ts = 0;
-          if (fecha) {
-            const d = new Date(`${fecha}T${hora}`);
-            ts = Number.isNaN(d.getTime()) ? 0 : d.getTime();
-          }
-
-          partidosJugados.push({
-            matchId,
-            fecha,
-            hora,
-            ts
-          });
+      // 1) Buscar la última jornada con al menos un partido jugado
+      let lastIndex = -1;
+      for (let i = jornadas.length - 1; i >= 0; i--) {
+        const j = jornadas[i];
+        const partidos = j.partidos || [];
+        const hasPlayed = partidos.some(p =>
+          isNum(p.goles_local) && isNum(p.goles_visitante)
+        );
+        if (hasPlayed) {
+          lastIndex = i;
+          break;
         }
       }
 
-      if (!partidosJugados.length) {
-        box.innerHTML = '<p class="muted">Todavía no hay partidos disputados.</p>';
+      if (lastIndex === -1) {
+        box.innerHTML = '<p class="muted">Todavía no hay jornadas con partidos jugados.</p>';
         return;
       }
 
-      // Ordenamos por fecha/hora y tomamos los últimos 3
-      partidosJugados.sort((a, b) => a.ts - b.ts);
-      const ultimos = partidosJugados.slice(-3);
-      const matchIds = ultimos.map(p => p.matchId).filter(Boolean);
+      // 2) Cogemos esa jornada y las dos anteriores (si existen)
+      const startIndex = Math.max(0, lastIndex - 2);
+      const selectedJornadas = jornadas.slice(startIndex, lastIndex + 1);
+
+      // Para el label (Jx–Jy)
+      const jNums = selectedJornadas
+        .map(j => j.numero ?? j.jornada)
+        .filter(n => n != null)
+        .sort((a, b) => a - b);
+
+      const badgeLabel = (() => {
+        if (!jNums.length) return 'Jornadas recientes';
+        if (jNums.length === 1) return `J${jNums[0]}`;
+        return `J${jNums[0]}–J${jNums[jNums.length - 1]}`;
+      })();
+
+      // 3) Sacar todos los match_id de partidos jugados en esas jornadas
+      const matchIds = [];
+      for (const j of selectedJornadas) {
+        for (const p of (j.partidos || [])) {
+          if (!isNum(p.goles_local) || !isNum(p.goles_visitante)) continue;
+          if (!p.id) continue; // p.id viene del matches.id en CoreStats
+          matchIds.push(p.id);
+        }
+      }
 
       if (!matchIds.length) {
-        box.innerHTML = '<p class="muted">No se pudieron determinar los últimos partidos.</p>';
+        box.innerHTML = '<p class="muted">No hay partidos disputados en las últimas jornadas.</p>';
         return;
       }
 
-      box.innerHTML = '<p class="muted">Calculando goles en los últimos partidos…</p>';
+      box.innerHTML = '<p class="muted">Calculando goleadores en las últimas jornadas…</p>';
 
+      // 4) Leer goal_events de esos partidos
       const supabase = await getSupabaseClient();
-      const cfg = typeof getSupabaseConfig === 'function' ? getSupabaseConfig() : {};
-      const season = cfg?.season || null;
-
-      // Consulta base: solo eventos de tipo "goal"
       let q = supabase
         .from('goal_events')
         .select(`
@@ -305,9 +310,6 @@
         .in('match_id', matchIds)
         .eq('event_type', 'goal');
 
-      // Si goal_events tiene columna season, puedes descomentar esto:
-      // if (season) q = q.eq('season', season);
-
       const { data, error } = await q;
       if (error) {
         console.error('Error goal_events:', error);
@@ -319,14 +321,14 @@
       if (!eventos.length) {
         box.innerHTML = `
           <p class="muted">
-            No hay goles registrados en los últimos ${ultimos.length} partidos.
+            No hay goles registrados en las jornadas seleccionadas.
           </p>
         `;
         return;
       }
 
-      // Agregamos goles por jugador
-      const byPlayer = new Map(); // key: player_id -> { playerId, nombre, equipo, goles }
+      // 5) Agregar goles por jugador
+      const byPlayer = new Map(); // player_id -> { playerId, nombre, equipo, goles }
 
       for (const ev of eventos) {
         const player = ev.player;
@@ -356,13 +358,13 @@
       if (!lista.length) {
         box.innerHTML = `
           <p class="muted">
-            No hay jugadores con goles registrados en los últimos ${ultimos.length} partidos.
+            No hay jugadores con goles registrados en las jornadas seleccionadas.
           </p>
         `;
         return;
       }
 
-      // Ordenamos: más goles, luego nombre (puedes cambiar el desempate si quieres otro criterio)
+      // 6) Ordenar por goles (y nombre como desempate) y sacar top 5
       lista.sort((a, b) =>
         (b.goles - a.goles) ||
         a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
@@ -371,9 +373,11 @@
       const ganador = lista[0];
       const top5 = lista.slice(0, 5);
 
-      const partidosLabel = ultimos.length === 1
-        ? 'último partido'
-        : `últimos ${ultimos.length} partidos`;
+      const jornadasLabel = (() => {
+        if (!jNums.length) return 'las últimas jornadas';
+        if (jNums.length === 1) return `la jornada ${jNums[0]}`;
+        return `las jornadas ${jNums[0]}–${jNums[jNums.length - 1]}`;
+      })();
 
       const rows = top5.map((p, idx) => `
         <tr>
@@ -391,12 +395,12 @@
 
       box.innerHTML = `
         <div class="goleador-momento-winner">
-          <div class="goleador-momento-badge">${partidosLabel}</div>
+          <div class="goleador-momento-badge">${badgeLabel}</div>
           <div class="goleador-momento-main">
             <img src="img/jugadores/${slug(ganador.nombre)}.jpg" alt="${ganador.nombre}" class="player-photo-lg">
             <div class="goleador-momento-info">
               <h3>${ganador.nombre}</h3>
-              <p>${ganador.goles} gol(es) en los ${partidosLabel}</p>
+              <p>${ganador.goles} gol(es) en ${jornadasLabel}</p>
               <p class="muted small">${ganador.equipo}</p>
             </div>
           </div>
