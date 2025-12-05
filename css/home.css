@@ -373,3 +373,80 @@
     align-items:flex-start;
   }
 }
+/* ==========================
+   CURIOSIDAD DEL DÍA (home)
+   ========================== */
+
+.curio-card{
+  background:var(--bg-elevated);
+  border-radius:16px;
+  padding:12px 12px 14px;
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 12px 28px rgba(0,0,0,.45);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.curio-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.curio-badge-wrap{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  padding:3px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.curio-badge-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:10px;
+}
+
+.curio-header-text{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+/* Reutiliza .chip base con un matiz */
+.curio-chip{
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  background:var(--accent-soft);
+  border-color:var(--accent);
+  color:#bbf7d0;
+}
+
+.curio-title{
+  margin:0;
+  font-size:1rem;
+  font-weight:800;
+}
+
+.curio-desc{
+  margin:0;
+  font-size:0.92rem;
+  color:#cbd5f5;
+}
+
+/* Pequeño matiz según categoría (bordes) */
+.curio-equipos{
+  border-left:3px solid #22c55e;
+}
+.curio-partidos{
+  border-left:3px solid #38bdf8;
+}
+.curio-jugadores{
+  border-left:3px solid #f97316;
+}
