@@ -220,6 +220,206 @@
       box.innerHTML = '<p class="muted">Error calculando el team form.</p>';
     }
   }
+  // ==========================
+  // GOLEADOR DEL MOMENTO
+  // - buscamos los ÚLTIMOS 3 PARTIDOS DE LIGA DISPUTADOS (con resultado)
+  // - contamos los goles de goal_events en esos partidos
+  // - goleador del momento = jugador con más goles en esos 3 partidos
+  // ==========================
+  async function renderGoleadorMomento() {
+    const box = document.querySelector('#home-goleador-momento .box-body');
+    if (!box) return;
+
+    // Necesitamos Supabase para leer goal_events + players
+    if (typeof getSupabaseClient !== 'function') {
+      box.innerHTML = '<p class="muted">Supabase no está configurado para calcular el goleador del momento.</p>';
+      return;
+    }
+
+    box.innerHTML = '<p class="muted">Buscando últimos partidos…</p>';
+
+    try {
+      // 1) Sacamos todos los partidos con resultado
+      const jornadas = await CoreStats.getResultados();
+      const partidosJugados = [];
+
+      for (const j of (jornadas || [])) {
+        for (const p of (j.partidos || [])) {
+          if (isNum(p.goles_local) && isNum(p.goles_visitante)) {
+            // construimos una fecha ordenable
+            const fecha = p.fecha || p.match_date || null;
+            const hora = p.hora || p.match_time || '00:00';
+            let ts = 0;
+            if (fecha) {
+              // asume formato YYYY-MM-DD
+              ts = new Date(`${fecha}T${hora}`).getTime();
+            }
+            partidosJugados.push({
+              id: p.id,
+              fecha,
+              hora,
+              ts
+            });
+          }
+        }
+      }
+
+      if (!partidosJugados.length) {
+        box.innerHTML = '<p class="muted">Todavía no hay partidos disputados.</p>';
+        return;
+      }
+
+      // 2) Ordenamos por fecha/hora y tomamos los últimos 3
+      partidosJugados.sort((a, b) => a.ts - b.ts);
+      const ultimos = partidosJugados.slice(-3);
+      const matchIds = ultimos.map(p => p.id).filter(Boolean);
+
+      if (!matchIds.length) {
+        box.innerHTML = '<p class="muted">No se pudieron determinar los últimos partidos.</p>';
+        return;
+      }
+
+      box.innerHTML = '<p class="muted">Calculando goles en los últimos partidos…</p>';
+
+      // 3) Consultamos goal_events para esos partidos
+      const supabase = await getSupabaseClient();
+      const cfg = typeof getSupabaseConfig === 'function' ? getSupabaseConfig() : {};
+      const season = cfg?.season || null;
+
+      // Solo eventos de tipo "goal"
+      let q = supabase
+        .from('goal_events')
+        .select(`
+          match_id,
+          event_type,
+          player:players (
+            id,
+            name
+          ),
+          team:league_teams (
+            id,
+            nickname,
+            display_name
+          )
+        `)
+        .in('match_id', matchIds)
+        .eq('event_type', 'goal');
+
+      // (No hace falta filtrar por season aquí porque match_id ya filtra
+      // a la temporada actual a través de matches / getResultados)
+
+      const { data, error } = await q;
+      if (error) {
+        console.error('Error goal_events:', error);
+        box.innerHTML = '<p class="muted">Error al leer los eventos de gol.</p>';
+        return;
+      }
+
+      const eventos = data || [];
+      if (!eventos.length) {
+        box.innerHTML = `
+          <p class="muted">
+            No hay goles registrados en los últimos ${ultimos.length} partidos.
+          </p>
+        `;
+        return;
+      }
+
+      // 4) Agregamos goles por jugador
+      const byPlayer = new Map(); // key: player_id -> { playerId, nombre, equipo, goles }
+
+      for (const ev of eventos) {
+        const player = ev.player;
+        if (!player || !player.id) continue; // si no tenemos jugador asociado, saltamos
+
+        const pid = player.id;
+        let rec = byPlayer.get(pid);
+        if (!rec) {
+          const team = ev.team || {};
+          const teamName =
+            team.nickname ||
+            team.display_name ||
+            'Equipo';
+
+          rec = {
+            playerId: pid,
+            nombre: player.name || 'Jugador',
+            equipo: teamName,
+            goles: 0
+          };
+          byPlayer.set(pid, rec);
+        }
+        rec.goles += 1;
+      }
+
+      const lista = Array.from(byPlayer.values());
+      if (!lista.length) {
+        box.innerHTML = `
+          <p class="muted">
+            No hay jugadores con goles registrados en los últimos ${ultimos.length} partidos.
+          </p>
+        `;
+        return;
+      }
+
+      // 5) Ordenamos: más goles, luego nombre
+      lista.sort((a, b) =>
+        (b.goles - a.goles) ||
+        a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+      );
+
+      const ganador = lista[0];
+      const top5 = lista.slice(0, 5);
+
+      // 6) Render
+      const partidosLabel = ultimos.length === 1
+        ? 'último partido'
+        : `últimos ${ultimos.length} partidos`;
+
+      const rows = top5.map((p, idx) => `
+        <tr>
+          <td class="pos">${idx + 1}</td>
+          <td class="jugador">
+            <img src="img/jugadores/${slug(p.nombre)}.jpg" alt="${p.nombre}" class="player-photo">
+            <div>
+              <div class="player-name">${p.nombre}</div>
+              <div class="player-team">${p.equipo}</div>
+            </div>
+          </td>
+          <td class="goles">${p.goles}</td>
+        </tr>
+      `).join('');
+
+      box.innerHTML = `
+        <div class="goleador-momento-winner">
+          <div class="goleador-momento-badge">${partidosLabel}</div>
+          <div class="goleador-momento-main">
+            <img src="img/jugadores/${slug(ganador.nombre)}.jpg" alt="${ganador.nombre}" class="player-photo-lg">
+            <div class="goleador-momento-info">
+              <h3>${ganador.nombre}</h3>
+              <p>${ganador.goles} gol(es) en los ${partidosLabel}</p>
+              <p class="muted small">${ganador.equipo}</p>
+            </div>
+          </div>
+        </div>
+        <table class="tabla tabla-compact goleador-momento-top">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Jugador</th>
+              <th>Goles</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      console.error('Error goleador del momento:', e);
+      box.innerHTML = '<p class="muted">Error calculando el goleador del momento.</p>';
+    }
+  }
 
   // ==========================
   // MINI PICHICHI (TOP 6)
@@ -735,6 +935,7 @@
     renderHeroNews(),
     renderClasificacionTop10(),
     renderTeamForm(),
+    renderGoleadorMomento(),
     renderPichichiMini(),
     renderMvpJornada(),
     renderMvpTemporada(),
