@@ -217,7 +217,7 @@
     }
   }
 
-  // ==========================
+   // ==========================
   // GOLEADOR DEL MOMENTO
   // ==========================
   async function renderGoleadorMomento() {
@@ -233,28 +233,35 @@
     box.innerHTML = '<p class="muted">Buscando últimos partidos…</p>';
 
     try {
-      // 1) Sacamos todos los partidos con resultado
       const jornadas = await CoreStats.getResultados();
       const partidosJugados = [];
 
+      // Helper para sacar el ID que realmente usa Supabase en goal_events.match_id
+      const getMatchId = (p) =>
+        p.match_id ?? p.supabase_id ?? p.id ?? null;
+
       for (const j of (jornadas || [])) {
         for (const p of (j.partidos || [])) {
-          if (isNum(p.goles_local) && isNum(p.goles_visitante)) {
-            // construimos una fecha ordenable
-            const fecha = p.fecha || p.match_date || null;
-            const hora = p.hora || p.match_time || '00:00';
-            let ts = 0;
-            if (fecha) {
-              // asume formato YYYY-MM-DD
-              ts = new Date(`${fecha}T${hora}`).getTime();
-            }
-            partidosJugados.push({
-              id: p.id,
-              fecha,
-              hora,
-              ts
-            });
+          if (!isNum(p.goles_local) || !isNum(p.goles_visitante)) continue;
+
+          const matchId = getMatchId(p);
+          if (!matchId) continue;
+
+          const fecha = p.fecha || p.match_date || null;
+          const hora  = p.hora  || p.match_time || '00:00';
+
+          let ts = 0;
+          if (fecha) {
+            const d = new Date(`${fecha}T${hora}`);
+            ts = Number.isNaN(d.getTime()) ? 0 : d.getTime();
           }
+
+          partidosJugados.push({
+            matchId,
+            fecha,
+            hora,
+            ts
+          });
         }
       }
 
@@ -263,10 +270,10 @@
         return;
       }
 
-      // 2) Ordenamos por fecha/hora y tomamos los últimos 3
+      // Ordenamos por fecha/hora y tomamos los últimos 3
       partidosJugados.sort((a, b) => a.ts - b.ts);
       const ultimos = partidosJugados.slice(-3);
-      const matchIds = ultimos.map(p => p.id).filter(Boolean);
+      const matchIds = ultimos.map(p => p.matchId).filter(Boolean);
 
       if (!matchIds.length) {
         box.innerHTML = '<p class="muted">No se pudieron determinar los últimos partidos.</p>';
@@ -275,12 +282,11 @@
 
       box.innerHTML = '<p class="muted">Calculando goles en los últimos partidos…</p>';
 
-      // 3) Consultamos goal_events para esos partidos
       const supabase = await getSupabaseClient();
       const cfg = typeof getSupabaseConfig === 'function' ? getSupabaseConfig() : {};
       const season = cfg?.season || null;
 
-      // Solo eventos de tipo "goal"
+      // Consulta base: solo eventos de tipo "goal"
       let q = supabase
         .from('goal_events')
         .select(`
@@ -299,6 +305,9 @@
         .in('match_id', matchIds)
         .eq('event_type', 'goal');
 
+      // Si goal_events tiene columna season, puedes descomentar esto:
+      // if (season) q = q.eq('season', season);
+
       const { data, error } = await q;
       if (error) {
         console.error('Error goal_events:', error);
@@ -316,12 +325,12 @@
         return;
       }
 
-      // 4) Agregamos goles por jugador
+      // Agregamos goles por jugador
       const byPlayer = new Map(); // key: player_id -> { playerId, nombre, equipo, goles }
 
       for (const ev of eventos) {
         const player = ev.player;
-        if (!player || !player.id) continue; // si no tenemos jugador asociado, saltamos
+        if (!player || !player.id) continue;
 
         const pid = player.id;
         let rec = byPlayer.get(pid);
@@ -353,7 +362,7 @@
         return;
       }
 
-      // 5) Ordenamos: más goles, luego nombre
+      // Ordenamos: más goles, luego nombre (puedes cambiar el desempate si quieres otro criterio)
       lista.sort((a, b) =>
         (b.goles - a.goles) ||
         a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
@@ -362,7 +371,6 @@
       const ganador = lista[0];
       const top5 = lista.slice(0, 5);
 
-      // 6) Render
       const partidosLabel = ultimos.length === 1
         ? 'último partido'
         : `últimos ${ultimos.length} partidos`;
@@ -411,6 +419,7 @@
       box.innerHTML = '<p class="muted">Error calculando el goleador del momento.</p>';
     }
   }
+
 
   // ==========================
   // MINI PICHICHI (TOP 6)
