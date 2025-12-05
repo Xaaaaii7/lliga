@@ -100,10 +100,13 @@
     if (hero) hero.style.display = 'none';
   }
 
-  // ====== HISTÓRICO (listado) ======
+    // ====== HISTÓRICO (listado) ======
   try {
     const grid = document.getElementById('news-grid');
-    if (!grid) throw new Error('news-grid no encontrado');
+    if (!grid) {
+      // En páginas sin histórico (por ejemplo la home) simplemente no hacemos nada
+      return;
+    }
 
     if (!visibles.length) {
       grid.innerHTML = `<p>No hay noticias por ahora.</p>`;
@@ -131,6 +134,7 @@
   } catch (e) {
     console.error('Error pintando histórico:', e);
   }
+
 
   // ====== MODAL NOTICIA ======
   function openNewsModal(n){
