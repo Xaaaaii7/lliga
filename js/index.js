@@ -217,7 +217,7 @@
     }
   }
 
-  // ==========================
+   // ==========================
   // GOLEADOR DEL MOMENTO
   // ==========================
   async function renderGoleadorMomento() {
@@ -278,7 +278,7 @@
       for (const j of selectedJornadas) {
         for (const p of (j.partidos || [])) {
           if (!isNum(p.goles_local) || !isNum(p.goles_visitante)) continue;
-          if (!p.id) continue; // p.id viene del matches.id en CoreStats
+          if (!p.id) continue; // p.id viene de matches.id
           matchIds.push(p.id);
         }
       }
@@ -327,9 +327,8 @@
         return;
       }
 
-      // 5) Agregar goles por jugador
-      const byPlayer = new Map(); // player_id -> { playerId, nombre, equipo, goles }
-
+      // 5) Agregar goles por jugador + nº de partidos (match_id distintos) en los que marca
+      const byPlayer = new Map(); 
       for (const ev of eventos) {
         const player = ev.player;
         if (!player || !player.id) continue;
@@ -347,14 +346,18 @@
             playerId: pid,
             nombre: player.name || 'Jugador',
             equipo: teamName,
-            goles: 0
+            goles: 0,
+            matchSet: new Set()   // partidos en los que ha marcado
           };
           byPlayer.set(pid, rec);
         }
         rec.goles += 1;
+        if (ev.match_id) {
+          rec.matchSet.add(ev.match_id);
+        }
       }
 
-      const lista = Array.from(byPlayer.values());
+      let lista = Array.from(byPlayer.values());
       if (!lista.length) {
         box.innerHTML = `
           <p class="muted">
@@ -364,9 +367,19 @@
         return;
       }
 
-      // 6) Ordenar por goles (y nombre como desempate) y sacar top 5
+      // Calculamos partidos del tramo (partidos con gol) para desempatar
+      lista = lista.map(p => ({
+        ...p,
+        partidosTramo: p.matchSet.size || 1 // mínimo 1 para evitar 0
+      }));
+
+      // 6) Ordenar:
+      //   1) más goles
+      //   2) a igualdad de goles, MENOS partidos en el tramo
+      //   3) nombre alfabético
       lista.sort((a, b) =>
         (b.goles - a.goles) ||
+        (a.partidosTramo - b.partidosTramo) ||
         a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
       );
 
@@ -400,7 +413,14 @@
             <img src="img/jugadores/${slug(ganador.nombre)}.jpg" alt="${ganador.nombre}" class="player-photo-lg">
             <div class="goleador-momento-info">
               <h3>${ganador.nombre}</h3>
-              <p>${ganador.goles} gol(es) en ${jornadasLabel}</p>
+              <p>
+                ${ganador.goles} gol(es) en las ultimas 3 jornadas
+                ${
+                  ganador.partidosTramo
+                    ? ` (en ${ganador.partidosTramo} partido${ganador.partidosTramo > 1 ? 's' : ''})`
+                    : ''
+                }
+              </p>
               <p class="muted small">${ganador.equipo}</p>
             </div>
           </div>
@@ -423,6 +443,7 @@
       box.innerHTML = '<p class="muted">Error calculando el goleador del momento.</p>';
     }
   }
+
 
 
   // ==========================
