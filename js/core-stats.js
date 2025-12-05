@@ -401,12 +401,12 @@
       });
     }
 
-    // 3) Número de partidos jugados por cada league_team_id (matches)
+    // 3) Número de partidos JUGADOS por cada league_team_id (matches con resultado)
     const matchesByTeam = new Map(); // league_team_id -> PJ
 
     let mQuery = supabase
       .from('matches')
-      .select('season, home_league_team_id, away_league_team_id');
+      .select('season, home_league_team_id, away_league_team_id, home_goals, away_goals');
 
     if (activeSeason) {
       mQuery = mQuery.eq('season', activeSeason);
@@ -417,8 +417,16 @@
       console.warn('Error cargando matches para Pichichi:', errMatches);
     } else if (allMatches) {
       for (const m of allMatches) {
+        // Solo contamos partidos jugados: ambos marcadores no nulos
+        const played =
+          m.home_goals != null &&
+          m.away_goals != null;
+
+        if (!played) continue;
+
         const h = m.home_league_team_id;
         const a = m.away_league_team_id;
+
         if (h != null) {
           matchesByTeam.set(h, (matchesByTeam.get(h) || 0) + 1);
         }
@@ -427,6 +435,7 @@
         }
       }
     }
+
 
     // 4) Eventos de gol por jugador para esa temporada
     let eventsQuery = supabase
