@@ -854,6 +854,127 @@
   const loadScorersStateSafe = (matchId, meta) => {
     return loadScorerStateForMatch(meta);
   };
+  // -----------------------------
+  // Editor de tarjetas rojas
+  // -----------------------------
+  const loadRedCardsForMatch = async (matchId, meta) => {
+    if (!hasSupabase || !matchId) return null;
+    const supa = await getSupa();
+    if (!supa) return null;
+
+    const localTeamId = meta.local_team_id;
+    const visitTeamId = meta.visitante_team_id;
+
+    if (!localTeamId || !visitTeamId) {
+      console.warn('RedCards: faltan league_team_id en meta', meta);
+      return null;
+    }
+
+    const { data, error } = await supa
+      .from('match_team_stats')
+      .select('league_team_id, red_cards')
+      .eq('match_id', matchId)
+      .in('league_team_id', [localTeamId, visitTeamId]);
+
+    if (error) {
+      console.warn('Error cargando tarjetas rojas', error);
+      return null;
+    }
+
+    let local = 0;
+    let visitante = 0;
+
+    (data || []).forEach(row => {
+      if (row.league_team_id === localTeamId) {
+        local = typeof row.red_cards === 'number' ? row.red_cards : 0;
+      } else if (row.league_team_id === visitTeamId) {
+        visitante = typeof row.red_cards === 'number' ? row.red_cards : 0;
+      }
+    });
+
+    return { local, visitante };
+  };
+
+  const saveRedCardsForMatch = async (matchId, meta, localVal, visitVal) => {
+    if (!hasSupabase || !matchId) {
+      return { ok: false, msg: 'Supabase no configurado' };
+    }
+    const supa = await getSupa();
+    if (!supa) return { ok: false, msg: 'Supabase no configurado' };
+
+    const localTeamId = meta.local_team_id;
+    const visitTeamId = meta.visitante_team_id;
+
+    if (!localTeamId || !visitTeamId) {
+      return { ok: false, msg: 'Faltan league_team_id en el partido' };
+    }
+
+    const l = Math.max(0, Number(localVal) || 0);
+    const v = Math.max(0, Number(visitVal) || 0);
+
+    const [resL, resV] = await Promise.all([
+      supa
+        .from('match_team_stats')
+        .update({ red_cards: l })
+        .eq('match_id', matchId)
+        .eq('league_team_id', localTeamId),
+      supa
+        .from('match_team_stats')
+        .update({ red_cards: v })
+        .eq('match_id', matchId)
+        .eq('league_team_id', visitTeamId)
+    ]);
+
+    if (resL.error || resV.error) {
+      console.error('Error guardando tarjetas rojas', resL.error, resV.error);
+      return { ok: false, msg: 'No se pudieron guardar las tarjetas rojas' };
+    }
+
+    return { ok: true, msg: 'Tarjetas rojas guardadas' };
+  };
+
+  const initRedCardsEditor = async (matchId, meta) => {
+    if (!hasSupabase || !matchId || !meta) return;
+    if (!bodyEl) return;
+
+    const section = bodyEl.querySelector('.redcards-editor');
+    if (!section) return;
+
+    const inputLocal = section.querySelector('input[data-side="local"]');
+    const inputVisit = section.querySelector('input[data-side="visitante"]');
+    const saveBtn = section.querySelector('.btn-save-redcards');
+    const statusEl = section.querySelector('.redcards-status');
+
+    if (statusEl) statusEl.textContent = 'Cargando tarjetas rojas...';
+
+    const current = await loadRedCardsForMatch(matchId, meta);
+    if (current) {
+      if (inputLocal) inputLocal.value = current.local ?? 0;
+      if (inputVisit) inputVisit.value = current.visitante ?? 0;
+    } else {
+      if (inputLocal && !inputLocal.value) inputLocal.value = 0;
+      if (inputVisit && !inputVisit.value) inputVisit.value = 0;
+    }
+
+    if (statusEl) statusEl.textContent = '';
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        if (!inputLocal || !inputVisit) return;
+        const lVal = inputLocal.value;
+        const vVal = inputVisit.value;
+
+        if (statusEl) statusEl.textContent = 'Guardando...';
+        saveBtn.disabled = true;
+        try {
+          const res = await saveRedCardsForMatch(matchId, meta, lVal, vVal);
+          if (statusEl) statusEl.textContent = res.msg || '';
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    }
+  };
 
   // -----------------------------
   // Render de tabla de estadísticas + cabecera
@@ -961,7 +1082,47 @@
       `;
     }
 
-    const matchId = meta?.id || '';
+     const matchId = meta?.id || '';
+
+    const redCardsEditorHtml =
+      (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
+        ? `
+      <hr class="stats-divider" />
+      <section class="redcards-editor" data-match-id="${matchId}">
+        <h3>Tarjetas rojas</h3>
+        <div class="redcards-row">
+          <label>
+            ${localName}
+            <input
+              type="number"
+              min="0"
+              step="1"
+              class="input-redcards"
+              data-side="local"
+              value="0"
+            />
+          </label>
+        </div>
+        <div class="redcards-row">
+          <label>
+            ${visitName}
+            <input
+              type="number"
+              min="0"
+              step="1"
+              class="input-redcards"
+              data-side="visitante"
+              value="0"
+            />
+          </label>
+        </div>
+        <div class="redcards-actions">
+          <button type="button" class="btn-save-redcards">Guardar rojas</button>
+          <span class="redcards-status" aria-live="polite"></span>
+        </div>
+      </section>
+      `
+        : '';
 
     const scorersEditorHtml =
       (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
@@ -1035,6 +1196,7 @@
       </div>
       ${summaryHtml}
       ${tableHtml}
+      ${redCardsEditorHtml}
       ${scorersEditorHtml}
     `;
   };
@@ -1347,6 +1509,7 @@
 
   if (meta.id) {
     void initScorersEditor(meta.id, meta);
+    void initRedCardsEditor(meta.id, meta);   // ← NUEVO
   }
 });
 
