@@ -27,11 +27,10 @@ const getSupabaseConfig = () => ({
   season: window?.ACTIVE_SEASON || window?.SUPABASE_CONFIG?.season || ''
 });
 
-let supabaseClient = null;
+let supabaseClient = window.__supabaseClient || null;
+let supabaseClientPromise = window.__supabaseClientPromise || null;
 
-async function getSupabaseClient() {
-  if (supabaseClient) return supabaseClient;
-
+async function loadSupabaseFactory() {
   const cdnUrls = [
     // 1º intento: esm.sh (muy estable para ESM)
     'https://esm.sh/@supabase/supabase-js@2.49.1',
@@ -58,11 +57,26 @@ async function getSupabaseClient() {
     throw new Error('No se puede conectar con el backend en este momento.');
   }
 
-  const { url, anonKey } = getSupabaseConfig();
-  if (!url || !anonKey) throw new Error('Falta configuración de BD');
+  return createClient;
+}
 
-  supabaseClient = createClient(url, anonKey);
-  return supabaseClient;
+async function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  if (supabaseClientPromise) return supabaseClientPromise;
+
+  supabaseClientPromise = (async () => {
+    const createClient = await loadSupabaseFactory();
+
+    const { url, anonKey } = getSupabaseConfig();
+    if (!url || !anonKey) throw new Error('Falta configuración de BD');
+
+    supabaseClient = createClient(url, anonKey);
+    window.__supabaseClient = supabaseClient;
+    return supabaseClient;
+  })();
+
+  window.__supabaseClientPromise = supabaseClientPromise;
+  return supabaseClientPromise;
 }
 
 function getActiveSeason() {
