@@ -96,9 +96,9 @@ async function getCurrentProfile() {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('nickname, is_admin')
+    .select('nickname, is_admin, is_approved, team_nickname')
     .eq('id', user.id)
-    .single();
+    .maybeSingle(); // o .single() si prefieres, pero maybeSingle es más permisivo
 
   if (error) {
     console.warn('Error cargando profile', error);
@@ -106,6 +106,7 @@ async function getCurrentProfile() {
   }
   return data || null;
 }
+
 
 async function isAdmin() {
   const profile = await getCurrentProfile();
