@@ -14,43 +14,90 @@
 </header>
 
 <main class="container" id="reglas">
-    <section class="rules">
-    <h2>Reglas Generales</h2>
-    <ul>
-      <li>Los partidos tendrán una duración de 10 minutos por parte.</li>
-      <li>La sala se tiene que crear como Autentico, no Ideal.</li>
-      <li>Se jugará con 5 cambios, en un máximo de 3 ventanas de cambio.</li>
-      <li>Se jugará un partido cada 2 semanas. Se dará una ventana de 2 semanas para que los jugadores acuerden un día para disputar el partido.</li>
-      <li>En caso de que los jugadores no puedan acordar ningún día dentro de esas 2 semanas, se seguirá el calendario y el partido quedará aplazado. Los jugadores podrán decidir posteriormente cuándo disputarlo.</li>
-      <li>Si todos los partidos de la jornada se hubieran jugado antes de finalizar las 2 semanas, se podrá adelantar la siguiente jornada.</li>
-      <li>
-        Para validar cada partido será necesario aportar una fotografía de la pantalla con el resultado/estadísticas al final del encuentro.
-        Ejemplo: 
-        <a href="img/foto_resultat.webp" target="_blank" rel="noopener noreferrer">
-          ver captura
-        </a>.
-      </li>
-     <li>
-        Se valorará retransmitir el partido (Twitch o YouTube).
-        <a href="javascript:void(0)" id="btn-guia-stream">Ver guía rápida PS4/PS5</a>
-      </li>
-      <li>Si un jugador se lesiona o es expulsado en un partido, no podrá disputar el siguiente.</li>
-    </ul>
+  <section class="rules">
 
-    <h2>Sistema de Puntuación</h2>
-    <ul>
-      <li>Victoria: 3 puntos</li>
-      <li>Empate: 1 punto</li>
-      <li>Derrota: 0 puntos</li>
-    </ul>
+    <article class="rule-card rule-general">
+      <div class="rule-card-header">
+        <span class="rule-icon">⚙️</span>
+        <h2>Reglas Generales</h2>
+      </div>
+      <ul>
+        <li>Los partidos tendrán una duración de 10 minutos por parte.</li>
+        <li>La sala se tiene que crear como Autentico, no Ideal.</li>
+        <li>Se jugará con 5 cambios, en un máximo de 3 ventanas de cambio.</li>
+        <li>Se jugará un partido cada 2 semanas. Se dará una ventana de 2 semanas para que los jugadores acuerden un día para disputar el partido.</li>
+        <li>En caso de que los jugadores no puedan acordar ningún día dentro de esas 2 semanas, se seguirá el calendario y el partido quedará aplazado. Los jugadores podrán decidir posteriormente cuándo disputarlo.</li>
+        <li>Si todos los partidos de la jornada se hubieran jugado antes de finalizar las 2 semanas, se podrá adelantar la siguiente jornada.</li>
+        <li>
+          Para validar cada partido será necesario aportar una fotografía de la pantalla con el resultado/estadísticas al final del encuentro.
+          Ejemplo:
+          <a href="img/foto_resultat.webp" target="_blank" rel="noopener noreferrer">
+            ver captura
+          </a>.
+        </li>
+        <li>
+          Se valorará retransmitir el partido (Twitch o YouTube).
+          <a href="javascript:void(0)" id="btn-guia-stream">Ver guía rápida PS4/PS5</a>
+        </li>
+        <li>Si un jugador se lesiona o es expulsado en un partido, no podrá disputar el siguiente.</li>
+      </ul>
+    </article>
 
-    <h2>Fair Play</h2>
-    <ul>
-      <li>Respeto entre todos los participantes.</li>
-      <li>No se puede abandonar un partido. En caso reiterado, se aplicará una sanción de -3 puntos al jugador que lo abandone.</li>
-      <li>Si un jugador no responde a la solicitud de su rival para jugar una jornada, se dará la victoria al jugador que sí respondió.</li>
-      <li>Si ninguno de los dos jugadores responde, el partido se dará por disputado con 0 puntos y 3 goles recibidos para cada uno.</li>
-    </ul>
+    <article class="rule-card rule-points">
+      <div class="rule-card-header">
+        <span class="rule-icon">📊</span>
+        <h2>Sistema de Puntuación</h2>
+      </div>
+      <ul>
+        <li>Victoria: 3 puntos</li>
+        <li>Empate: 1 punto</li>
+        <li>Derrota: 0 puntos</li>
+      </ul>
+    </article>
+
+    <article class="rule-card rule-fairplay">
+      <div class="rule-card-header">
+        <span class="rule-icon">🤝</span>
+        <h2>Fair Play</h2>
+      </div>
+      <ul>
+        <li>Respeto entre todos los participantes.</li>
+        <li>No se puede abandonar un partido. En caso reiterado, se aplicará una sanción de -3 puntos al jugador que lo abandone.</li>
+        <li>Si un jugador no responde a la solicitud de su rival para jugar una jornada, se dará la victoria al jugador que sí respondió.</li>
+        <li>Si ninguno de los dos jugadores responde, el partido se dará por disputado con 0 puntos y 3 goles recibidos para cada uno.</li>
+      </ul>
+    </article>
+
+    <article class="rule-card rule-scheduling">
+      <div class="rule-card-header">
+        <span class="rule-icon">📅</span>
+        <h2>Gestión de Jornadas y Disponibilidad</h2>
+      </div>
+      <ul>
+        <li><strong>Duración de cada jornada:</strong> Cada jornada dura 2 semanas completas. Al finalizar la segunda semana (sábado por la noche), el partido se considera pendiente. El domingo se aplicará la resolución del partido, salvo que se haya solicitado una prórroga.</li>
+
+        <li><strong>Iniciativa para disputar el partido:</strong> Se considera que un jugador ha mostrado iniciativa cuando propone una fecha y hora concretas, con al menos 24 horas de antelación, y dentro del periodo de la jornada. Las propuestas de jugar “al momento” o con muy poco margen no cuentan como iniciativa por no ofrecer suficiente flexibilidad al rival.</li>
+
+        <li><strong>Resolución si el partido no se juega:</strong>
+          <ul>
+            <li>Ambos jugadores muestran iniciativa → empate 0–0.</li>
+            <li>Solo uno muestra iniciativa → victoria 3–0 para quien sí la mostró.</li>
+            <li>Ninguno muestra iniciativa → empate 0–0.</li>
+          </ul>
+        </li>
+
+        <li><strong>Prórrogas:</strong> Deben solicitarse antes de cerrar la jornada. Por lo general se concederá una semana adicional, aunque dependerá de cada caso. El objetivo es evitar retrasos prolongados sin bloquear la liga.</li>
+
+        <li><strong>Incumplimiento de un acuerdo:</strong> Si dos jugadores acuerdan una fecha y hora y uno no se presenta sin avisar ni causa justificada, tendrá una valoración negativa en la resolución, pudiendo derivar en un 3–0 en contra si el partido no llega a disputarse dentro del plazo.</li>
+
+        <li><strong>Causas justificadas:</strong> Al ser un torneo entre amigos, se aplicará el sentido común. Se consideran causas justificadas: enfermedad, imprevistos laborales o académicos, compromisos familiares importantes o problemas técnicos reales (internet caído, consola averiada, apagón...). No se consideran justificadas: olvidos, falta de ganas o no avisar pese a saber de antemano que no se podrá jugar.</li>
+
+        <li><strong>Disponibilidad mínima:</strong> En la medida de lo posible, cada jugador debería ofrecer al menos dos franjas horarias distintas durante las dos semanas. Si por motivos personales solo puede jugar en horarios muy concretos, se aplicarán las resoluciones correspondientes sin penalizar ni favorecer a nadie.</li>
+
+        <li><strong>Comunicación oficial:</strong> Toda la comunicación referente a propuestas de fecha, avisos, acuerdos y solicitudes de prórroga debe realizarse en el chat oficial del torneo. Los mensajes privados no se tendrán en cuenta para la resolución del partido.</li>
+      </ul>
+    </article>
+
   </section>
 </main>
 
@@ -82,10 +129,8 @@
   </div>
 </div>
 
-<!-- incluye tus scripts comunes -->
 <script src="js/common.js"></script>
 <script src="js/reglas.js"></script>
-
 
 <footer class="site-footer">© Torneo entre amigos</footer>
 </body>
