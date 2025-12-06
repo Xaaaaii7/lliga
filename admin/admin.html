@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Admin</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Panel de administración</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container">
+  <section>
+    <h2>Temporada activa</h2>
+    <p><strong id="admin-season"></strong></p>
+  </section>
+
+  <section class="admin-menu">
+    <h2>Gestión</h2>
+    <ul>
+      <li><a href="admin-matches.html">Partidos (matches)</a></li>
+      <li><a href="admin-league-teams.html">Equipos de liga (league_teams)</a></li>
+    </ul>
+  </section>
+</main>
+
+<script src="js/common.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await AppUtils.ensureAdmin();
+  if (!ok) return;
+
+  const seasonEl = document.getElementById('admin-season');
+  if (seasonEl) {
+    seasonEl.textContent = AppUtils.getActiveSeason();
+  }
+});
+</script>
+</body>
+</html>
