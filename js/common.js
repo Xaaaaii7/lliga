@@ -31,9 +31,36 @@ let supabaseClient = null;
 
 async function getSupabaseClient() {
   if (supabaseClient) return supabaseClient;
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm');
+
+  const cdnUrls = [
+    // 1º intento: esm.sh (muy estable para ESM)
+    'https://esm.sh/@supabase/supabase-js@2.49.1',
+    // 2º intento: jsDelivr (el que tenías antes)
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm'
+  ];
+
+  let createClient = null;
+  let lastError = null;
+
+  for (const url of cdnUrls) {
+    try {
+      const mod = await import(url);
+      createClient = mod.createClient;
+      if (createClient) break;
+    } catch (err) {
+      console.warn('No se pudo cargar la librería de BD desde', url, err);
+      lastError = err;
+    }
+  }
+
+  if (!createClient) {
+    console.error('No se pudo cargar la librería de BD desde ningún CDN', lastError);
+    throw new Error('No se puede conectar con el backend en este momento.');
+  }
+
   const { url, anonKey } = getSupabaseConfig();
-  if (!url || !anonKey) throw new Error('Falta configuración de Supabase');
+  if (!url || !anonKey) throw new Error('Falta configuración de BD');
+
   supabaseClient = createClient(url, anonKey);
   return supabaseClient;
 }
