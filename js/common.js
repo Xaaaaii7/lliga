@@ -75,6 +75,117 @@ function genAlineacionFromEsquema(esquema){
   ];
 }
 
+// ─────────────────────────────
+// AUTH HELPERS (NUEVO)
+// ─────────────────────────────
+
+async function getCurrentUser() {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.warn('Error obteniendo usuario actual', error);
+    return null;
+  }
+  return data.user || null;
+}
+
+async function getCurrentProfile() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('nickname, is_admin')
+    .eq('id', user.id)
+    .single();
+
+  if (error) {
+    console.warn('Error cargando profile', error);
+    return null;
+  }
+  return data || null;
+}
+
+async function isAdmin() {
+  const profile = await getCurrentProfile();
+  return !!(profile && profile.is_admin === true);
+}
+
+async function ensureAdmin(options = {}) {
+  const {
+    redirectIfNotLogged = 'login.html',
+    redirectIfNotAdmin = 'index.html'
+  } = options;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    window.location.href = redirectIfNotLogged;
+    return false;
+  }
+
+  const profile = await getCurrentProfile();
+  if (!profile?.is_admin) {
+    window.location.href = redirectIfNotAdmin;
+    return false;
+  }
+
+  return true;
+}
+
+async function login(email, password) {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+async function logout() {
+  const supabase = await getSupabaseClient();
+  await supabase.auth.signOut();
+  // Redirigimos a inicio por defecto
+  window.location.href = 'index.html';
+}
+
+// Renderizar zona usuario (login/admin/logout) en el header
+async function renderUserSection() {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+
+  let container = document.getElementById('user-section');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'user-section';
+    container.className = 'user-section';
+    header.appendChild(container);
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    container.innerHTML = `<a href="login.html">Login</a>`;
+    return;
+  }
+
+  const profile = await getCurrentProfile();
+
+  let html = `<span class="user-name">${profile?.nickname || user.email}</span>`;
+  if (profile?.is_admin) {
+    html += ` | <a href="admin.html">Admin</a>`;
+  }
+  html += ` | <a href="#" id="logout-btn">Logout</a>`;
+
+  container.innerHTML = html;
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await logout();
+    });
+  }
+}
+
+// Exponer helpers en AppUtils
 Object.assign(AppUtils, {
   loadJSON,
   fmtDate,
@@ -84,7 +195,13 @@ Object.assign(AppUtils, {
   getSupabaseConfig,
   getSupabaseClient,
   getActiveSeason,
-  genAlineacionFromEsquema
+  genAlineacionFromEsquema,
+  getCurrentUser,
+  getCurrentProfile,
+  isAdmin,
+  ensureAdmin,
+  login,
+  logout
 });
 
 window.AppUtils = AppUtils;
@@ -150,4 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // Renderizar info de usuario (login/admin/logout)
+  renderUserSection().catch(console.error);
 });
