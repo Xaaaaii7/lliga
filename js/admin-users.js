@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const supabase = await AppUtils.getSupabaseClient();
   const tbody = document.getElementById('users-tbody');
+  const escapeHtml = AppUtils.escapeHtml || ((v) => String(v ?? ''));
 
   // 1) Cargar profiles
   const { data: profiles, error } = await supabase
@@ -54,17 +55,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const adminTxt = p.is_admin ? 'Sí' : 'No';
     const statusHtml = renderStatus(p);
 
+    const safeNickname = escapeHtml(p.nickname || '');
+    const safeTeam = escapeHtml(p.team_nickname || '');
+
     const actions = p.is_approved
       ? `<button class="btn btn-secondary btn-sm btn-mark-pending" data-id="${p.id}">Marcar pendiente</button>`
       : `<button class="btn btn-primary btn-sm btn-approve" data-id="${p.id}">Aprobar</button>`;
 
     const clubLink = p.team_nickname
-      ? `<a href="club.html?team=${encodeURIComponent(p.team_nickname)}" target="_blank">${p.team_nickname}</a>`
+      ? `<a href="club.html?team=${encodeURIComponent(p.team_nickname)}" target="_blank">${safeTeam}</a>`
       : '';
 
     return `
       <tr data-id="${p.id}">
-        <td>${p.nickname || ''}</td>
+        <td>${safeNickname}</td>
         <td>${clubLink}</td>
         <td>${adminTxt}</td>
         <td>${statusHtml}</td>
