@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Login</title>
   <link rel="stylesheet" href="css/style.css" />
-  <!-- Si luego creas un admin.css, lo importas aquí o dentro de style.css -->
 </head>
 <body class="page-auth">
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Acceso a la administración</h1>
+  <h1>Acceso a la administración y clubes</h1>
   <nav id="main-nav"></nav>
 </header>
 
@@ -18,7 +17,6 @@
   <section class="auth-card">
     <h2>Iniciar sesión</h2>
     <p class="auth-subtitle">
-      
     </p>
 
     <form id="login-form" class="auth-form">
@@ -39,42 +37,14 @@
       <p id="login-error" class="auth-error"></p>
     </form>
 
-    <p class="auth-hint">
-    </p>
-
     <p class="auth-back">
-      <a href="index.html" class="link-muted">&larr; Volver a la web</a>
+      ¿Aún no tienes cuenta?
+      <a href="register.html" class="link-muted">Regístrate</a>
     </p>
   </section>
 </main>
 
 <script src="js/common.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('login-form');
-  const emailInput = document.getElementById('login-email');
-  const passInput = document.getElementById('login-password');
-  const errorEl = document.getElementById('login-error');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorEl.textContent = '';
-    form.classList.add('is-loading');
-
-    const email = emailInput.value.trim();
-    const password = passInput.value;
-
-    try {
-      await AppUtils.login(email, password);
-      window.location.href = 'admin.html';
-    } catch (err) {
-      console.error(err);
-      errorEl.textContent = 'Error de login. Revisa email y contraseña.';
-    } finally {
-      form.classList.remove('is-loading');
-    }
-  });
-});
-</script>
+<script src="js/login.js"></script>
 </body>
 </html>
