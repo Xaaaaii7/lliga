@@ -66,12 +66,8 @@
   let _pichichiRowsCache = null;
   // Mapa interno de equipos por id de league_teams (para casar stats)
   let _teamMapCache = null;
-
   // Mapa de sanciones por nombre normalizado de equipo
   let _penaltyByTeamNorm = null;
-  // Mapa interno de equipos por id de league_teams (para casar stats)
-  let _teamMapCache = null;
-
   // Caché de clasificaciones por jornada / opciones
   const _clasifCache = new Map(); // key: `${limit||'ALL'}|${useH2H?1:0}`
 
