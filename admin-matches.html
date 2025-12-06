@@ -6,19 +6,36 @@
   <title>Torneo — Admin Partidos</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="page-admin">
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
   <h1>Admin — Partidos</h1>
   <nav id="main-nav"></nav>
 </header>
 
-<main class="container">
+<main class="container admin-wrapper">
+  <section class="admin-header-card">
+    <div class="admin-header-main">
+      <div>
+        <p class="admin-kicker">Gestión de calendario</p>
+        <h2>Partidos de la temporada <span id="season-label"></span></h2>
+        <p class="admin-desc">
+          Edita fecha, hora, equipos, goles y enlace de stream de cada partido.
+          Los cambios se reflejan directamente en la web pública.
+        </p>
+      </div>
+      <div class="admin-season-box">
+        <span class="admin-season-label">Temporada activa</span>
+        <span class="admin-season-value" id="admin-season">–</span>
+      </div>
+    </div>
+  </section>
+
   <section>
-    <h2>Partidos de la temporada <span id="season-label"></span></h2>
     <table class="admin-table">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Jornada</th>
           <th>Fecha</th>
           <th>Hora</th>
@@ -29,86 +46,90 @@
         </tr>
       </thead>
       <tbody id="matches-tbody">
-        <tr><td colspan="7">Cargando...</td></tr>
+        <tr><td colspan="8">Cargando partidos...</td></tr>
       </tbody>
     </table>
   </section>
 </main>
 
+<!-- Modal edición partido -->
+<div id="match-modal-backdrop" class="modal-backdrop" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar partido</h3>
+      <button type="button" class="modal-close" id="match-modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="match-form" class="admin-form">
+        <input type="hidden" id="match-id" />
+
+        <div class="admin-form-row">
+          <label>
+            ID (solo lectura)
+            <input type="text" id="match-id-readonly" readonly />
+          </label>
+          <label>
+            Jornada
+            <input type="number" id="match-round" readonly />
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label>
+            Local
+            <select id="match-home-team"></select>
+          </label>
+          <label>
+            Visitante
+            <select id="match-away-team"></select>
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label>
+            Fecha
+            <input type="date" id="match-date" />
+          </label>
+          <label>
+            Hora
+            <input type="time" id="match-time" />
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label>
+            Goles local
+            <input type="number" id="match-home-goals" min="0" />
+          </label>
+          <label>
+            Goles visitante
+            <input type="number" id="match-away-goals" min="0" />
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label class="full-width">
+            URL del stream (Twitch/YouTube, etc.)
+            <input type="text" id="match-stream-url" />
+          </label>
+        </div>
+
+        <p id="match-error" class="auth-error"></p>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="match-cancel-btn">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" id="match-save-btn">
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="js/common.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
-  if (!ok) return;
-
-  const season = AppUtils.getActiveSeason();
-  document.getElementById('season-label').textContent = season;
-
-  const tbody = document.getElementById('matches-tbody');
-  const supabase = await AppUtils.getSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('matches')
-    .select(`
-      id,
-      season,
-      round_id,
-      match_date,
-      match_time,
-      home_goals,
-      away_goals,
-      home:league_teams!matches_home_league_team_id_fkey ( id, nickname ),
-      away:league_teams!matches_away_league_team_id_fkey ( id, nickname )
-    `)
-    .eq('season', season)
-    .order('round_id', { ascending: true })
-    .order('match_date', { ascending: true });
-
-  if (error) {
-    console.error(error);
-    tbody.innerHTML = `<tr><td colspan="7">Error cargando partidos.</td></tr>`;
-    return;
-  }
-
-  if (!data || !data.length) {
-    tbody.innerHTML = `<tr><td colspan="7">No hay partidos para esta temporada.</td></tr>`;
-    return;
-  }
-
-  const fmtDate = AppUtils.fmtDate;
-
-  tbody.innerHTML = data.map(m => {
-    const fecha = m.match_date ? fmtDate(m.match_date) : '';
-    const hora = m.match_time || '';
-    const local = m.home?.nickname || '-';
-    const visit = m.away?.nickname || '-';
-    const res = (m.home_goals ?? '') === '' || (m.away_goals ?? '') === ''
-      ? '–'
-      : `${m.home_goals} - ${m.away_goals}`;
-
-    return `
-      <tr data-id="${m.id}">
-        <td>${m.round_id ?? ''}</td>
-        <td>${fecha}</td>
-        <td>${hora}</td>
-        <td>${local}</td>
-        <td>${visit}</td>
-        <td>${res}</td>
-        <td>
-          <button class="btn-edit-match" data-id="${m.id}">Editar</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  // De momento, solo un placeholder para editar
-  tbody.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-edit-match');
-    if (!btn) return;
-    const id = btn.getAttribute('data-id');
-    alert('Aquí abriremos el editor para el partido: ' + id);
-  });
-});
-</script>
+<script src="js/admin-matches.js"></script>
 </body>
 </html>
