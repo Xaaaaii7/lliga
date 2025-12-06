@@ -20,8 +20,8 @@
         <p class="admin-kicker">Modo administrador</p>
         <h2>Resumen de control del torneo</h2>
         <p class="admin-desc">
-          Desde aquí puedes gestionar los partidos, sanciones de equipos y, en el futuro,
-          más opciones del torneo.
+          Desde aquí puedes gestionar los partidos, sanciones de equipos y usuarios
+          registrados del torneo.
         </p>
       </div>
       <div class="admin-season-box">
@@ -55,22 +55,23 @@
       </a>
     </article>
 
-    <article class="admin-card admin-card-disabled">
-      <h3>Próximamente</h3>
+    <article class="admin-card">
+      <h3>Usuarios (profiles)</h3>
       <p>
-        Aquí podrás añadir más herramientas: generación automática de jornadas,
-        gestión de noticias, resúmenes automáticos, etc.
+        Revisa las cuentas registradas, aprueba o bloquea su acceso y consulta
+        qué equipo tiene asignado cada usuario.
       </p>
-      <button class="btn btn-disabled btn-full" disabled>
-        En desarrollo
-      </button>
+      <a href="admin-users.html" class="btn btn-secondary btn-full">
+        Gestionar usuarios
+      </a>
     </article>
   </section>
 
   <section class="admin-note">
     <p>
       Si algo no cuadra (clasificación, sanciones, etc.), revisa primero
-      los datos en <strong>matches</strong> y <strong>league_teams</strong>.
+      los datos en <strong>matches</strong>, <strong>league_teams</strong> y
+      la asignación de usuarios en <strong>profiles</strong>.
     </p>
   </section>
 </main>
