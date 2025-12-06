@@ -64,7 +64,11 @@
   let _resultadosCache = null;
   let _statsIndexCache = null;
   let _pichichiRowsCache = null;
+  // Mapa interno de equipos por id de league_teams (para casar stats)
+  let _teamMapCache = null;
 
+  // Mapa de sanciones por nombre normalizado de equipo
+  let _penaltyByTeamNorm = null;
   // Mapa interno de equipos por id de league_teams (para casar stats)
   let _teamMapCache = null;
 
@@ -127,16 +131,16 @@
 
     const supabase = await getSupabaseClient();
 
-    let query = supabase
+        let query = supabase
       .from('matches')
       .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
         home_league_team_id,away_league_team_id,
         home:league_teams!matches_home_league_team_id_fkey(
-          id,nickname,display_name,club:clubs(id,name)
+          id,nickname,display_name,penalty_points,penalty_reason,club:clubs(id,name)
         ),
         away:league_teams!matches_away_league_team_id_fkey(
-          id,nickname,display_name,club:clubs(id,name)
+          id,nickname,display_name,penalty_points,penalty_reason,club:clubs(id,name)
         )
       `)
       .order('round_id', { ascending: true })
@@ -160,10 +164,13 @@
     });
     _teamMapCache = teamMap;
 
+    // Nuevo: mapa de sanciones por nombre normalizado
+    const penaltyMap = new Map();
+
     // Construimos jornadas como en resultados.json
     const jornadasMap = new Map();
 
-    matches.forEach((m, idx) => {
+        matches.forEach((m, idx) => {
       const roundNum = Number(m.round_id);
       const numero = Number.isFinite(roundNum) && roundNum > 0
         ? roundNum
@@ -178,6 +185,17 @@
 
       const localName = teamNameFromObj(m.home || {}, m.home_league_team_id);
       const visitName = teamNameFromObj(m.away || {}, m.away_league_team_id);
+
+      // 🔴 Nuevo: registrar sanciones por nombre normalizado
+      const localPenalty = m.home && Number.isFinite(+m.home.penalty_points)
+        ? +m.home.penalty_points
+        : 0;
+      const visitPenalty = m.away && Number.isFinite(+m.away.penalty_points)
+        ? +m.away.penalty_points
+        : 0;
+
+      penaltyMap.set(norm(localName), localPenalty);
+      penaltyMap.set(norm(visitName), visitPenalty);
 
       const partido = {
         id: m.id,
@@ -198,6 +216,10 @@
       jornada.partidos.push(partido);
       jornadasMap.set(numero, jornada);
     });
+
+    // 🔴 Guardamos el mapa de sanciones en caché global
+    _penaltyByTeamNorm = penaltyMap;
+
 
     const jornadas = Array
       .from(jornadasMap.values())
@@ -498,7 +520,21 @@ const loadPichichiFromSupabase = async () => {
       }
     }
 
-    const equipos = Array.from(teams.values());
+   const equipos = Array.from(teams.values());
+
+    // 🔴 Aplicar sanciones si las tenemos
+    if (_penaltyByTeamNorm && _penaltyByTeamNorm.size) {
+      for (const t of equipos) {
+        const k = norm(t.nombre);
+        const pen = _penaltyByTeamNorm.get(k) || 0;
+
+        t.pts_raw = t.pts;       // puntos por partidos (sin sanción)
+        t.penalty_pts = pen;     // sanción
+        t.pts = t.pts_raw - pen; // puntos finales
+
+        if (t.pts < 0) t.pts = 0; // opcional: evitar negativos
+      }
+    }
 
     equipos.sort((A, B) => {
       if (B.pts !== A.pts) return B.pts - A.pts;
