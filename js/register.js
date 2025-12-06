@@ -68,7 +68,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       // a) Crear usuario en Supabase Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: 'https://xaaaaii7.github.io/lliga/login.html'
+        }
       });
 
       if (signUpError) {
