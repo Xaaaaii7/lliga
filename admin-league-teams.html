@@ -6,134 +6,98 @@
   <title>Torneo — Admin Equipos Liga</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="page-admin">
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
   <h1>Admin — Equipos de Liga</h1>
   <nav id="main-nav"></nav>
 </header>
 
-<main class="container">
+<main class="container admin-wrapper">
+  <section class="admin-header-card">
+    <div class="admin-header-main">
+      <div>
+        <p class="admin-kicker">Gestión de sanciones</p>
+        <h2>Equipos de la temporada <span id="season-label"></span></h2>
+        <p class="admin-desc">
+          Ajusta los puntos de sanción y el motivo asociado para cada equipo.
+          Estos valores se tienen en cuenta en la clasificación del torneo.
+        </p>
+      </div>
+      <div class="admin-season-box">
+        <span class="admin-season-label">Temporada activa</span>
+        <span class="admin-season-value" id="admin-season">–</span>
+      </div>
+    </div>
+  </section>
+
   <section>
-    <h2>Equipos de la temporada <span id="season-label"></span></h2>
     <table class="admin-table">
       <thead>
         <tr>
           <th>Club</th>
           <th>Nickname</th>
-          <th>Jugador</th>
+          <th>Display</th>
           <th>Puntos sanción</th>
           <th>Motivo</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody id="league-teams-tbody">
-        <tr><td colspan="6">Cargando...</td></tr>
+        <tr><td colspan="6">Cargando equipos...</td></tr>
       </tbody>
     </table>
   </section>
 </main>
 
+<!-- Modal edición sanción -->
+<div id="penalty-modal-backdrop" class="modal-backdrop" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar sanción de equipo</h3>
+      <button type="button" class="modal-close" id="penalty-modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="penalty-form" class="admin-form">
+        <input type="hidden" id="penalty-team-id" />
+
+        <div class="admin-form-row">
+          <label class="full-width">
+            Equipo
+            <input type="text" id="penalty-team-name" readonly />
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label>
+            Puntos de sanción
+            <input type="number" id="penalty-points" />
+          </label>
+        </div>
+
+        <div class="admin-form-row">
+          <label class="full-width">
+            Motivo
+            <textarea id="penalty-reason" rows="3"></textarea>
+          </label>
+        </div>
+
+        <p id="penalty-error" class="auth-error"></p>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="penalty-cancel-btn">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" id="penalty-save-btn">
+            Guardar sanción
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="js/common.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
-  if (!ok) return;
-
-  const season = AppUtils.getActiveSeason();
-  document.getElementById('season-label').textContent = season;
-
-  const tbody = document.getElementById('league-teams-tbody');
-  const supabase = await AppUtils.getSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('league_teams')
-    .select(`
-      id,
-      season,
-      nickname,
-      display_name,
-      penalty_points,
-      penalty_reason,
-      club:clubs!league_teams_club_id_fkey ( name ),
-      user:users!league_teams_user_id_fkey ( name )
-    `)
-    .eq('season', season)
-    .order('id', { ascending: true });
-
-  if (error) {
-    console.error(error);
-    tbody.innerHTML = `<tr><td colspan="6">Error cargando equipos de liga.</td></tr>`;
-    return;
-  }
-
-  if (!data || !data.length) {
-    tbody.innerHTML = `<tr><td colspan="6">No hay equipos para esta temporada.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = data.map(t => {
-    const clubName = t.club?.name || '-';
-    const userName = t.user?.name || '';
-    const motivoShort = t.penalty_reason
-      ? (t.penalty_reason.length > 40 ? t.penalty_reason.slice(0, 37) + '…' : t.penalty_reason)
-      : '';
-
-    return `
-      <tr data-id="${t.id}">
-        <td>${clubName}</td>
-        <td>${t.nickname}</td>
-        <td>${userName}</td>
-        <td>${t.penalty_points}</td>
-        <td title="${t.penalty_reason || ''}">${motivoShort}</td>
-        <td>
-          <button class="btn-edit-penalty" data-id="${t.id}">Editar sanción</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  tbody.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.btn-edit-penalty');
-    if (!btn) return;
-
-    const id = Number(btn.getAttribute('data-id'));
-    const row = btn.closest('tr');
-    const currentPoints = Number(row.children[3].textContent || 0);
-    const currentReason = row.children[4].getAttribute('title') || '';
-
-    const newPointsStr = prompt('Puntos de sanción (puede ser negativo o 0):', currentPoints);
-    if (newPointsStr === null) return; // cancel
-
-    const newPoints = Number(newPointsStr);
-    if (Number.isNaN(newPoints)) {
-      alert('Valor no válido para puntos.');
-      return;
-    }
-
-    const newReason = prompt('Motivo de sanción:', currentReason);
-    if (newReason === null) return;
-
-    const { error: updError } = await supabase
-      .from('league_teams')
-      .update({
-        penalty_points: newPoints,
-        penalty_reason: newReason
-      })
-      .eq('id', id);
-
-    if (updError) {
-      console.error(updError);
-      alert('Error actualizando sanción.');
-      return;
-    }
-
-    // Actualizar tabla en el DOM
-    row.children[3].textContent = newPoints;
-    row.children[4].textContent = newReason.length > 40 ? newReason.slice(0,37) + '…' : newReason;
-    row.children[4].setAttribute('title', newReason || '');
-  });
-});
-</script>
+<script src="js/admin-league-teams.js"></script>
 </body>
 </html>
