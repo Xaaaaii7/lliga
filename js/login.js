@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const passInput = document.getElementById('login-password');
   const errorEl = document.getElementById('login-error');
 
+  const forgotLink = document.getElementById('forgot-password-link');
+  const forgotSection = document.getElementById('forgot-password-section');
+  const forgotForm = document.getElementById('forgot-form');
+  const forgotEmailInput = document.getElementById('forgot-email');
+  const forgotMsg = document.getElementById('forgot-msg');
+
+  // ─────────────────────────────
+  // Login normal
+  // ─────────────────────────────
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorEl.textContent = '';
@@ -39,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Si no está aprobado
       if (profile.is_approved === false) {
-        errorEl.textContent = 'Tu cuenta está creada pero aún no ha sido aprobada por el administrador.';
+        errorEl.textContent = 'Tu cuenta está creada pero aún no ha sido aprobada por el organizador.';
         form.classList.remove('is-loading');
         return;
       }
@@ -55,9 +64,60 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'index.html';
     } catch (err) {
       console.error(err);
-      errorEl.textContent = 'Error de login. Revisa email y contraseña.';
+      errorEl.textContent = err?.message || 'Error de login. Revisa email y contraseña.';
     } finally {
       form.classList.remove('is-loading');
     }
   });
+
+  // ─────────────────────────────
+  // Mostrar / ocultar bloque "olvidé contraseña"
+  // ─────────────────────────────
+  if (forgotLink && forgotSection && forgotForm && forgotEmailInput && forgotMsg) {
+    forgotLink.addEventListener('click', () => {
+      const hidden = forgotSection.hidden;
+      forgotSection.hidden = !hidden;
+      forgotMsg.textContent = '';
+
+      // Si lo acabamos de abrir y el campo está vacío, copiamos el email del login
+      if (!forgotSection.hidden && !forgotEmailInput.value && emailInput.value) {
+        forgotEmailInput.value = emailInput.value;
+      }
+    });
+
+    // ─────────────────────────────
+    // Enviar email de restablecimiento
+    // ─────────────────────────────
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      forgotMsg.textContent = '';
+      forgotForm.classList.add('is-loading');
+
+      const email = forgotEmailInput.value.trim();
+      if (!email) {
+        forgotMsg.textContent = 'Introduce un email válido.';
+        forgotForm.classList.remove('is-loading');
+        return;
+      }
+
+      try {
+        const supabase = await AppUtils.getSupabaseClient();
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) {
+          console.error(error);
+          forgotMsg.textContent = 'No se ha podido enviar el correo. Inténtalo de nuevo en unos minutos.';
+          forgotForm.classList.remove('is-loading');
+          return;
+        }
+
+        // Mensaje neutro (sin decir si el email existe o no)
+        forgotMsg.textContent = 'Si la dirección existe en el sistema, recibirás un correo con instrucciones para crear una nueva contraseña.';
+      } catch (err) {
+        console.error(err);
+        forgotMsg.textContent = 'Ha ocurrido un error. Inténtalo más tarde.';
+      } finally {
+        forgotForm.classList.remove('is-loading');
+      }
+    });
+  }
 });
