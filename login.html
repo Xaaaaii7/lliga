@@ -17,6 +17,8 @@
   <section class="auth-card">
     <h2>Iniciar sesión</h2>
     <p class="auth-subtitle">
+      Accede con tu usuario del torneo. Si eres jugador, te enviaremos a la
+      página de tu club; si eres admin, al panel de administración.
     </p>
 
     <form id="login-form" class="auth-form">
@@ -41,6 +43,33 @@
       ¿Aún no tienes cuenta?
       <a href="register.html" class="link-muted">Regístrate</a>
     </p>
+
+    <p class="auth-back">
+      <button type="button" id="forgot-password-link" class="link-as-button">
+        ¿Has olvidado tu contraseña?
+      </button>
+    </p>
+
+    <!-- Bloque para solicitar reset de contraseña -->
+    <section id="forgot-password-section" class="auth-card-secondary" hidden>
+      <h3>Restablecer contraseña</h3>
+      <p class="auth-subtitle">
+        Introduce tu email y te enviaremos un mensaje con instrucciones para crear una contraseña nueva.
+      </p>
+
+      <form id="forgot-form" class="auth-form">
+        <label class="auth-field">
+          <span>Email</span>
+          <input type="email" id="forgot-email" autocomplete="email" required />
+        </label>
+
+        <button type="submit" class="btn btn-secondary auth-submit">
+          Enviar instrucciones
+        </button>
+
+        <p id="forgot-msg" class="auth-info"></p>
+      </form>
+    </section>
   </section>
 </main>
 
