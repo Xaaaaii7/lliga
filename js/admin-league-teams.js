@@ -1,0 +1,181 @@
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await AppUtils.ensureAdmin();
+  if (!ok) return;
+
+  const season = AppUtils.getActiveSeason();
+  const seasonLabelEl = document.getElementById('season-label');
+  const adminSeasonEl = document.getElementById('admin-season');
+  if (seasonLabelEl) seasonLabelEl.textContent = season;
+  if (adminSeasonEl) adminSeasonEl.textContent = season;
+
+  const supabase = await AppUtils.getSupabaseClient();
+  const tbody = document.getElementById('league-teams-tbody');
+
+  // 1) Cargar league_teams
+  const { data: leagueTeams, error: ltError } = await supabase
+    .from('league_teams')
+    .select('id, season, nickname, display_name, penalty_points, penalty_reason, club_id')
+    .eq('season', season)
+    .order('id', { ascending: true });
+
+  if (ltError) {
+    console.error(ltError);
+    tbody.innerHTML = '<tr><td colspan="6">Error cargando equipos de liga.</td></tr>';
+    return;
+  }
+
+  if (!leagueTeams || !leagueTeams.length) {
+    tbody.innerHTML = '<tr><td colspan="6">No hay equipos para esta temporada.</td></tr>';
+    return;
+  }
+
+  // 2) Cargar nombres de clubs
+  const clubIds = [...new Set(leagueTeams.map(t => t.club_id).filter(Boolean))];
+
+  let clubsById = {};
+  if (clubIds.length) {
+    const { data: clubs, error: clubsError } = await supabase
+      .from('clubs')
+      .select('id, name')
+      .in('id', clubIds);
+
+    if (clubsError) {
+      console.warn('Error cargando clubs, se mostrarán IDs.', clubsError);
+    } else {
+      (clubs || []).forEach(c => { clubsById[c.id] = c; });
+    }
+  }
+
+  tbody.innerHTML = leagueTeams.map(t => {
+    const clubName = clubsById[t.club_id]?.name || (t.club_id != null ? `Club #${t.club_id}` : '-');
+    const motivoShort = t.penalty_reason
+      ? (t.penalty_reason.length > 40 ? t.penalty_reason.slice(0, 37) + '…' : t.penalty_reason)
+      : '';
+
+    return `
+      <tr data-id="${t.id}">
+        <td>${clubName}</td>
+        <td>${t.nickname}</td>
+        <td>${t.display_name || ''}</td>
+        <td>${t.penalty_points}</td>
+        <td title="${t.penalty_reason || ''}">${motivoShort}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm btn-edit-penalty" data-id="${t.id}">
+            Editar sanción
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // ─────────────────────────────
+  // Modal de sanciones
+  // ─────────────────────────────
+  const backdrop = document.getElementById('penalty-modal-backdrop');
+  const closeBtn = document.getElementById('penalty-modal-close');
+  const cancelBtn = document.getElementById('penalty-cancel-btn');
+  const form = document.getElementById('penalty-form');
+  const errorEl = document.getElementById('penalty-error');
+
+  const teamIdInput = document.getElementById('penalty-team-id');
+  const teamNameInput = document.getElementById('penalty-team-name');
+  const pointsInput = document.getElementById('penalty-points');
+  const reasonInput = document.getElementById('penalty-reason');
+
+  function openPenaltyModal(teamId) {
+    const team = leagueTeams.find(t => t.id === teamId);
+    if (!team) return;
+
+    const clubName = clubsById[team.club_id]?.name || (team.club_id != null ? `Club #${team.club_id}` : '-');
+    const display = team.display_name || team.nickname;
+
+    errorEl.textContent = '';
+    form.classList.remove('is-loading');
+
+    teamIdInput.value = team.id;
+    teamNameInput.value = `${clubName} — ${display}`;
+    pointsInput.value = team.penalty_points;
+    reasonInput.value = team.penalty_reason || '';
+
+    backdrop.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closePenaltyModal() {
+    backdrop.hidden = true;
+    document.body.classList.remove('modal-open');
+  }
+
+  closeBtn.addEventListener('click', closePenaltyModal);
+  cancelBtn.addEventListener('click', closePenaltyModal);
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) {
+      closePenaltyModal();
+    }
+  });
+
+  tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-edit-penalty');
+    if (!btn) return;
+    const id = Number(btn.getAttribute('data-id'));
+    openPenaltyModal(id);
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.textContent = '';
+    form.classList.add('is-loading');
+
+    const teamId = Number(teamIdInput.value);
+    const team = leagueTeams.find(t => t.id === teamId);
+    if (!team) {
+      errorEl.textContent = 'Equipo no encontrado en memoria.';
+      form.classList.remove('is-loading');
+      return;
+    }
+
+    const pointsStr = pointsInput.value;
+    const points = Number(pointsStr);
+
+    if (Number.isNaN(points)) {
+      errorEl.textContent = 'Los puntos de sanción deben ser un número (puede ser 0 o negativo).';
+      form.classList.remove('is-loading');
+      return;
+    }
+
+    const reason = reasonInput.value.trim() || null;
+
+    const { error: updError } = await supabase
+      .from('league_teams')
+      .update({
+        penalty_points: points,
+        penalty_reason: reason
+      })
+      .eq('id', teamId);
+
+    if (updError) {
+      console.error(updError);
+      errorEl.textContent = 'Error guardando la sanción.';
+      form.classList.remove('is-loading');
+      return;
+    }
+
+    // Actualizar memoria
+    team.penalty_points = points;
+    team.penalty_reason = reason;
+
+    // Actualizar tabla
+    const row = tbody.querySelector(`tr[data-id="${teamId}"]`);
+    if (row) {
+      row.children[3].textContent = points;
+      const motivoShort = reason
+        ? (reason.length > 40 ? reason.slice(0, 37) + '…' : reason)
+        : '';
+      row.children[4].textContent = motivoShort;
+      row.children[4].setAttribute('title', reason || '');
+    }
+
+    form.classList.remove('is-loading');
+    closePenaltyModal();
+  });
+});
