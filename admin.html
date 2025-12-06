@@ -3,41 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Torneo — Admin</title>
+  <title>Torneo — Login</title>
   <link rel="stylesheet" href="css/style.css" />
+  <!-- Si luego creas un admin.css, lo importas aquí o dentro de style.css -->
 </head>
-<body>
+<body class="page-auth">
 <header class="site-header">
   <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Panel de administración</h1>
+  <h1>Acceso a la administración</h1>
   <nav id="main-nav"></nav>
 </header>
 
-<main class="container">
-  <section>
-    <h2>Temporada activa</h2>
-    <p><strong id="admin-season"></strong></p>
-  </section>
+<main class="container auth-wrapper">
+  <section class="auth-card">
+    <h2>Iniciar sesión</h2>
+    <p class="auth-subtitle">
+      Usa el usuario del torneo configurado en Supabase.
+    </p>
 
-  <section class="admin-menu">
-    <h2>Gestión</h2>
-    <ul>
-      <li><a href="admin-matches.html">Partidos (matches)</a></li>
-      <li><a href="admin-league-teams.html">Equipos de liga (league_teams)</a></li>
-    </ul>
+    <form id="login-form" class="auth-form">
+      <label class="auth-field">
+        <span>Email</span>
+        <input type="email" id="login-email" autocomplete="email" required />
+      </label>
+
+      <label class="auth-field">
+        <span>Contraseña</span>
+        <input type="password" id="login-password" autocomplete="current-password" required />
+      </label>
+
+      <button type="submit" class="btn btn-primary auth-submit">
+        Entrar
+      </button>
+
+      <p id="login-error" class="auth-error"></p>
+    </form>
+
+    <p class="auth-hint">
+      ¿Has olvidado la contraseña?  
+      Cámbiala desde el panel de Supabase en <strong>Authentication → Users</strong>.
+    </p>
+
+    <p class="auth-back">
+      <a href="index.html" class="link-muted">&larr; Volver a la web</a>
+    </p>
   </section>
 </main>
 
 <script src="js/common.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
-  if (!ok) return;
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('login-form');
+  const emailInput = document.getElementById('login-email');
+  const passInput = document.getElementById('login-password');
+  const errorEl = document.getElementById('login-error');
 
-  const seasonEl = document.getElementById('admin-season');
-  if (seasonEl) {
-    seasonEl.textContent = AppUtils.getActiveSeason();
-  }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.textContent = '';
+    form.classList.add('is-loading');
+
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+
+    try {
+      await AppUtils.login(email, password);
+      window.location.href = 'admin.html';
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = 'Error de login. Revisa email y contraseña.';
+    } finally {
+      form.classList.remove('is-loading');
+    }
+  });
 });
 </script>
 </body>
