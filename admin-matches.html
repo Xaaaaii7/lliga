@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torneo — Admin Partidos</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+  <h1>Admin — Partidos</h1>
+  <nav id="main-nav"></nav>
+</header>
+
+<main class="container">
+  <section>
+    <h2>Partidos de la temporada <span id="season-label"></span></h2>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Jornada</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Local</th>
+          <th>Visitante</th>
+          <th>Resultado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="matches-tbody">
+        <tr><td colspan="7">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script src="js/common.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await AppUtils.ensureAdmin();
+  if (!ok) return;
+
+  const season = AppUtils.getActiveSeason();
+  document.getElementById('season-label').textContent = season;
+
+  const tbody = document.getElementById('matches-tbody');
+  const supabase = await AppUtils.getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('matches')
+    .select(`
+      id,
+      season,
+      round_id,
+      match_date,
+      match_time,
+      home_goals,
+      away_goals,
+      home:league_teams!matches_home_league_team_id_fkey ( id, nickname ),
+      away:league_teams!matches_away_league_team_id_fkey ( id, nickname )
+    `)
+    .eq('season', season)
+    .order('round_id', { ascending: true })
+    .order('match_date', { ascending: true });
+
+  if (error) {
+    console.error(error);
+    tbody.innerHTML = `<tr><td colspan="7">Error cargando partidos.</td></tr>`;
+    return;
+  }
+
+  if (!data || !data.length) {
+    tbody.innerHTML = `<tr><td colspan="7">No hay partidos para esta temporada.</td></tr>`;
+    return;
+  }
+
+  const fmtDate = AppUtils.fmtDate;
+
+  tbody.innerHTML = data.map(m => {
+    const fecha = m.match_date ? fmtDate(m.match_date) : '';
+    const hora = m.match_time || '';
+    const local = m.home?.nickname || '-';
+    const visit = m.away?.nickname || '-';
+    const res = (m.home_goals ?? '') === '' || (m.away_goals ?? '') === ''
+      ? '–'
+      : `${m.home_goals} - ${m.away_goals}`;
+
+    return `
+      <tr data-id="${m.id}">
+        <td>${m.round_id ?? ''}</td>
+        <td>${fecha}</td>
+        <td>${hora}</td>
+        <td>${local}</td>
+        <td>${visit}</td>
+        <td>${res}</td>
+        <td>
+          <button class="btn-edit-match" data-id="${m.id}">Editar</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // De momento, solo un placeholder para editar
+  tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-edit-match');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    alert('Aquí abriremos el editor para el partido: ' + id);
+  });
+});
+</script>
+</body>
+</html>
