@@ -18,6 +18,13 @@ const normalizeText = (value) => String(value || '')
   .replace(/[^a-z0-9\s-]/g,'')
   .trim();
 
+const escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 const slugify = (value) => normalizeText(value).replace(/\s+/g,'-');
 const logoPath = (name, base='img') => `${base}/${slugify(name)}.png`;
 
@@ -210,7 +217,9 @@ async function renderUserSection() {
 
   const profile = await getCurrentProfile();
 
-  let html = `<span class="user-name">${profile?.nickname || user.email}</span>`;
+  const safeName = escapeHtml(profile?.nickname || user.email);
+
+  let html = `<span class="user-name">${safeName}</span>`;
   if (profile?.is_admin) {
     html += ` | <a href="admin.html">Admin</a>`;
   }
@@ -232,6 +241,7 @@ Object.assign(AppUtils, {
   loadJSON,
   fmtDate,
   normalizeText,
+  escapeHtml,
   slugify,
   logoPath,
   getSupabaseConfig,
