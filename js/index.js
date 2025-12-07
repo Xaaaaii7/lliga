@@ -11,60 +11,6 @@
   const isNum = CoreStats.isNum || (v => typeof v === 'number' && Number.isFinite(v));
   const slug = CoreStats.slug || (s => String(s || '').toLowerCase().replace(/\s+/g, '-'));
 
-  // ==========================
-  // HERO NOTICIAS DESTACADAS
-  // ==========================
-  async function renderHeroNews() {
-    const hero = document.getElementById('home-hero-slider');
-    if (!hero) return;
-
-    if (typeof loadJSON !== 'function') {
-      hero.innerHTML = '<p class="muted">No está configurado AppUtils.loadJSON.</p>';
-      return;
-    }
-
-    const noticias = await loadJSON('data/noticias.json').catch(() => []);
-    const lista = Array.isArray(noticias) ? noticias : [];
-
-    // asumo que hay una propiedad "destacada" booleana
-    let destacadas = lista.filter(n => n.destacada);
-    if (!destacadas.length) destacadas = lista.slice(0, 5);
-    if (!destacadas.length) {
-      hero.innerHTML = '<p class="muted">No hay noticias destacadas todavía.</p>';
-      return;
-    }
-
-    hero.innerHTML = destacadas.map((n, idx) => {
-      const activo = idx === 0 ? ' is-active' : '';
-      const img = n.imagen || n.image || '';
-      const url = n.url || (n.slug ? `noticia_${n.slug}.html` : '#');
-      const fecha = n.fecha || '';
-      const titulo = n.titulo || n.title || 'Noticia';
-      const subtitulo = n.subtitulo || n.subtitle || '';
-
-      return `
-        <article class="hero-slide${activo}" data-idx="${idx}">
-          ${img ? `<div class="hero-slide-img" style="background-image:url('${img}')"></div>` : ''}
-          <div class="hero-slide-content">
-            <span class="hero-slide-date">${fecha}</span>
-            <h3><a href="${url}">${titulo}</a></h3>
-            ${subtitulo ? `<p>${subtitulo}</p>` : ''}
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    // rotación simple
-    const slides = Array.from(hero.querySelectorAll('.hero-slide'));
-    if (slides.length <= 1) return;
-
-    let current = 0;
-    setInterval(() => {
-      slides[current].classList.remove('is-active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('is-active');
-    }, 8000);
-  }
 
   // ==========================
   // CLASIFICACIÓN TOP 10
@@ -217,7 +163,7 @@
     }
   }
 
-   // ==========================
+  // ==========================
   // GOLEADOR DEL MOMENTO
   // ==========================
   async function renderGoleadorMomento() {
@@ -328,7 +274,7 @@
       }
 
       // 5) Agregar goles por jugador + nº de partidos (match_id distintos) en los que marca
-      const byPlayer = new Map(); 
+      const byPlayer = new Map();
       for (const ev of eventos) {
         const player = ev.player;
         if (!player || !player.id) continue;
@@ -415,11 +361,10 @@
               <h3>${ganador.nombre}</h3>
               <p>
                 ${ganador.goles} gol(es) en las ultimas 3 jornadas
-                ${
-                  ganador.partidosTramo
-                    ? ` (en ${ganador.partidosTramo} partido${ganador.partidosTramo > 1 ? 's' : ''})`
-                    : ''
-                }
+                ${ganador.partidosTramo
+          ? ` (en ${ganador.partidosTramo} partido${ganador.partidosTramo > 1 ? 's' : ''})`
+          : ''
+        }
               </p>
               <p class="muted small">${ganador.equipo}</p>
             </div>
@@ -719,7 +664,7 @@
       const payload = row.payload || {};
 
       // nickname / display_name del equipo
-      const nickname    = payload.nickname || payload.teamNickname || '';
+      const nickname = payload.nickname || payload.teamNickname || '';
       const displayName = payload.display_name || payload.teamLabel || nickname || '';
 
       // la imagen ideal es nickname.png
@@ -786,12 +731,12 @@
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-      { index: 5, line: "MC",  x: 25, y: 55 },
-      { index: 6, line: "MC",  x: 45, y: 50 },
-      { index: 7, line: "MC",  x: 65, y: 50 },
-      { index: 8, line: "MC",  x: 75, y: 55 },
+      { index: 5, line: "MC", x: 25, y: 55 },
+      { index: 6, line: "MC", x: 45, y: 50 },
+      { index: 7, line: "MC", x: 65, y: 50 },
+      { index: 8, line: "MC", x: 75, y: 55 },
       { index: 9, line: "DEL", x: 40, y: 30 },
-      { index: 10,line: "DEL", x: 60, y: 30 }
+      { index: 10, line: "DEL", x: 60, y: 30 }
     ],
     "4-3-3": [
       { index: 0, line: "POR", x: 50, y: 90 },
@@ -799,12 +744,12 @@
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-      { index: 5, line: "MC",  x: 30, y: 55 },
-      { index: 6, line: "MC",  x: 50, y: 50 },
-      { index: 7, line: "MC",  x: 70, y: 55 },
+      { index: 5, line: "MC", x: 30, y: 55 },
+      { index: 6, line: "MC", x: 50, y: 50 },
+      { index: 7, line: "MC", x: 70, y: 55 },
       { index: 8, line: "DEL", x: 25, y: 30 },
       { index: 9, line: "DEL", x: 50, y: 25 },
-      { index: 10,line: "DEL", x: 75, y: 30 }
+      { index: 10, line: "DEL", x: 75, y: 30 }
     ],
     "4-5-1": [
       { index: 0, line: "POR", x: 50, y: 90 },
@@ -812,25 +757,25 @@
       { index: 2, line: "DEF", x: 40, y: 75 },
       { index: 3, line: "DEF", x: 60, y: 75 },
       { index: 4, line: "DEF", x: 80, y: 72 },
-      { index: 5, line: "MC",  x: 20, y: 55 },
-      { index: 6, line: "MC",  x: 35, y: 50 },
-      { index: 7, line: "MC",  x: 50, y: 45 },
-      { index: 8, line: "MC",  x: 65, y: 50 },
-      { index: 9, line: "MC",  x: 80, y: 55 },
-      { index: 10,line: "DEL", x: 50, y: 25 }
+      { index: 5, line: "MC", x: 20, y: 55 },
+      { index: 6, line: "MC", x: 35, y: 50 },
+      { index: 7, line: "MC", x: 50, y: 45 },
+      { index: 8, line: "MC", x: 65, y: 50 },
+      { index: 9, line: "MC", x: 80, y: 55 },
+      { index: 10, line: "DEL", x: 50, y: 25 }
     ],
     "3-5-2": [
       { index: 0, line: "POR", x: 50, y: 90 },
       { index: 1, line: "DEF", x: 30, y: 75 },
       { index: 2, line: "DEF", x: 50, y: 72 },
       { index: 3, line: "DEF", x: 70, y: 75 },
-      { index: 4, line: "MC",  x: 20, y: 55 },
-      { index: 5, line: "MC",  x: 35, y: 50 },
-      { index: 6, line: "MC",  x: 50, y: 45 },
-      { index: 7, line: "MC",  x: 65, y: 50 },
-      { index: 8, line: "MC",  x: 80, y: 55 },
+      { index: 4, line: "MC", x: 20, y: 55 },
+      { index: 5, line: "MC", x: 35, y: 50 },
+      { index: 6, line: "MC", x: 50, y: 45 },
+      { index: 7, line: "MC", x: 65, y: 50 },
+      { index: 8, line: "MC", x: 80, y: 55 },
       { index: 9, line: "DEL", x: 40, y: 30 },
-      { index: 10,line: "DEL", x: 60, y: 30 }
+      { index: 10, line: "DEL", x: 60, y: 30 }
     ]
   };
   const DEFAULT_SYSTEM = "4-3-3";
@@ -1053,7 +998,7 @@
   // INIT
   // ==========================
   await Promise.all([
-    renderHeroNews(),
+
     renderClasificacionTop10(),
     renderTeamForm(),
     renderGoleadorMomento(),
