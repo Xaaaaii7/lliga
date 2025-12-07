@@ -2,20 +2,47 @@
   const root = document.getElementById('jornada');
   if (!root) return;
 
-  // Helpers utilidades (loadJSON desde AppUtils)
+  // Helpers utilidades (loadJSON ya no es principal, usamos getSupabaseClient)
   const AppUtils = window.AppUtils || {};
-  const { loadJSON } = AppUtils;
+  const { getSupabaseClient } = AppUtils;
 
-  if (typeof loadJSON !== 'function') {
+  if (typeof getSupabaseClient !== 'function') {
     root.innerHTML = `
       <p style="text-align:center;color:#9fb3c8">
-        Error de configuración: falta AppUtils.loadJSON para cargar data/jornada.json
+        Error de configuración: falta AppUtils.getSupabaseClient para cargar jornadas.
       </p>`;
     return;
   }
 
-  // Config de jornadas (vídeo + poll + winner)
-  const jornadasCfg = await loadJSON('data/jornada.json').catch(() => null);
+  // Carga de jornadas desde Supabase
+  let jornadasCfg = [];
+  try {
+    const supabase = await getSupabaseClient();
+    const { data, error } = await supabase
+      .from('jornadas_config')
+      .select('*')
+      .order('jornada', { ascending: true });
+
+    if (error) throw error;
+
+    // Mapear de estructura plana (DB) a estructura anidada (antiguo JSON)
+    // para no romper la lógica de render existente
+    jornadasCfg = (data || []).map(row => ({
+      jornada: row.jornada,
+      gol_youtube: row.gol_youtube,
+      poll: {
+        embed_url: row.poll_embed_url,
+        winner: row.winner,
+        winner_team: row.winner_team,
+        winner_detail: row.winner_detail
+      }
+    }));
+
+  } catch (err) {
+    console.error("Error cargando jornadas desde Supabase:", err);
+    root.innerHTML = '<p style="text-align:center;color:#9fb3c8">Error cargando las jornadas.</p>';
+    return;
+  }
 
   if (!Array.isArray(jornadasCfg) || !jornadasCfg.length) {
     root.innerHTML = '<p style="text-align:center;color:#9fb3c8">No hay jornadas configuradas todavía.</p>';
@@ -75,7 +102,7 @@
 
   const prevBtn = navWrap.querySelector('#prevJornada');
   const nextBtn = navWrap.querySelector('#nextJornada');
-  const label   = navWrap.querySelector('#jornadaLabel');
+  const label = navWrap.querySelector('#jornadaLabel');
 
   // ==========================
   //   HERO ganador votación
@@ -86,10 +113,10 @@
     if (!winnerName) return '';
 
     const teamName = poll.winner_team || poll.team || '';
-    const detail   = poll.winner_detail;
+    const detail = poll.winner_detail;
 
     const fotoJugador = playerPhotoPath(winnerName);
-    const escudoTeam  = teamName ? logoPath(teamName) : null;
+    const escudoTeam = teamName ? logoPath(teamName) : null;
 
     return `
       <div class="jornada-winner-hero">
@@ -206,7 +233,7 @@
       : '';
 
     const winnerHeroHtml = hasWinner ? renderWinnerHero(jCfg, num) : '';
-    const mvpHeroHtml    = renderMvpHero(num);
+    const mvpHeroHtml = renderMvpHero(num);
 
     root.innerHTML = `
       <section class="jornada-bloque">
