@@ -127,7 +127,7 @@
 
     const supabase = await getSupabaseClient();
 
-        let query = supabase
+    let query = supabase
       .from('matches')
       .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
@@ -166,7 +166,7 @@
     // Construimos jornadas como en resultados.json
     const jornadasMap = new Map();
 
-        matches.forEach((m, idx) => {
+    matches.forEach((m, idx) => {
       const roundNum = Number(m.round_id);
       const numero = Number.isFinite(roundNum) && roundNum > 0
         ? roundNum
@@ -295,17 +295,12 @@
         _resultadosCache = Array.isArray(jornadas) ? jornadas : [];
         if (_resultadosCache.length) return _resultadosCache;
       } catch (e) {
-        console.warn('Fallo cargando resultados desde Supabase, usando JSON local:', e);
+        console.warn('Fallo cargando resultados desde Supabase:', e);
       }
     }
 
-    // Fallback a JSON local (si tienes AppUtils.loadJSON)
-    if (typeof loadJSON === 'function') {
-      const jornadas = await loadJSON("data/resultados.json").catch(() => []);
-      _resultadosCache = Array.isArray(jornadas) ? jornadas : [];
-    } else {
-      _resultadosCache = [];
-    }
+    // Sin fallback a JSON local
+    _resultadosCache = [];
     return _resultadosCache;
   };
 
@@ -319,21 +314,16 @@
         _statsIndexCache = idx && typeof idx === "object" ? idx : {};
         if (Object.keys(_statsIndexCache).length) return _statsIndexCache;
       } catch (e) {
-        console.warn('Fallo cargando stats desde Supabase, usando JSON local:', e);
+        console.warn('Fallo cargando stats desde Supabase:', e);
       }
     }
 
-    // Fallback a JSON local
-    if (typeof loadJSON === 'function') {
-      const stats = await loadJSON("data/partidos_stats.json").catch(() => ({}));
-      _statsIndexCache = stats && typeof stats === "object" ? stats : {};
-    } else {
-      _statsIndexCache = {};
-    }
+    // Sin fallback a JSON local
+    _statsIndexCache = {};
     return _statsIndexCache;
   };
 
-    // --------------------------
+  // --------------------------
   // Pichichi desde Supabase (con fallback a TSV)
   // --------------------------
   const SHEET_TSV_URL =
@@ -355,80 +345,80 @@
   // Carga pichichi desde Supabase:
   // - base de jugadores en tabla "goleadores"
   // - goles / partidos desde "goal_events"
-const loadPichichiFromSupabase = async () => {
-  if (!hasSupabase) return [];
+  const loadPichichiFromSupabase = async () => {
+    if (!hasSupabase) return [];
 
-  const supaCfg = typeof getSupabaseConfig === 'function'
-    ? getSupabaseConfig()
-    : { season: '' };
+    const supaCfg = typeof getSupabaseConfig === 'function'
+      ? getSupabaseConfig()
+      : { season: '' };
 
-  const seasonFromCfg = supaCfg.season || '';
-  const activeSeason =
-    (typeof getActiveSeason === 'function' && getActiveSeason()) ||
-    seasonFromCfg ||
-    '';
+    const seasonFromCfg = supaCfg.season || '';
+    const activeSeason =
+      (typeof getActiveSeason === 'function' && getActiveSeason()) ||
+      seasonFromCfg ||
+      '';
 
-  const supabase = await getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
-  let query = supabase
-    .from('goleadores') // la VIEW
-    .select('season, player_id, jugador, manager, partidos, goles');
+    let query = supabase
+      .from('goleadores') // la VIEW
+      .select('season, player_id, jugador, manager, partidos, goles');
 
-  if (activeSeason) {
-    query = query.eq('season', activeSeason);
-  }
+    if (activeSeason) {
+      query = query.eq('season', activeSeason);
+    }
 
-  const { data, error } = await query;
-  if (error) {
-    console.warn('Error cargando pichichi desde vista goleadores:', error);
-    return [];
-  }
+    const { data, error } = await query;
+    if (error) {
+      console.warn('Error cargando pichichi desde vista goleadores:', error);
+      return [];
+    }
 
-  if (!data || !data.length) return [];
+    if (!data || !data.length) return [];
 
-  // Adaptamos al formato que espera computePichichiPlayers:
-  // "Jugador", "Equipo", "Partidos", "Goles"
-  const rows = data.map(r => ({
-    "Jugador":   r.jugador || '',
-    "Equipo":    r.manager || '',           // aquí usamos el nickname del manager
-    "Partidos":  String(r.partidos ?? 0),   // partidos jugados por el manager
-    "Goles":     String(r.goles ?? 0)
-  }));
+    // Adaptamos al formato que espera computePichichiPlayers:
+    // "Jugador", "Equipo", "Partidos", "Goles"
+    const rows = data.map(r => ({
+      "Jugador": r.jugador || '',
+      "Equipo": r.manager || '',           // aquí usamos el nickname del manager
+      "Partidos": String(r.partidos ?? 0),   // partidos jugados por el manager
+      "Goles": String(r.goles ?? 0)
+    }));
 
-  return rows;
-};
+    return rows;
+  };
 
 
   CoreStats.getPichichiRows = async () => {
-  if (_pichichiRowsCache) return _pichichiRowsCache;
+    if (_pichichiRowsCache) return _pichichiRowsCache;
 
-  // 1) Intentamos Supabase
-  if (hasSupabase) {
-    try {
-      const rowsDb = await loadPichichiFromSupabase();
-      if (Array.isArray(rowsDb) && rowsDb.length) {
-        _pichichiRowsCache = rowsDb;
-        return _pichichiRowsCache;
+    // 1) Intentamos Supabase
+    if (hasSupabase) {
+      try {
+        const rowsDb = await loadPichichiFromSupabase();
+        if (Array.isArray(rowsDb) && rowsDb.length) {
+          _pichichiRowsCache = rowsDb;
+          return _pichichiRowsCache;
+        }
+      } catch (e) {
+        console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);
       }
-    } catch (e) {
-      console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);
     }
-  }
 
-  // 2) Fallback al TSV antiguo (por si acaso)
-  try {
-    const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const txt = await res.text();
-    const { rows } = parseTSV(txt);
-    _pichichiRowsCache = Array.isArray(rows) ? rows : [];
-    return _pichichiRowsCache;
-  } catch (e) {
-    console.warn('No se pudo cargar TSV pichichi:', e);
-    _pichichiRowsCache = [];
-    return _pichichiRowsCache;
-  }
-};
+    // 2) Fallback al TSV antiguo (por si acaso)
+    try {
+      const res = await fetch(SHEET_TSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const txt = await res.text();
+      const { rows } = parseTSV(txt);
+      _pichichiRowsCache = Array.isArray(rows) ? rows : [];
+      return _pichichiRowsCache;
+    } catch (e) {
+      console.warn('No se pudo cargar TSV pichichi:', e);
+      _pichichiRowsCache = [];
+      return _pichichiRowsCache;
+    }
+  };
 
   // Se mantiene computePichichiPlayers igual que lo tienes:
   CoreStats.computePichichiPlayers = (rows) => {
@@ -516,7 +506,7 @@ const loadPichichiFromSupabase = async () => {
       }
     }
 
-   const equipos = Array.from(teams.values());
+    const equipos = Array.from(teams.values());
 
     // 🔴 Aplicar sanciones si las tenemos
     if (_penaltyByTeamNorm && _penaltyByTeamNorm.size) {

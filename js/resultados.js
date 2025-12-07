@@ -3,10 +3,10 @@
   if (!root) return;
 
   // Modal refs
-  const backdrop  = document.getElementById('stats-backdrop');
-  const bodyEl    = document.getElementById('stats-body');
-  const closeBtn  = document.getElementById('stats-close');
-  const titleEl   = document.getElementById('stats-title');
+  const backdrop = document.getElementById('stats-backdrop');
+  const bodyEl = document.getElementById('stats-body');
+  const closeBtn = document.getElementById('stats-close');
+  const titleEl = document.getElementById('stats-title');
 
   // Helpers comunes
   const {
@@ -72,7 +72,7 @@
     if (!backdrop) return;
     backdrop.hidden = true;
     document.body.style.overflow = '';
-    if (bodyEl)  bodyEl.innerHTML = '';
+    if (bodyEl) bodyEl.innerHTML = '';
     if (titleEl) titleEl.textContent = 'Estadísticas del partido';
   };
 
@@ -81,24 +81,40 @@
 
   // Listeners de cierre
   closeBtn?.addEventListener('click', closeModal);
-  backdrop?.addEventListener('click', (e)=> {
+  backdrop?.addEventListener('click', (e) => {
     if (e.target === backdrop) closeModal();
   });
-  document.addEventListener('keydown', (e)=> {
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
   });
 
   // -----------------------------
-  // METEO: mapa clave -> ciudad (tu JSON)
+  // METEO: mapa clave -> ciudad (desde Supabase team_cities)
   // -----------------------------
   let ciudadesConfig = {};
-  try {
-    if (typeof loadJSON === 'function') {
-      ciudadesConfig = await loadJSON('data/equipos_ciudades.json');
+
+  const loadCitiesMap = async () => {
+    if (!hasSupabase) return;
+    try {
+      const supa = await getSupa();
+      const { data, error } = await supa
+        .from('team_cities')
+        .select('nickname, city');
+
+      if (!error && data) {
+        data.forEach(row => {
+          if (row.nickname && row.city) {
+            ciudadesConfig[row.nickname] = row.city;
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Error cargando team_cities:', e);
     }
-  } catch {
-    ciudadesConfig = {};
-  }
+  };
+
+  // Disparamos la carga en paralelo (no bloqueante estricto, pero útil tenerla pronto)
+  const citiesPromise = loadCitiesMap();
 
   const getCityForKey = (keyName) => {
     if (!keyName) return null;
@@ -113,13 +129,13 @@
     const c = Number(code);
 
     if (c === 0) return { label: "Despejado", emoji: "☀️" };
-    if ([1,2,3].includes(c)) return { label: "Nublado", emoji: "⛅" };
-    if ([45,48].includes(c)) return { label: "Niebla", emoji: "🌫️" };
+    if ([1, 2, 3].includes(c)) return { label: "Nublado", emoji: "⛅" };
+    if ([45, 48].includes(c)) return { label: "Niebla", emoji: "🌫️" };
 
-    if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(c))
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(c))
       return { label: "Lluvia", emoji: "🌧️" };
 
-    if ([71,73,75,77,85,86].includes(c))
+    if ([71, 73, 75, 77, 85, 86].includes(c))
       return { label: "Nieve", emoji: "❄️" };
 
     return { label: "Variable", emoji: "🌥️" };
@@ -173,10 +189,10 @@
   let statsIndex = {};
   let statsIndexReady = false;
   let statsIndexPromise = null;
-  
+
   const ensureStatsIndex = async () => {
     if (statsIndexReady) return statsIndex;
-  
+
     if (!statsIndexPromise) {
       statsIndexPromise = CoreStats.getStatsIndex()
         .then(idx => {
@@ -191,7 +207,7 @@
           return statsIndex;
         });
     }
-  
+
     return statsIndexPromise;
   };
 
@@ -316,12 +332,12 @@
     const round = matchMeta.round_id || matchMeta.jornada || null;
 
     // IDs de equipo en la liga (league_teams.id)
-    const localTeamId  = matchMeta.local_team_id;
-    const visitTeamId  = matchMeta.visitante_team_id;
+    const localTeamId = matchMeta.local_team_id;
+    const visitTeamId = matchMeta.visitante_team_id;
 
     // IDs de club (clubs.id) – puede que vengan de CoreStats o no
-    let localClubId    = matchMeta.local_club_id;
-    let visitClubId    = matchMeta.visitante_club_id;
+    let localClubId = matchMeta.local_club_id;
+    let visitClubId = matchMeta.visitante_club_id;
 
     // Nicknames (managers) por lado
     let localManagerNick = '';
@@ -748,10 +764,10 @@
     const section = bodyEl.querySelector('.scorers-editor');
     if (!section) return;
 
-    const statusEl   = section.querySelector('.scorers-status');
-    const saveBtn    = section.querySelector('.btn-save-scorers');
-    const editPanel  = section.querySelector('.scorers-edit-panel');
-    const toggleBtn  = section.querySelector('.btn-toggle-scorers-edit');
+    const statusEl = section.querySelector('.scorers-status');
+    const saveBtn = section.querySelector('.btn-save-scorers');
+    const editPanel = section.querySelector('.scorers-edit-panel');
+    const toggleBtn = section.querySelector('.btn-toggle-scorers-edit');
 
     if (statusEl) statusEl.textContent = 'Cargando goleadores...';
 
@@ -804,15 +820,15 @@
       const matchState = scorerState[matchId];
       if (!matchState) return;
 
-      const btnPlus  = target.closest && target.closest('.btn-plus-goal');
+      const btnPlus = target.closest && target.closest('.btn-plus-goal');
       const btnMinus = target.closest && target.closest('.btn-minus-goal');
-      const btnRem   = target.closest && target.closest('.btn-remove-scorer');
+      const btnRem = target.closest && target.closest('.btn-remove-scorer');
 
       if (btnPlus || btnMinus || btnRem) {
         e.preventDefault();
         const side = target.getAttribute('data-side') ||
           (target.closest('.scorers-col') && target.closest('.scorers-col').getAttribute('data-side'));
-        const pid  = target.getAttribute('data-player-id');
+        const pid = target.getAttribute('data-player-id');
         if (!side || !pid) return;
 
         if (btnPlus) {
@@ -984,18 +1000,18 @@
     const equipos = Object.keys(statsObj || {});
     const hasStats = equipos.length === 2;
 
-    const localName  = meta?.local || (equipos[0] || 'Local');
-    const visitName  = meta?.visitante || (equipos[1] || 'Visitante');
+    const localName = meta?.local || (equipos[0] || 'Local');
+    const visitName = meta?.visitante || (equipos[1] || 'Visitante');
 
-    const gl = isNum(meta?.goles_local)     ? meta.goles_local     : null;
+    const gl = isNum(meta?.goles_local) ? meta.goles_local : null;
     const gv = isNum(meta?.goles_visitante) ? meta.goles_visitante : null;
     const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
 
     const fechaTexto = meta?.fecha
       ? fmtDate(meta.fecha)
       : (meta?.fechaJornada ? fmtDate(meta.fechaJornada) : '');
-    const horaTexto  = meta?.hora || '';
-    const jTexto     = meta?.jornada ? `Jornada ${meta.jornada}` : '';
+    const horaTexto = meta?.hora || '';
+    const jTexto = meta?.jornada ? `Jornada ${meta.jornada}` : '';
 
     const metaLine = [fechaTexto, horaTexto, jTexto].filter(Boolean).join(' · ');
 
@@ -1014,7 +1030,7 @@
         (data && Object.prototype.hasOwnProperty.call(data, k)) ? data[k] : null;
 
       const ataqueKeys = ['goles', 'tiros', 'tiros_a_puerta'];
-      const balonKeys  = ['posesion', 'pases', 'pases_completados', 'centros'];
+      const balonKeys = ['posesion', 'pases', 'pases_completados', 'centros'];
 
       const buildKvList = (keys) => keys
         .filter(k => get(Adata, k) !== null || get(Bdata, k) !== null)
@@ -1026,7 +1042,7 @@
         `).join('');
 
       const ataqueHtml = buildKvList(ataqueKeys);
-      const balonHtml  = buildKvList(balonKeys);
+      const balonHtml = buildKvList(balonKeys);
 
       if (ataqueHtml || balonHtml) {
         summaryHtml = `
@@ -1082,7 +1098,7 @@
       `;
     }
 
-     const matchId = meta?.id || '';
+    const matchId = meta?.id || '';
 
     const redCardsEditorHtml =
       (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
@@ -1223,8 +1239,8 @@
 
     // 1) Pintamos las tarjetas SIN esperar a la meteo
     const cardsHtml = partidos.map((p, idx) => {
-      const pid = p.id || `J${j.numero}-P${idx+1}`;
-      const gl = isNum(p.goles_local)     ? p.goles_local     : null;
+      const pid = p.id || `J${j.numero}-P${idx + 1}`;
+      const gl = isNum(p.goles_local) ? p.goles_local : null;
       const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
       const marcador = (gl !== null && gv !== null) ? `${gl} – ${gv}` : '-';
       const jugado = (gl !== null && gv !== null);
@@ -1334,7 +1350,7 @@
       const cityName = getCityForKey(p.local);
       if (!cityName) return;
 
-      const pid = p.id || `J${j.numero}-P${idx+1}`;
+      const pid = p.id || `J${j.numero}-P${idx + 1}`;
       const cardBtn = jornadaWrap.querySelector(`.partido-card[data-partido-id="${pid}"]`);
       if (!cardBtn) return;
 
@@ -1469,49 +1485,49 @@
 
   // Delegación: click en tarjeta de partido (stats) o botón "Subir imagen"
   root.addEventListener('click', async (e) => {
-  const target = e.target;
+    const target = e.target;
 
-  // 1) Botón "Subir imagen"
-  const uploadBtn = target.closest?.('.upload-photo-btn');
-  if (uploadBtn) {
-    e.preventDefault();
-    handleUploadClick(uploadBtn);
-    return;
-  }
+    // 1) Botón "Subir imagen"
+    const uploadBtn = target.closest?.('.upload-photo-btn');
+    if (uploadBtn) {
+      e.preventDefault();
+      handleUploadClick(uploadBtn);
+      return;
+    }
 
-  // 2) Tarjeta de partido
-  const cardBtn = target.closest?.('.partido-card');
-  if (!cardBtn) return;
+    // 2) Tarjeta de partido
+    const cardBtn = target.closest?.('.partido-card');
+    if (!cardBtn) return;
 
-  const id = cardBtn.getAttribute('data-partido-id');
-  if (!id) return;
+    const id = cardBtn.getAttribute('data-partido-id');
+    if (!id) return;
 
-  const meta = partidoMeta[id];
-  if (!meta || !bodyEl) return;
+    const meta = partidoMeta[id];
+    if (!meta || !bodyEl) return;
 
-  // Pintamos algo rápido mientras se cargan las stats
-  bodyEl.innerHTML = `<p class="hint">Cargando estadísticas...</p>`;
-  if (titleEl) {
-    titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
-  }
-  openModal();
+    // Pintamos algo rápido mientras se cargan las stats
+    bodyEl.innerHTML = `<p class="hint">Cargando estadísticas...</p>`;
+    if (titleEl) {
+      titleEl.textContent = `Estadísticas — ${meta.local} vs ${meta.visitante}`;
+    }
+    openModal();
 
-  // Lazy: cargamos statsIndex sólo ahora
-  let stats = {};
-  try {
-    const idx = await ensureStatsIndex();
-    stats = idx[id] || {};
-  } catch (err) {
-    console.warn('Error cargando stats para partido', id, err);
-  }
+    // Lazy: cargamos statsIndex sólo ahora
+    let stats = {};
+    try {
+      const idx = await ensureStatsIndex();
+      stats = idx[id] || {};
+    } catch (err) {
+      console.warn('Error cargando stats para partido', id, err);
+    }
 
-  bodyEl.innerHTML = renderStats(stats, meta);
+    bodyEl.innerHTML = renderStats(stats, meta);
 
-  if (meta.id) {
-    void initScorersEditor(meta.id, meta);
-    void initRedCardsEditor(meta.id, meta);   // ← NUEVO
-  }
-});
+    if (meta.id) {
+      void initScorersEditor(meta.id, meta);
+      void initRedCardsEditor(meta.id, meta);   // ← NUEVO
+    }
+  });
 
 
   // Primera carga: última jornada jugada
