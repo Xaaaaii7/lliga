@@ -21,14 +21,48 @@
   if (getSupabaseClient) {
     try {
       const supabase = await getSupabaseClient();
-      const { data, error } = await supabase
-        .from("users")
-        .select("youtube_playlist_id")
-        .ilike("nickname", team) // case-insensitive match con el nombre del equipo/manager
-        .maybeSingle();
+      const season = (window.AppUtils && window.AppUtils.getActiveSeason)
+        ? window.AppUtils.getActiveSeason()
+        : (window.AppUtils.getSupabaseConfig().season || '');
+
+      // Traer todos los equipos de la temporada con su user asociado
+      let query = supabase
+        .from("league_teams")
+        .select(`
+          nickname,
+          display_name,
+          user:users!user_id(youtube_playlist_id)
+        `);
+
+      if (season) {
+        query = query.eq('season', season);
+      }
+
+      const { data, error } = await query;
 
       if (!error && data) {
-        playlistId = data.youtube_playlist_id;
+        // Helper de slug local si no está en scope
+        const slug = (window.AppUtils && window.AppUtils.slugify)
+          ? window.AppUtils.slugify
+          : (s => String(s).toLowerCase().replace(/\s+/g, '-'));
+
+        const target = (team || '').toLowerCase();
+
+        // Buscar coincidencia por slug de nickname O display_name
+        const found = data.find(row => {
+          const sNick = slug(row.nickname || '');
+          const sDisp = slug(row.display_name || '');
+          // Probamos match exacto del slug (ej: "milan" == "milan")
+          return sNick === target || sDisp === target;
+        });
+
+        if (found && found.user) {
+          // found.user puede ser array o objeto segun relacion
+          const u = Array.isArray(found.user) ? found.user[0] : found.user;
+          if (u && u.youtube_playlist_id) {
+            playlistId = u.youtube_playlist_id;
+          }
+        }
       }
     } catch (e) {
       console.warn("Error cargando playlist desde DB:", e);
