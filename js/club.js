@@ -13,13 +13,13 @@
   // Helpers desde CoreStats
   // --------------------------
   const isNum = CoreStats.isNum;
-  const norm  = CoreStats.norm;
-  const slug  = CoreStats.slug;
+  const norm = CoreStats.norm;
+  const slug = CoreStats.slug;
 
-  const logoPath        = (team)   => `img/${slug(team)}.png`;
-  const formationPath   = (team)   => `img/formacion/${slug(team)}.png`;
+  const logoPath = (team) => `img/${slug(team)}.png`;
+  const formationPath = (team) => `img/formacion/${slug(team)}.png`;
   const playerPhotoPath = (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
-  const plantillaPath   = (team)   => `data/plantillas/${slug(team)}.json`;
+  const plantillaPath = (team) => `data/plantillas/${slug(team)}.json`;
 
   // --------------------------
   // Helpers Supabase (users)
@@ -52,7 +52,7 @@
   // HERO
   // --------------------------
   document.getElementById("club-title").textContent = CLUB;
-  document.getElementById("club-name").textContent  = CLUB;
+  document.getElementById("club-name").textContent = CLUB;
 
   const bannerLogo = document.getElementById("club-banner-logo");
   bannerLogo.src = logoPath(CLUB);
@@ -64,7 +64,7 @@
   const resultados = await CoreStats.getResultados();
   const statsIndex = await CoreStats.getStatsIndex();
 
-  resultados.sort((a,b)=> (a.numero||0) - (b.numero||0));
+  resultados.sort((a, b) => (a.numero || 0) - (b.numero || 0));
 
   // --------------------------
   // Partidos del club (cronológicos)
@@ -111,9 +111,9 @@
     return clubWon ? "W" : "L";
   });
 
-  const countW = formResults.filter(r => r==="W").length;
-  const countD = formResults.filter(r => r==="D").length;
-  const countL = formResults.filter(r => r==="L").length;
+  const countW = formResults.filter(r => r === "W").length;
+  const countD = formResults.filter(r => r === "D").length;
+  const countL = formResults.filter(r => r === "L").length;
 
   const formRating = (() => {
     if (formResults.length < 3) return "NO DATA";
@@ -148,7 +148,7 @@
   // --------------------------
   // Clasificación desde CoreStats (con H2H)
   // --------------------------
-  const fullClasif = await CoreStats.computeClasificacion(null, { useH2H:true });
+  const fullClasif = await CoreStats.computeClasificacion(null, { useH2H: true });
   const idxClub = fullClasif.findIndex(t => norm(t.nombre) === norm(CLUB));
 
   const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
@@ -171,8 +171,8 @@
   if (descEl) descEl.innerHTML = bannerStatsHTML;
 
   let mini = [];
-  if (idxClub === -1) mini = fullClasif.slice(0,9);
-  else mini = fullClasif.slice(Math.max(0, idxClub-4), idxClub+5);
+  if (idxClub === -1) mini = fullClasif.slice(0, 9);
+  else mini = fullClasif.slice(Math.max(0, idxClub - 4), idxClub + 5);
 
   // --------------------------
   // Máximo goleador del club desde TSV (CoreStats)
@@ -229,14 +229,14 @@
       <table class="club-mini-table">
         <thead><tr><th>#</th><th>Equipo</th><th>Pts</th></tr></thead>
         <tbody>
-          ${mini.map(t=>{
-            const pos = fullClasif.findIndex(x=> norm(x.nombre)===norm(t.nombre)) + 1;
-            return `
-              <tr class="${norm(t.nombre)===norm(CLUB) ? "club-highlight" : ""}">
+          ${mini.map(t => {
+    const pos = fullClasif.findIndex(x => norm(x.nombre) === norm(t.nombre)) + 1;
+    return `
+              <tr class="${norm(t.nombre) === norm(CLUB) ? "club-highlight" : ""}">
                 <td>${pos}</td><td>${t.nombre}</td><td>${t.pts}</td>
               </tr>
             `;
-          }).join("")}
+  }).join("")}
         </tbody>
       </table>
     </div>
@@ -288,8 +288,8 @@
     if (!hasSupabase || !clubNickname) return null;
 
     const supabase = await getSupabaseClient();
-    const cfg     = (typeof getSupabaseConfig === "function") ? getSupabaseConfig() : {};
-    const season  = cfg?.season || null;
+    const cfg = (typeof getSupabaseConfig === "function") ? getSupabaseConfig() : {};
+    const season = cfg?.season || null;
 
     // 1) Resolver club_id a partir de league_teams.nickname (y season)
     let ltQuery = supabase
@@ -382,11 +382,11 @@
       squad: membs
         .filter(m => m.player) // por si acaso
         .map(m => ({
-          id:           m.player.id,
-          name:         m.player.name,
-          position:     m.player.position,
-          dateOfBirth:  m.player.date_of_birth,
-          nationality:  m.player.nationality
+          id: m.player.id,
+          name: m.player.name,
+          position: m.player.position,
+          dateOfBirth: m.player.date_of_birth,
+          nationality: m.player.nationality
         }))
     };
   }
@@ -438,13 +438,13 @@
     }
 
     Object.values(groups).forEach(arr =>
-      arr.sort((a,b)=>
-        String(a.position||"").localeCompare(String(b.position||""), "es", {sensitivity:"base"}) ||
-        String(a.name||"").localeCompare(String(b.name||""), "es", {sensitivity:"base"})
+      arr.sort((a, b) =>
+        String(a.position || "").localeCompare(String(b.position || ""), "es", { sensitivity: "base" }) ||
+        String(a.name || "").localeCompare(String(b.name || ""), "es", { sensitivity: "base" })
       )
     );
 
-    const groupOrder = ["Porteros","Defensas","Centrocampistas","Delanteros","Otros"];
+    const groupOrder = ["Porteros", "Defensas", "Centrocampistas", "Delanteros", "Otros"];
 
     plantillaEl.innerHTML = `
       <div class="club-box club-plantilla-head" style="grid-column:span 12">
@@ -455,15 +455,15 @@
         <div class="squad-meta muted">${squad.length} jugadores</div>
       </div>
 
-      ${groupOrder.filter(k=>groups[k]?.length).map(k=>{
-        const players = groups[k];
-        return `
+      ${groupOrder.filter(k => groups[k]?.length).map(k => {
+      const players = groups[k];
+      return `
           <div class="club-box club-plantilla-group" style="grid-column:span 12">
             <h4 class="plantilla-group-title">${k} <span class="muted">(${players.length})</span></h4>
             <div class="plantilla-grid">
-              ${players.map(pl=>{
-                const age = calcAge(pl.dateOfBirth || pl.date_of_birth);
-                return `
+              ${players.map(pl => {
+        const age = calcAge(pl.dateOfBirth || pl.date_of_birth);
+        return `
                   <div class="plantilla-card">
                     <div class="plantilla-card-top">
                       <div class="plantilla-name">${pl.name || "—"}</div>
@@ -471,15 +471,15 @@
                     </div>
                     <div class="plantilla-card-meta">
                       ${pl.nationality ? `<span class="pill">${pl.nationality}</span>` : ""}
-                      ${age!=null ? `<span class="pill">${age} años</span>` : ""}
+                      ${age != null ? `<span class="pill">${age} años</span>` : ""}
                     </div>
                   </div>
                 `;
-              }).join("")}
+      }).join("")}
             </div>
           </div>
         `;
-      }).join("")}
+    }).join("")}
     `;
   };
 
@@ -500,20 +500,16 @@
         console.warn("Error cargando plantilla desde Supabase:", e);
       }
 
-      // 2) Fallback al JSON antiguo (por compat)
-      if (!teamData) {
-        const jsonData = await loadJSON(plantillaPath(CLUB)).catch(()=>null);
-        if (jsonData) {
-          teamData = jsonData;
-        }
-      }
+      // 2) Sin Fallback a JSON antiguo
+      // if (!teamData) ...
+
 
       if (!teamData) {
         plantillaEl.innerHTML = `
           <div class="club-box" style="grid-column:span 12">
             <h3>Plantilla</h3>
             <p class="muted">
-              No hay datos de plantilla ni en BD ni en <code>${plantillaPath(CLUB)}</code>.
+              No hay datos de plantilla en base de datos.
             </p>
           </div>`;
         return;
@@ -581,24 +577,24 @@
         return idx >= 0 ? idx + 1 : null;
       };
 
-      const posesionMedia   = posMed(teamAdv);
-      const pasesTotales    = teamAdv.pases;
-      const pasesComp       = teamAdv.completados;
-      const accPase         = passAcc(teamAdv);
-      const tirosTotales    = teamAdv.tiros;
-      const tirosPuerta     = teamAdv.taPuerta;
-      const golesTotales    = teamAdv.goles;
-      const precTiro        = precisionTiro(teamAdv);
-      const convGol         = conversionGol(teamAdv);
-      const combShot        = combinedShot(teamAdv);
-      const fairScore       = fair(teamAdv);
-      const efectDef        = efectRival(teamAdv); // goles encajados / tiros a puerta rival
+      const posesionMedia = posMed(teamAdv);
+      const pasesTotales = teamAdv.pases;
+      const pasesComp = teamAdv.completados;
+      const accPase = passAcc(teamAdv);
+      const tirosTotales = teamAdv.tiros;
+      const tirosPuerta = teamAdv.taPuerta;
+      const golesTotales = teamAdv.goles;
+      const precTiro = precisionTiro(teamAdv);
+      const convGol = conversionGol(teamAdv);
+      const combShot = combinedShot(teamAdv);
+      const fairScore = fair(teamAdv);
+      const efectDef = efectRival(teamAdv); // goles encajados / tiros a puerta rival
 
-      const posRank      = rankOf(posesionTop);
-      const passRank     = rankOf(passTop);
-      const shotRank     = rankOf(shotTop);
-      const fairRank     = rankOf(fairTop);
-      const efectRank    = rankOf(efectTop);
+      const posRank = rankOf(posesionTop);
+      const passRank = rankOf(passTop);
+      const shotRank = rankOf(shotTop);
+      const fairRank = rankOf(fairTop);
+      const efectRank = rankOf(efectTop);
 
       tabStats.innerHTML = `
         <div class="club-grid club-stats-grid">
@@ -618,8 +614,8 @@
             <div class="stat-main">${fmtPct(posesionMedia)}</div>
             <p class="muted">
               ${posRank
-                ? `Puesto ${posRank} de ${totalTeams} en posesión media.`
-                : `Sin ranking disponible.`}
+          ? `Puesto ${posRank} de ${totalTeams} en posesión media.`
+          : `Sin ranking disponible.`}
             </p>
           </div>
 
@@ -632,8 +628,8 @@
             </ul>
             <p class="muted">
               ${passRank
-                ? `Puesto ${passRank} de ${totalTeams} en precisión de pase.`
-                : `Sin ranking disponible.`}
+          ? `Puesto ${passRank} de ${totalTeams} en precisión de pase.`
+          : `Sin ranking disponible.`}
             </p>
           </div>
 
@@ -649,8 +645,8 @@
             </ul>
             <p class="muted">
               ${shotRank
-                ? `Puesto ${shotRank} de ${totalTeams} en calidad de tiro.`
-                : `Sin ranking disponible.`}
+          ? `Puesto ${shotRank} de ${totalTeams} en calidad de tiro.`
+          : `Sin ranking disponible.`}
             </p>
           </div>
 
@@ -664,8 +660,8 @@
             </ul>
             <p class="muted">
               ${fairRank
-                ? `Puesto ${fairRank} de ${totalTeams} en fair play (más alto = mejor).`
-                : `Sin ranking disponible.`}
+          ? `Puesto ${fairRank} de ${totalTeams} en fair play (más alto = mejor).`
+          : `Sin ranking disponible.`}
             </p>
           </div>
 
@@ -678,8 +674,8 @@
             </ul>
             <p class="muted">
               ${efectRank
-                ? `Puesto ${efectRank} de ${totalTeams} en solidez defensiva (más bajo = mejor).`
-                : `Sin ranking disponible.`}
+          ? `Puesto ${efectRank} de ${totalTeams} en solidez defensiva (más bajo = mejor).`
+          : `Sin ranking disponible.`}
             </p>
           </div>
         </div>
@@ -697,8 +693,8 @@
   // --------------------------
   // TAB VIDEOS (playlist desde Supabase.users + fallback JSON)
   // --------------------------
-  const videosMsgEl   = document.getElementById("videos-msg");
-  const playlistEl    = document.getElementById("playlist-embed");
+  const videosMsgEl = document.getElementById("videos-msg");
+  const playlistEl = document.getElementById("playlist-embed");
 
   const setVideosMsg = (t) => { if (videosMsgEl) videosMsgEl.textContent = t || ""; };
 
@@ -713,20 +709,8 @@
       }
     }
 
-    // 2) Fallback opcional a playlists.json (por compat)
-    try {
-      const playlists = await loadJSON("data/playlists.json").catch(() => null);
-      if (playlists && typeof playlists === "object") {
-        const directKey = `Liga Voll Damm - ${clubName}`;
-        if (playlists[directKey]) return playlists[directKey];
-
-        const nkDirect = norm(directKey);
-        const foundDirect = Object.keys(playlists).find(k => norm(k) === nkDirect);
-        if (foundDirect) return playlists[foundDirect];
-      }
-    } catch (e) {
-      console.warn("Error leyendo playlists.json:", e);
-    }
+    // 2) Sin Fallback a JSON
+    // try { const playlists = await loadJSON("data/playlists.json")... }
 
     return null;
   }
@@ -743,9 +727,9 @@
 
     return entries.map(e => {
       const videoId = e.querySelector("yt\\:videoId, videoId")?.textContent?.trim();
-      const title   = e.querySelector("title")?.textContent?.trim() || "Vídeo";
+      const title = e.querySelector("title")?.textContent?.trim() || "Vídeo";
       const thumbEl = e.querySelector("media\\:thumbnail, thumbnail");
-      const thumb   = thumbEl?.getAttribute("url") || "";
+      const thumb = thumbEl?.getAttribute("url") || "";
 
       return { videoId, title, thumb };
     }).filter(x => x.videoId);
@@ -779,12 +763,12 @@
       <div class="playlist-list">
         ${items.map((v, i) => `
           <button
-            class="playlist-item ${i===0 ? "active" : ""}"
+            class="playlist-item ${i === 0 ? "active" : ""}"
             data-video-id="${v.videoId}">
             <img class="playlist-thumb" src="${v.thumb}" alt="">
             <div class="playlist-meta">
               <div class="playlist-title">${v.title}</div>
-              <div class="playlist-sub muted">Vídeo ${i+1}</div>
+              <div class="playlist-sub muted">Vídeo ${i + 1}</div>
             </div>
           </button>
         `).join("")}
@@ -852,7 +836,7 @@
   // --------------------------
   document.querySelectorAll(".tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
       const t = btn.dataset.tab;

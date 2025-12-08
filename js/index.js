@@ -3,7 +3,7 @@
   const CoreStats = window.CoreStats || {};
   const AppUtils = window.AppUtils || {};
   const {
-    loadJSON,
+
     getSupabaseClient,
     getSupabaseConfig
   } = AppUtils;

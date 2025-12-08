@@ -14,27 +14,41 @@
   const playlistName = `Liga Voll Damm - ${team}`;
 
   // carga playlists.json
-  let playlists = {};
-  try {
-    playlists = await loadJSON("data/playlists.json");
-  } catch (e) {
-    msgEl.textContent = "No se pudo cargar playlists.json.";
-    return;
+  // Carga desde Supabase
+  let playlistId = null;
+  const { getSupabaseClient } = window.AppUtils || {};
+
+  if (getSupabaseClient) {
+    try {
+      const supabase = await getSupabaseClient();
+      const { data, error } = await supabase
+        .from("users")
+        .select("youtube_playlist_id")
+        .ilike("nickname", team) // case-insensitive match con el nombre del equipo/manager
+        .maybeSingle();
+
+      if (!error && data) {
+        playlistId = data.youtube_playlist_id;
+      }
+    } catch (e) {
+      console.warn("Error cargando playlist desde DB:", e);
+    }
   }
 
-  const playlistId = playlists[playlistName];
-
+  // Si no tenemos ID, mostramos error (sin fallback a JSON)
   if (!playlistId) {
     msgEl.innerHTML = `
       <p style="color:var(--muted)">
         No hay playlist configurada para <b>${team}</b>.
       </p>
-      <p style="color:var(--muted); font-size:.9em">
-        Esperaba una entrada: <code>${playlistName}</code>
-      </p>
     `;
     return;
   }
+
+  // Ya tenemos el ID, seguimos...
+  // (Eliminamos la parte vieja de playlists[playlistName])
+
+
 
   // pinta embed de playlist
   msgEl.textContent = "";

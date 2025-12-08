@@ -10,7 +10,7 @@
 
   // Helpers comunes
   const {
-    loadJSON,
+
     fmtDate,
     normalizeText,
     slugify,

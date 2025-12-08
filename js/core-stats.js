@@ -15,7 +15,7 @@
     getSupabaseClient,
     getSupabaseConfig,
     getActiveSeason,
-    loadJSON,        // <- para el fallback a JSON local
+
   } = AppUtils;
 
   const hasSupabase =

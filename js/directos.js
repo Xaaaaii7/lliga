@@ -4,16 +4,49 @@ const PARENT_DOMAIN = "xaaaaii7.github.io";
 let CHANNEL_TEAM_MAP = {};
 
 // CARGAR MAPPING CANAL → EQUIPO DESDE JSON
+// CARGAR MAPPING CANAL → EQUIPO DESDE SUPABASE
 async function loadChannelTeamMap() {
+  const { getSupabaseClient } = window.AppUtils || {};
+  if (!getSupabaseClient) {
+    console.warn("No se puede cargar mapa de canales: falta Supabase Client");
+    return;
+  }
+
   try {
-    const data = await loadJSON("data/channel_teams.json");
+    const supabase = await getSupabaseClient();
+    // Consultamos users y league_teams para obtener canal y nombre de equipo
+    // Hacemos el join manual o via query si hay FK.
+    // league_teams tiene user_id -> users.id
+    const { data, error } = await supabase
+      .from('league_teams')
+      .select(`
+        display_name,
+        nickname,
+        user:users!user_id(twitch_channel)
+      `);
+
+    if (error) throw error;
+
     const normalized = {};
-    Object.keys(data || {}).forEach(k => {
-      normalized[String(k).toLowerCase()] = data[k];
-    });
+    if (data) {
+      data.forEach(row => {
+        const list = Array.isArray(row.user) ? row.user : [row.user];
+        const user = list[0]; // La relación es 1:1 habitualmente
+
+        if (user && user.twitch_channel) {
+          const ch = String(user.twitch_channel).toLowerCase().trim();
+          // Prioridad: display_name (equipo) > nickname (manager)
+          const teamName = row.display_name || row.nickname;
+          if (ch && teamName) {
+            normalized[ch] = teamName;
+          }
+        }
+      });
+    }
     CHANNEL_TEAM_MAP = normalized;
+
   } catch (e) {
-    console.warn("No se pudo cargar data/channel_teams.json", e);
+    console.warn("Error cargando mapa de canales desde DB:", e);
     CHANNEL_TEAM_MAP = {};
   }
 }
@@ -57,7 +90,7 @@ async function loadChannelTeamMap() {
     </div>
   `;
 
-  const loadingEl      = document.getElementById("directo-loading");
+  const loadingEl = document.getElementById("directo-loading");
   const matchContainer = document.getElementById("main-stream-match");
 
   // =========================
@@ -93,7 +126,7 @@ async function loadChannelTeamMap() {
     );
 
     for (const j of jornadasOrdenadas) {
-      const jNum   = j.numero ?? j.jornada ?? null;
+      const jNum = j.numero ?? j.jornada ?? null;
       const jFecha = j.fecha;
 
       for (const p of (j.partidos || [])) {
@@ -109,7 +142,7 @@ async function loadChannelTeamMap() {
           return {
             jNum,
             fecha: p.fecha || jFecha || null,
-            hora:  p.hora || null,
+            hora: p.hora || null,
             local: p.local,
             visitante: p.visitante
           };
@@ -182,7 +215,7 @@ async function loadChannelTeamMap() {
   // =========================
   function setMainStream(channel) {
     const container = document.getElementById("main-stream");
-    const statusEl  = document.getElementById("main-stream-status");
+    const statusEl = document.getElementById("main-stream-status");
     if (!container) return;
 
     if (!channel) {
@@ -221,7 +254,7 @@ async function loadChannelTeamMap() {
   // =========================
   function renderChannelsList(channels, currentChannel) {
     const listWrap = document.getElementById("streams-list");
-    const aside    = document.getElementById("streams-list-wrapper");
+    const aside = document.getElementById("streams-list-wrapper");
     if (!listWrap) return;
 
     if (!channels.length) {
@@ -259,6 +292,17 @@ async function loadChannelTeamMap() {
 
   // 1) Cargar mapping canal→equipo
   await loadChannelTeamMap();
+
+  // 1a) Si no tenemos resultados, cargar para poder buscar próximo partido
+  if (!jornadasRes || !jornadasRes.length) {
+    if (window.CoreStats && typeof CoreStats.getResultados === 'function') {
+      try {
+        jornadasRes = await CoreStats.getResultados();
+      } catch (e) {
+        console.warn("No se pudieron cargar resultados desde CoreStats en directos.js", e);
+      }
+    }
+  }
 
   // 2) Pedir canales en directo
   const liveChannels = await fetchLiveChannels();
