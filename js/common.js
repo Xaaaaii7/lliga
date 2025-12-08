@@ -129,12 +129,25 @@ function genAlineacionFromEsquema(esquema){
 
 async function getCurrentUser() {
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error) {
-    console.warn('Error obteniendo usuario actual', error);
+
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    // Si no hay sesión, Supabase lanza AuthSessionMissingError:
+    if (error) {
+      if (error.name === "AuthSessionMissingError") {
+        // Caso normal: usuario anónimo, no lo tratamos como error
+        return null;
+      }
+      console.error("Error obteniendo usuario actual", error);
+      return null;
+    }
+
+    return data?.user ?? null;
+  } catch (e) {
+    console.error("Error inesperado en getCurrentUser:", e);
     return null;
   }
-  return data.user || null;
 }
 
 async function getCurrentProfile() {
