@@ -505,7 +505,8 @@
         event_type
       `)
       .eq('match_id', matchId)
-      .eq('event_type', 'goal');
+      .eq('match_id', matchId)
+      .in('event_type', ['goal', 'own_goal']);
 
     if (errMatchEv) {
       console.warn('Error cargando goal_events del partido:', errMatchEv);
@@ -525,6 +526,10 @@
 
       if (ev.event_type === 'goal') {
         aggGoals[side][pid] = (aggGoals[side][pid] || 0) + 1;
+      } else if (ev.event_type === 'own_goal') {
+        // OWN_GOAL_ID = -1
+        const ogKey = -1;
+        aggGoals[side][ogKey] = (aggGoals[side][ogKey] || 0) + 1;
       }
     });
 
@@ -555,7 +560,14 @@
       Object.keys(counts).forEach(pidStr => {
         const pid = Number(pidStr);
         const goals = counts[pidStr];
-        const meta = playerMeta[pid] || { name: `Jugador ${pid}` };
+        // Handle Own Goal (pid = -1)
+        let meta;
+        if (pid === -1) {
+          meta = { name: 'Gol en propia' };
+        } else {
+          meta = playerMeta[pid] || { name: `Jugador ${pid}` };
+        }
+
         out.push({
           player_id: pid,
           name: meta.name,
@@ -679,6 +691,7 @@
       if (!sel) return;
       sel.innerHTML = `
         <option value="">Añadir goleador…</option>
+        <option value="-1">Gol en propia</option>
         ${players.map(p => `
           <option value="${p.player_id}">
             ${p.name} (${p.totalGoals} gol${p.totalGoals === 1 ? '' : 'es'})
@@ -710,7 +723,9 @@
     const pid = Number(playerId);
     let item = arr.find(x => x.player_id === pid);
     if (!item) {
-      const meta = state.playerMeta[pid] || { name: `Jugador ${pid}` };
+      const meta = (pid === -1)
+        ? { name: 'Gol en propia' }
+        : (state.playerMeta[pid] || { name: `Jugador ${pid}` });
       item = { player_id: pid, name: meta.name, goals: 0 };
       arr.push(item);
     }
@@ -782,7 +797,8 @@
       .from('goal_events')
       .delete()
       .eq('match_id', matchId)
-      .eq('event_type', 'goal');
+      .eq('match_id', matchId)
+      .in('event_type', ['goal', 'own_goal']);
 
     if (errDel) {
       console.error('Error borrando goal_events:', errDel);
@@ -798,9 +814,9 @@
           rows.push({
             match_id: matchId,
             league_team_id: leagueTeamId,
-            player_id: p.player_id,
+            player_id: (p.player_id === -1) ? null : p.player_id,
             minute: null,
-            event_type: 'goal'
+            event_type: (p.player_id === -1) ? 'own_goal' : 'goal'
           });
         }
       });
