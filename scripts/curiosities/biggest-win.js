@@ -6,16 +6,18 @@ export async function run(supabase) {
     const { data: matches, error: matchesError } = await supabase
         .from('matches')
         .select(`
-      id,
-      local_team_id,
-      visitor_team_id,
-      goles_local,
-      goles_visitante,
-      jornada
-    `)
+    id,
+    home_league_team_id,
+    away_league_team_id,
+    home_goals,
+    away_goals,
+    round_id
+  `)
         .eq('season', SEASON)
-        .not('goles_local', 'is', null)
-        .not('goles_visitante', 'is', null);
+        .not('home_goals', 'is', null)
+        .not('away_goals', 'is', null);
+    // NOTE: 'round_id' seems to be the column name instead of 'jornada' in schema provided earlier.
+    // But let's check matches columns again if needed. The schema dump said 'round_id'.
 
     if (matchesError) throw new Error(`Error fetching matches: ${matchesError.message}`);
     if (!matches || !matches.length) {
@@ -36,7 +38,7 @@ export async function run(supabase) {
     let bestMatch = null;
 
     for (const m of matches) {
-        const diff = Math.abs(m.goles_local - m.goles_visitante);
+        const diff = Math.abs(m.home_goals - m.away_goals);
         if (diff > maxDiff) {
             maxDiff = diff;
             bestMatch = m;
@@ -48,37 +50,35 @@ export async function run(supabase) {
         return;
     }
 
-    const localTeam = teamMap.get(bestMatch.local_team_id);
-    const visitorTeam = teamMap.get(bestMatch.visitor_team_id);
+    const localTeam = teamMap.get(bestMatch.home_league_team_id);
+    const visitorTeam = teamMap.get(bestMatch.away_league_team_id);
 
     const localName = localTeam ? (localTeam.nickname || localTeam.display_name) : 'Local';
     const visitorName = visitorTeam ? (visitorTeam.nickname || visitorTeam.display_name) : 'Visitor';
 
-    console.log(`Biggest win: ${localName} ${bestMatch.goles_local} - ${bestMatch.goles_visitante} ${visitorName} (Diff: ${maxDiff})`);
+    console.log(`Biggest win: ${localName} ${bestMatch.home_goals} - ${bestMatch.away_goals} ${visitorName} (Diff: ${maxDiff})`);
 
-    // 4. Payload
     const title = `Mayor Goleada`;
-    const description = `La mayor goleada de la temporada: ${localName} ${bestMatch.goles_local} - ${bestMatch.goles_visitante} ${visitorName} en la jornada ${bestMatch.jornada}.`;
+    // Use round_id as Jornada
+    const description = `La mayor goleada de la temporada: ${localName} ${bestMatch.home_goals} - ${bestMatch.away_goals} ${visitorName} en la jornada ${bestMatch.round_id}.`;
 
     const payload = {
         category: 'partidos',
         matchId: bestMatch.id,
-        localId: bestMatch.local_team_id,
-        visitorId: bestMatch.visitor_team_id,
+        localId: bestMatch.home_league_team_id,
+        visitorId: bestMatch.away_league_team_id,
         localName,
         visitorName,
-        localGoals: bestMatch.goles_local,
-        visitorGoals: bestMatch.goles_visitante,
+        localGoals: bestMatch.home_goals,
+        visitorGoals: bestMatch.away_goals,
         diff: maxDiff,
-        badge: localTeam ? `img/${(localTeam.nickname || 'default').toLowerCase()}.png` : '' // Use local badge typically? Or maybe winner's badge?
+        badge: localTeam ? `img/${(localTeam.nickname || 'default').toLowerCase()}.png` : ''
     };
 
-    // If local won, use local badge. If visitor won, use visitor badge.
-    if (bestMatch.goles_visitante > bestMatch.goles_local) {
+    if (bestMatch.away_goals > bestMatch.home_goals) {
         payload.badge = visitorTeam ? `img/${(visitorTeam.nickname || 'default').toLowerCase()}.png` : '';
     }
 
-    // 5. Insert
     const today = new Date().toISOString().slice(0, 10);
     const entry = {
         fecha: today,

@@ -2,16 +2,13 @@ export async function run(supabase) {
     const SEASON = process.env.SEASON || '2025-26';
     console.log(`Starting Daily Curiosity: Injuries (Season: ${SEASON})`);
 
-    // We assume injuries_team_events has match_id, team_id or similar. 
-    // If we can't be sure, we wrap in try-catch or assume team_id exists.
-    // Generally "events" tables link to matches/teams.
-
     try {
+        // Correct table name is 'match_injuries' based on schema check
         const { data: events, error } = await supabase
-            .from('injuries_team_events')
+            .from('match_injuries')
             .select(`
         id,
-        team_id,
+        league_team_id,
         match:matches!inner (season),
         team:league_teams (nickname, display_name)
       `)
@@ -22,7 +19,7 @@ export async function run(supabase) {
 
         const map = new Map();
         events.forEach(r => {
-            const id = r.team_id; // assuming column name
+            const id = r.league_team_id;
             if (!id) return;
             if (!map.has(id)) map.set(id, { count: 0, name: r.team ? (r.team.nickname || r.team.display_name) : 'Equipo' });
             map.get(id).count++;
@@ -53,6 +50,6 @@ export async function run(supabase) {
         });
 
     } catch (err) {
-        console.log('Skipping injuries task due to error (maybe schema differs):', err.message);
+        console.log('Skipping injuries task due to error:', err.message);
     }
 }

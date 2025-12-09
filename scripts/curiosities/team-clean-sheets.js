@@ -2,26 +2,25 @@ export async function run(supabase) {
     const SEASON = process.env.SEASON || '2025-26';
     console.log(`Starting Daily Curiosity: Clean Sheets (Season: ${SEASON})`);
 
-    // matches where goals_against == 0
-    // Easier: fetch all matches, iterate
+    // Fixed: goles_local -> home_goals, etc.
     const { data: matches, error } = await supabase
         .from('matches')
         .select(`
-      local_team_id,
-      visitor_team_id,
-      goles_local,
-      goles_visitante,
+      home_league_team_id,
+      away_league_team_id,
+      home_goals,
+      away_goals,
       home:league_teams!matches_home_league_team_id_fkey (nickname, display_name),
       away:league_teams!matches_away_league_team_id_fkey (nickname, display_name)
     `)
         .eq('season', SEASON)
-        .not('goles_local', 'is', null)
-        .not('goles_visitante', 'is', null);
+        .not('home_goals', 'is', null)
+        .not('away_goals', 'is', null);
 
     if (error) throw new Error(error.message);
     if (!matches?.length) return;
 
-    const map = new Map(); // id -> count
+    const map = new Map();
 
     const add = (id, name) => {
         if (!map.has(id)) map.set(id, { count: 0, name });
@@ -30,12 +29,12 @@ export async function run(supabase) {
 
     matches.forEach(m => {
         // Local clean sheet if visitor goals == 0
-        if (m.goles_visitante === 0) {
-            add(m.local_team_id, m.home.nickname || m.home.display_name);
+        if (m.away_goals === 0) {
+            add(m.home_league_team_id, m.home.nickname || m.home.display_name);
         }
         // Visitor clean sheet if local goals == 0
-        if (m.goles_local === 0) {
-            add(m.visitor_team_id, m.away.nickname || m.away.display_name);
+        if (m.home_goals === 0) {
+            add(m.away_league_team_id, m.away.nickname || m.away.display_name);
         }
     });
 
