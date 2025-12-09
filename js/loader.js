@@ -23,6 +23,13 @@ const AppUtils = {
 // Expose globally
 window.AppUtils = AppUtils;
 
+// Also expose individual helpers globally for backward compatibility (e.g. fmtDate, normalizeText)
+Object.keys(AppUtils).forEach(key => {
+    if (typeof window[key] === 'undefined') {
+        window[key] = AppUtils[key];
+    }
+});
+
 // Initialize UI (Nav, Header) when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', UI.initNavigation);
