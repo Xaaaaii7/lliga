@@ -554,6 +554,23 @@
     [].forEach(() => {
     });
 
+    // 5) Cargar lesiones desde 'match_injuries'
+    const { data: injuryEvents, error: errInj } = await supa
+      .from('match_injuries')
+      .select('player_id, league_team_id')
+      .eq('match_id', matchId);
+
+    if (errInj) {
+      console.warn('Error cargando match_injuries:', errInj);
+    }
+
+    const aggInj = { local: [], visitante: [] };
+    (injuryEvents || []).forEach(ev => {
+      const pid = ev.player_id;
+      if (ev.league_team_id === localTeamId) aggInj.local.push(pid);
+      else if (ev.league_team_id === visitTeamId) aggInj.visitante.push(pid);
+    });
+
     const buildSideArr = (side) => {
       const out = [];
       const counts = aggGoals[side] || {};
@@ -584,7 +601,21 @@
     const buildRedArr = (side) => {
       const out = [];
       const pids = aggRed[side] || [];
-      // Deduplicate just in case DB has multiples
+      const uniquePids = [...new Set(pids)];
+      uniquePids.forEach(pid => {
+        const meta = playerMeta[pid] || { name: `Jugador ${pid}` };
+        out.push({
+          player_id: pid,
+          name: meta.name
+        });
+      });
+      out.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      return out;
+    };
+
+    const buildInjuriesArr = (side) => {
+      const out = [];
+      const pids = aggInj[side] || [];
       const uniquePids = [...new Set(pids)];
       uniquePids.forEach(pid => {
         const meta = playerMeta[pid] || { name: `Jugador ${pid}` };
@@ -607,6 +638,8 @@
       visitante: buildSideArr('visitante'),
       redLocal: buildRedArr('local'),
       redVisitante: buildRedArr('visitante'),
+      injuriesLocal: buildInjuriesArr('local'),
+      injuriesVisitante: buildInjuriesArr('visitante'),
       playersLocal: localPlayers,
       playersVisitante: visitPlayers,
       playerMeta,
@@ -1173,6 +1206,193 @@
   };
 
   // -----------------------------
+  // Editor de lesiones
+  // -----------------------------
+  const renderInjuriesList = (sectionEl, side, state) => {
+    if (!sectionEl || !state) return;
+    const listEl = sectionEl.querySelector(`.injuries-list[data-side="${side}"]`);
+    if (!listEl) return;
+
+    const arr = (side === 'local' ? state.injuriesLocal : state.injuriesVisitante) || [];
+    if (!arr.length) {
+      listEl.innerHTML = `<li class="scorer-empty">Sin lesiones.</li>`;
+      return;
+    }
+
+    listEl.innerHTML = arr.map(p => `
+      <li class="scorer-item" data-player-id="${p.player_id}">
+        <span class="scorer-name">${p.name}</span>
+        <button type="button" class="btn-remove-injury" data-player-id="${p.player_id}" data-side="${side}">✕</button>
+      </li>
+    `).join('');
+  };
+
+  const fillInjuriesSelects = (sectionEl, state) => {
+    if (!sectionEl || !state) return;
+
+    const fill = (side, allPlayers, currentInjured) => {
+      const sel = sectionEl.querySelector(`select[data-side="${side}"]`);
+      if (!sel) return;
+
+      const currentIds = new Set(currentInjured.map(p => p.player_id));
+      const available = allPlayers.filter(p => !currentIds.has(p.player_id));
+
+      sel.innerHTML = `
+        <option value="">Añadir lesionado…</option>
+        ${available.map(p => `
+          <option value="${p.player_id}">${p.name}</option>
+        `).join('')}
+      `;
+    };
+
+    fill('local', state.playersLocal || [], state.injuriesLocal || []);
+    fill('visitante', state.playersVisitante || [], state.injuriesVisitante || []);
+  };
+
+  const addInjuryToState = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = (side === 'local' ? state.injuriesLocal : state.injuriesVisitante);
+    const pid = Number(playerId);
+    if (arr.some(p => p.player_id === pid)) return;
+
+    const meta = state.playerMeta[pid] || { name: `Jugador ${pid}` };
+    arr.push({ player_id: pid, name: meta.name });
+    arr.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  };
+
+  const removeInjuryFromState = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = (side === 'local' ? state.injuriesLocal : state.injuriesVisitante);
+    const pid = Number(playerId);
+    const idx = arr.findIndex(x => x.player_id === pid);
+    if (idx !== -1) arr.splice(idx, 1);
+  };
+
+  const saveInjuriesFull = async (matchId) => {
+    const state = scorerState[matchId];
+    if (!state) return { ok: false, msg: 'No hay datos' };
+
+    const supa = await getSupa();
+    if (!supa) return { ok: false, msg: 'Supabase no configurado' };
+
+    const meta = state.meta;
+    const localTeamId = meta.local_team_id;
+    const visitTeamId = meta.visitante_team_id;
+
+    if (!localTeamId || !visitTeamId) return { ok: false, msg: 'Faltan IDs de equipo' };
+
+    // 1) Borrar lesiones antiguas
+    const { error: errDel } = await supa
+      .from('match_injuries')
+      .delete()
+      .eq('match_id', matchId);
+
+    if (errDel) {
+      console.error('Error borrando match_injuries:', errDel);
+      return { ok: false, msg: 'Error al limpiar lesiones antiguas' };
+    }
+
+    // 2) Insertar nuevas
+    const rows = [];
+    (state.injuriesLocal || []).forEach(p => {
+      rows.push({
+        match_id: matchId,
+        league_team_id: localTeamId,
+        player_id: p.player_id
+      });
+    });
+    (state.injuriesVisitante || []).forEach(p => {
+      rows.push({
+        match_id: matchId,
+        league_team_id: visitTeamId,
+        player_id: p.player_id
+      });
+    });
+
+    if (rows.length) {
+      const { error: errIns } = await supa.from('match_injuries').insert(rows);
+      if (errIns) {
+        console.error('Error insertando match_injuries:', errIns);
+        return { ok: false, msg: 'Error guardando lesiones' };
+      }
+    }
+
+    // 3) Actualizar suspensiones (siguiente partido) con reason='injury'
+    await Promise.all([
+      saveSuspensionForMatch(matchId, localTeamId, state.injuriesLocal.map(p => p.player_id), matchId, 'injury'),
+      saveSuspensionForMatch(matchId, visitTeamId, state.injuriesVisitante.map(p => p.player_id), matchId, 'injury')
+    ]);
+
+    return { ok: true, msg: 'Lesiones registradas correctamente' };
+  };
+
+  const initInjuriesEditor = async (matchId, meta) => {
+    if (!hasSupabase || !matchId || !meta) return;
+    if (!bodyEl) return;
+
+    const section = bodyEl.querySelector('.injuries-editor');
+    if (!section) return;
+
+    const statusEl = section.querySelector('.injuries-status');
+    const saveBtn = section.querySelector('.btn-save-injuries');
+
+    const state = await loadScorerStateForMatch(meta);
+    if (!state) {
+      if (statusEl) statusEl.textContent = 'Error cargando datos.';
+      return;
+    }
+
+    const refreshUI = () => {
+      fillInjuriesSelects(section, state);
+      renderInjuriesList(section, 'local', state);
+      renderInjuriesList(section, 'visitante', state);
+    };
+
+    refreshUI();
+
+    section.querySelectorAll('.btn-add-injury').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const side = btn.getAttribute('data-side');
+        const sel = section.querySelector(`select[data-side="${side}"]`);
+        if (!sel) return;
+        const val = sel.value;
+        if (!val) return;
+        addInjuryToState(matchId, side, val);
+        refreshUI();
+      });
+    });
+
+    section.addEventListener('click', (e) => {
+      const target = e.target;
+      const btnRem = target.closest && target.closest('.btn-remove-injury');
+      if (btnRem) {
+        e.preventDefault();
+        const side = btnRem.getAttribute('data-side');
+        const pid = btnRem.getAttribute('data-player-id');
+        if (side && pid) {
+          removeInjuryFromState(matchId, side, pid);
+          refreshUI();
+        }
+      }
+    });
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        if (statusEl) statusEl.textContent = 'Guardando...';
+        saveBtn.disabled = true;
+        try {
+          const res = await saveInjuriesFull(matchId);
+          if (statusEl) statusEl.textContent = res.msg || '';
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    }
+  };
+
+  // -----------------------------
   // Render de tabla de estadísticas + cabecera
   // statsObj viene de CoreStats.getStatsIndex()[matchId]
   // -----------------------------
@@ -1316,6 +1536,42 @@
       `
         : '';
 
+    const injuriesEditorHtml =
+      (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
+        ? `
+      <hr class="stats-divider" />
+      <section class="injuries-editor" data-match-id="${matchId}">
+        <h3>Lesiones (Bajas próximo partido)</h3>
+        <div class="scorers-columns">
+          <div class="scorers-col" data-side="local">
+            <h4>${localName}</h4>
+            <ul class="scorers-list injuries-list" data-side="local"></ul>
+            <div class="scorers-add">
+              <select data-side="local">
+                <option value="">Añadir lesionado…</option>
+              </select>
+              <button type="button" class="btn-add-injury" data-side="local">＋</button>
+            </div>
+          </div>
+          <div class="scorers-col" data-side="visitante">
+            <h4>${visitName}</h4>
+            <ul class="scorers-list injuries-list" data-side="visitante"></ul>
+            <div class="scorers-add">
+              <select data-side="visitante">
+                <option value="">Añadir lesionado…</option>
+              </select>
+              <button type="button" class="btn-add-injury" data-side="visitante">＋</button>
+            </div>
+          </div>
+        </div>
+        <div class="injuries-actions">
+           <span class="injuries-status" aria-live="polite"></span>
+           <button type="button" class="btn-save-injuries">Guardar lesiones</button>
+        </div>
+      </section>
+      `
+        : '';
+
     const scorersEditorHtml =
       (hasSupabase && meta?.local_team_id && meta?.visitante_team_id && matchId)
         ? `
@@ -1389,6 +1645,7 @@
       ${summaryHtml}
       ${tableHtml}
       ${redCardsEditorHtml}
+      ${injuriesEditorHtml}
       ${scorersEditorHtml}
     `;
   };
@@ -1575,8 +1832,19 @@
             div.style.fontSize = '0.8rem';
             div.style.color = '#ef4444'; // rojo suave
 
-            const names = susList.map(s => `${s.playerName} (${s.teamName})`).join(', ');
-            div.innerHTML = `<strong>Sancionados:</strong> ${names}`;
+            const sancionados = susList.filter(s => s.reason === 'red_card' || !s.reason);
+            const lesionados = susList.filter(s => s.reason === 'injury');
+
+            let html = '';
+            if (sancionados.length) {
+              const names = sancionados.map(s => `${s.playerName} (${s.teamName})`).join(', ');
+              html += `<div style="color:#ef4444"><strong>Sancionados:</strong> ${names}</div>`;
+            }
+            if (lesionados.length) {
+              const names = lesionados.map(s => `${s.playerName} (${s.teamName})`).join(', ');
+              html += `<div style="color:#f59e0b"><strong>Lesionados:</strong> ${names}</div>`;
+            }
+            div.innerHTML = html;
 
             statusLine.parentNode.insertBefore(div, statusLine.nextSibling);
           });
@@ -1599,6 +1867,7 @@
       .from('player_suspensions')
       .select(`
         match_id,
+        reason,
         player:players(name),
         team:league_teams(nickname, display_name)
       `)
@@ -1616,7 +1885,7 @@
       const tName = row.team?.nickname || row.team?.display_name || 'Equipo';
 
       if (!map[mid]) map[mid] = [];
-      map[mid].push({ playerName: pName, teamName: tName });
+      map[mid].push({ playerName: pName, teamName: tName, reason: row.reason });
     });
     return map;
   };
@@ -1643,10 +1912,9 @@
     return data.id;
   };
 
-  const saveSuspensionForMatch = async (matchId, teamId, playerIds, originMatchId) => {
+  const saveSuspensionForMatch = async (matchId, teamId, playerIds, originMatchId, reason = 'red_card') => {
     // 1. Borrar suspensiones previas generadas por este partido (originMatchId) para este equipo
-    //    que ya no estén en la lista de playerIds (por si se quitó la roja).
-    //    Si playerIds está vacío, se borran todas las de ese equipo/match origen.
+    //    que ya no estén en la lista de playerIds (por si se quitó la roja/lesión).
     const supa = await getSupa();
     if (!supa) return;
 
@@ -1677,17 +1945,11 @@
     }
 
     // A insertar: los que están en nueva lista pero no en DB
-    // OJO: Si hacen falta inserts, necesitamos saber el "match_id" destino (siguiente partido).
-    // Si ya existe la suspensión con ese origin_match_id, no pasa nada (unique constraint) o upsert.
-    // Pero el match_id destino podría haber cambiado si se reprogramó? 
-    // Simplificación: Solo insertamos si no existe. 
-
     const toInsert = playerIds.filter(pid => !currentPids.includes(pid));
 
     if (toInsert.length > 0) {
       // Buscar siguiente partido
       const meta = partidoMeta[originMatchId];
-      // Necesitamos meta para saber season y round actual
       if (!meta) return;
 
       const season = getActiveSeasonSafe();
@@ -1695,7 +1957,7 @@
 
       const nextMatchId = await getNextMatchForTeam(season, teamId, currentRound);
       if (!nextMatchId) {
-        console.log('No next match found for suspension for team', teamId);
+        console.log('No next match found for suspension/injury for team', teamId);
         return;
       }
 
@@ -1704,12 +1966,12 @@
         league_team_id: teamId,
         match_id: nextMatchId,
         origin_match_id: originMatchId,
-        reason: 'red_card'
+        reason: reason
       }));
 
       const { error: errIns } = await supa
         .from('player_suspensions')
-        .insert(rows); // rely on unique constraint or just insert
+        .insert(rows);
 
       if (errIns) console.warn('Error inserting suspensions', errIns);
     }
@@ -1864,10 +2126,10 @@
 
     if (meta.id) {
       void initScorersEditor(meta.id, meta);
-      void initRedCardsEditor(meta.id, meta);   // ← NUEVO
+      void initRedCardsEditor(meta.id, meta);
+      void initInjuriesEditor(meta.id, meta);
     }
   });
-
 
   // Primera carga: última jornada jugada
   await renderJornada(current);
