@@ -1,13 +1,8 @@
-import { getSupabaseAdmin } from '../utils/supabase-admin.js';
 
-// Configuration
-// We can pass season as an argument or env var, defaulting to current one.
-const SEASON = process.env.SEASON || '2025-26';
-
-async function main() {
+// function to run the logic
+export async function run(supabase) {
+    const SEASON = process.env.SEASON || '2025-26';
     console.log(`Starting Daily Curiosity: Most Scoring Team (Season: ${SEASON})`);
-
-    const supabase = getSupabaseAdmin();
 
     // 1. Fetch all finished matches for the season
     // We assume "finished" means goals are not null.
@@ -98,8 +93,6 @@ async function main() {
     console.log(`Leader: ${teamName} with ${leaderStats.goals} goals in ${leaderStats.matches} matches.`);
 
     // 5. Build payload and text
-    // Text: "El jugador X es el equipo mas goleador de la liga con Y goles en Z partidos"
-    // Replaced "El jugador X" with "El equipo [Nickname]" based on context.
     const title = `Equipo más goleador`;
     const description = `El equipo ${teamName} es el equipo más goleador de la liga con ${leaderStats.goals} goles en ${leaderStats.matches} partidos.`;
 
@@ -134,8 +127,3 @@ async function main() {
 
     console.log('Successfully inserted daily curiosity:', entry);
 }
-
-main().catch(err => {
-    console.error('Script failed:', err);
-    process.exit(1);
-});
