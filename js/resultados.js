@@ -1036,7 +1036,13 @@
       console.warn('Error actualizando contador rojas', resL.error, resV.error);
     }
 
-    return { ok: true, msg: 'Tarjetas rojas guardadas correctamente' };
+    // 4) Actualizar suspensiones (siguiente partido)
+    await Promise.all([
+      saveSuspensionForMatch(matchId, localTeamId, state.redLocal.map(p => p.player_id), matchId),
+      saveSuspensionForMatch(matchId, visitTeamId, state.redVisitante.map(p => p.player_id), matchId)
+    ]);
+
+    return { ok: true, msg: 'Tarjetas rojas y sanciones guardadas' };
   };
 
   const initRedCardsEditor = async (matchId, meta) => {
@@ -1489,6 +1495,169 @@
           // En error, simplemente dejamos el placeholder o lo vaciamos
         });
     });
+
+    // 3) Cargamos sanciones (suspensiones) para mostrarlas en las tarjetas
+    //    Esto se hace en paralelo, y cuando lleguen actualizamos el DOM
+    if (hasSupabase && partidos.length > 0) {
+      loadSuspensionsForMatches(partidos)
+        .then(suspensionsMap => {
+          if (current !== num) return;
+          // suspensionsMap: matchId -> [{ playerName, teamName, reason... }]
+          Object.keys(suspensionsMap).forEach(mId => {
+            const cardBtn = jornadaWrap.querySelector(`.partido-card[data-partido-id="${mId}"]`);
+            if (!cardBtn) return;
+            const susList = suspensionsMap[mId];
+            if (!susList || !susList.length) return;
+
+            // Buscamos dónde inyectarlo. Por ejemplo antes de .result-status-line o dentro.
+            // Vamos a crear un bloque .result-suspensions
+            const statusLine = cardBtn.querySelector('.result-status-line');
+            if (!statusLine) return;
+
+            const div = document.createElement('div');
+            div.className = 'result-suspensions';
+            div.style.marginTop = '8px';
+            div.style.fontSize = '0.8rem';
+            div.style.color = '#ef4444'; // rojo suave
+
+            const names = susList.map(s => `${s.playerName} (${s.teamName})`).join(', ');
+            div.innerHTML = `<strong>Sancionados:</strong> ${names}`;
+
+            statusLine.parentNode.insertBefore(div, statusLine.nextSibling);
+          });
+        })
+        .catch(err => console.warn('Error loading suspensions', err));
+    }
+  };
+
+  // -----------------------------
+  // Helper: Sanciones (suspensiones)
+  // -----------------------------
+  const loadSuspensionsForMatches = async (partidos) => {
+    const supa = await getSupa();
+    if (!supa) return {};
+
+    const matchIds = partidos.map(p => p.id).filter(Boolean);
+    if (!matchIds.length) return {};
+
+    const { data, error } = await supa
+      .from('player_suspensions')
+      .select(`
+        match_id,
+        player:players(name),
+        team:league_teams(nickname, display_name)
+      `)
+      .in('match_id', matchIds);
+
+    if (error) {
+      console.warn('Error fetching player_suspensions:', error);
+      return {};
+    }
+
+    const map = {};
+    (data || []).forEach(row => {
+      const mid = row.match_id;
+      const pName = row.player?.name || 'Jugador';
+      const tName = row.team?.nickname || row.team?.display_name || 'Equipo';
+
+      if (!map[mid]) map[mid] = [];
+      map[mid].push({ playerName: pName, teamName: tName });
+    });
+    return map;
+  };
+
+  const getNextMatchForTeam = async (season, teamId, currentRoundId) => {
+    const supa = await getSupa();
+    if (!supa) return null;
+
+    // Asumimos que round_id es numérico y secuencial
+    const currentRoundNum = Number(currentRoundId);
+    if (!isNum(currentRoundNum)) return null;
+
+    const { data, error } = await supa
+      .from('matches')
+      .select('id, round_id')
+      .eq('season', season)
+      .or(`home_league_team_id.eq.${teamId},away_league_team_id.eq.${teamId}`)
+      .gt('round_id', currentRoundNum)
+      .order('round_id', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (error || !data) return null;
+    return data.id;
+  };
+
+  const saveSuspensionForMatch = async (matchId, teamId, playerIds, originMatchId) => {
+    // 1. Borrar suspensiones previas generadas por este partido (originMatchId) para este equipo
+    //    que ya no estén en la lista de playerIds (por si se quitó la roja).
+    //    Si playerIds está vacío, se borran todas las de ese equipo/match origen.
+    const supa = await getSupa();
+    if (!supa) return;
+
+    // Primero obtenemos las suspensiones actuales de este origen+equipo
+    const { data: currentSus, error: errGet } = await supa
+      .from('player_suspensions')
+      .select('player_id')
+      .eq('origin_match_id', originMatchId)
+      .eq('league_team_id', teamId);
+
+    if (errGet) {
+      console.warn('Error reading current suspensions', errGet);
+    }
+
+    const currentPids = (currentSus || []).map(x => x.player_id);
+    const newPidsSet = new Set(playerIds);
+
+    // A eliminar: los que están en DB pero no en la nueva lista
+    const toDelete = currentPids.filter(pid => !newPidsSet.has(pid));
+
+    if (toDelete.length > 0) {
+      await supa
+        .from('player_suspensions')
+        .delete()
+        .eq('origin_match_id', originMatchId)
+        .eq('league_team_id', teamId)
+        .in('player_id', toDelete);
+    }
+
+    // A insertar: los que están en nueva lista pero no en DB
+    // OJO: Si hacen falta inserts, necesitamos saber el "match_id" destino (siguiente partido).
+    // Si ya existe la suspensión con ese origin_match_id, no pasa nada (unique constraint) o upsert.
+    // Pero el match_id destino podría haber cambiado si se reprogramó? 
+    // Simplificación: Solo insertamos si no existe. 
+
+    const toInsert = playerIds.filter(pid => !currentPids.includes(pid));
+
+    if (toInsert.length > 0) {
+      // Buscar siguiente partido
+      const meta = partidoMeta[originMatchId];
+      // Necesitamos meta para saber season y round actual
+      if (!meta) return;
+
+      const season = getActiveSeasonSafe();
+      const currentRound = meta.round_id || meta.jornada;
+
+      const nextMatchId = await getNextMatchForTeam(season, teamId, currentRound);
+      if (!nextMatchId) {
+        console.log('No next match found for suspension for team', teamId);
+        return;
+      }
+
+      const rows = toInsert.map(pid => ({
+        player_id: pid,
+        league_team_id: teamId,
+        match_id: nextMatchId,
+        origin_match_id: originMatchId,
+        reason: 'red_card'
+      }));
+
+      const { error: errIns } = await supa
+        .from('player_suspensions')
+        .insert(rows); // rely on unique constraint or just insert
+
+      if (errIns) console.warn('Error inserting suspensions', errIns);
+    }
   };
 
 
