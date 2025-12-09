@@ -694,6 +694,18 @@
   const addGoalToState = (matchId, side, playerId) => {
     const state = scorerState[matchId];
     if (!state) return;
+
+    // Check limit
+    const limit = (side === 'local') ? state.meta.goles_local : state.meta.goles_visitante;
+    const teamCols = state[side] || [];
+    const currentTotal = teamCols.reduce((acc, p) => acc + p.goals, 0);
+
+    // Permitir si limit es null/undefined (por si acaso), pero debería ser numérico
+    if (typeof limit === 'number' && currentTotal >= limit) {
+      alert(`No puedes añadir más goles. El ${side === 'local' ? 'Local' : 'Visitante'} tiene ${limit} goles en total.`);
+      return;
+    }
+
     const arr = state[side] || (state[side] = []);
     const pid = Number(playerId);
     let item = arr.find(x => x.player_id === pid);
@@ -712,10 +724,21 @@
   const changeGoalCount = (matchId, side, playerId, delta) => {
     const state = scorerState[matchId];
     if (!state) return;
+
     const arr = state[side] || (state[side] = []);
     const pid = Number(playerId);
     const idx = arr.findIndex(x => x.player_id === pid);
     if (idx === -1) return;
+
+    if (delta > 0) {
+      const limit = (side === 'local') ? state.meta.goles_local : state.meta.goles_visitante;
+      const currentTotal = arr.reduce((acc, p) => acc + p.goals, 0);
+      if (typeof limit === 'number' && currentTotal >= limit) {
+        alert(`Límite de goles alcanzado (${limit}).`);
+        return;
+      }
+    }
+
     arr[idx].goals += delta;
     if (arr[idx].goals <= 0) {
       arr.splice(idx, 1);
