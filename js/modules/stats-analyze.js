@@ -1,5 +1,6 @@
 import { isNum, toNum } from './utils.js';
 import { getStatsIndex, getResultados } from './stats-data.js';
+import { computeClasificacion } from './stats-calc.js';
 
 // Normaliza % a 0..1
 const parsePct01 = v => {
@@ -554,3 +555,69 @@ export const computeGoleadorMomento = async () => {
         jNums
     };
 };
+
+/**
+ * Compute matches history for a team up to a specific jornada
+ * @param {Object[]} jornadas - Array of all matches
+ * @param {number} hasta - limit jornada
+ * @param {string} teamName 
+ * @returns {Array} List of matches with result context
+ */
+export function computePartidosEquipo(jornadas, hasta, teamName) {
+    const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+    const matches = [];
+    for (let i = 0; i < hasta; i++) {
+        const j = jornadas[i];
+        if (!j) continue;
+        for (const p of (j.partidos || [])) {
+            if (!p.local || !p.visitante) continue;
+            const gl = isNum(p.goles_local) ? p.goles_local : null;
+            const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
+            if (gl === null || gv === null) continue;
+
+            if (p.local === teamName || p.visitante === teamName) {
+                const isLocal = p.local === teamName;
+                const gf = isLocal ? gl : gv;
+                const gc = isLocal ? gv : gl;
+                let result = 'E';
+                if (gf > gc) result = 'V';
+                else if (gf < gc) result = 'D';
+
+                matches.push({
+                    jornada: i + 1,
+                    local: p.local,
+                    visitante: p.visitante,
+                    gl,
+                    gv,
+                    gf,
+                    gc,
+                    isLocal,
+                    result
+                });
+            }
+        }
+    }
+    return matches;
+}
+
+/**
+ * Compute position history for a team
+ * @param {number} hasta - limit jornada
+ * @param {string} teamName 
+ * @returns {Promise<Array>} List of {jornada, pos, pts}
+ */
+export async function computePosicionesEquipo(hasta, teamName) {
+    const history = [];
+    for (let jNum = 1; jNum <= hasta; jNum++) {
+        const tabla = await computeClasificacion(jNum);
+        const idx = tabla.findIndex(e => e.nombre === teamName);
+        if (idx === -1) continue;
+        history.push({
+            jornada: jNum,
+            pos: idx + 1,
+            pts: tabla[idx].pts
+        });
+    }
+    return history;
+}
+
