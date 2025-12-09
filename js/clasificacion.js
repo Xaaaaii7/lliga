@@ -1,7 +1,7 @@
 
-import { logoPath, isNum, dg } from './modules/utils.js';
+import { logoPath, isNum } from './modules/utils.js';
 import { getResultados } from './modules/stats-data.js';
-import { computeClasificacion } from './modules/stats-calc.js';
+import { computeClasificacion, dg } from './modules/stats-calc.js';
 import { computePartidosEquipo, computePosicionesEquipo } from './modules/stats-analyze.js';
 import * as Render from './modules/render.js';
 
