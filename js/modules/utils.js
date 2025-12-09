@@ -28,5 +28,12 @@ export const fmtDate = (iso) => {
 export async function loadJSON(path) {
     const res = await fetch(path, { cache: 'no-store' });
     if (!res.ok) throw new Error('No se pudo cargar ' + path);
-    return res.json();
-}
+
+    export const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+
+    export const toNum = (v) => {
+        if (v == null || v === "") return 0;
+        const n = parseFloat(String(v).replace(",", "."));
+        return Number.isFinite(n) ? n : 0;
+    };
+
