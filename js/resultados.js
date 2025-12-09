@@ -505,7 +505,7 @@
         event_type
       `)
       .eq('match_id', matchId)
-      .in('event_type', ['goal', 'red_card']);
+      .eq('event_type', 'goal');
 
     if (errMatchEv) {
       console.warn('Error cargando goal_events del partido:', errMatchEv);
@@ -525,9 +525,28 @@
 
       if (ev.event_type === 'goal') {
         aggGoals[side][pid] = (aggGoals[side][pid] || 0) + 1;
-      } else if (ev.event_type === 'red_card') {
-        aggRed[side].push(pid);
       }
+    });
+
+    // 4) Cargar tarjetas rojas desde 'match_red_cards'
+    const { data: redCardsEvents, error: errRed } = await supa
+      .from('match_red_cards')
+      .select('player_id, league_team_id')
+      .eq('match_id', matchId);
+
+    if (errRed) {
+      console.warn('Error cargando match_red_cards:', errRed);
+    }
+
+    // override aggRed with fetched data
+    (redCardsEvents || []).forEach(rc => {
+      const pid = rc.player_id;
+      if (rc.league_team_id === localTeamId) aggRed.local.push(pid);
+      else if (rc.league_team_id === visitTeamId) aggRed.visitante.push(pid);
+    });
+
+    // empty dummy loop to match replacement
+    [].forEach(() => {
     });
 
     const buildSideArr = (side) => {
@@ -978,41 +997,38 @@
 
     if (!localTeamId || !visitTeamId) return { ok: false, msg: 'Faltan IDs de equipo' };
 
-    // 1) Borrar rojas antiguas
+    // 1) Borrar rojas antiguas de ESTA tabla
     const { error: errDel } = await supa
-      .from('goal_events')
+      .from('match_red_cards')
       .delete()
-      .eq('match_id', matchId)
-      .eq('event_type', 'red_card');
+      .eq('match_id', matchId);
 
     if (errDel) {
-      console.error('Error borrando rojas:', errDel);
+      console.error('Error borrando rojas de match_red_cards:', errDel);
       return { ok: false, msg: 'Error al limpiar rojas antiguas' };
     }
 
-    // 2) Insertar nuevas
+    // 2) Insertar nuevas en match_red_cards
     const rows = [];
     (state.redLocal || []).forEach(p => {
       rows.push({
         match_id: matchId,
         league_team_id: localTeamId,
-        player_id: p.player_id,
-        event_type: 'red_card'
+        player_id: p.player_id
       });
     });
     (state.redVisitante || []).forEach(p => {
       rows.push({
         match_id: matchId,
         league_team_id: visitTeamId,
-        player_id: p.player_id,
-        event_type: 'red_card'
+        player_id: p.player_id
       });
     });
 
     if (rows.length) {
-      const { error: errIns } = await supa.from('goal_events').insert(rows);
+      const { error: errIns } = await supa.from('match_red_cards').insert(rows);
       if (errIns) {
-        console.error('Error insertando rojas:', errIns);
+        console.error('Error insertando rojas en match_red_cards:', errIns);
         return { ok: false, msg: 'Error guardando detalle tarjetas' };
       }
     }
