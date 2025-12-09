@@ -517,7 +517,8 @@
 
     (matchEvents || []).forEach(ev => {
       const pid = ev.player_id;
-      if (!pid) return;
+      // Para goles normales es vital el pid, pero para own_goal puede ser null
+      if (!pid && ev.event_type !== 'own_goal') return;
 
       const side = (ev.league_team_id === localTeamId)
         ? 'local'
