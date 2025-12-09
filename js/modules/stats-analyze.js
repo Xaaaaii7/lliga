@@ -305,3 +305,49 @@ export const computeMvpPorJornada = async (jornadaNumero) => {
         winner
     };
 };
+
+export const computeMvpTemporada = async () => {
+    const jornadas = await getResultados();
+    const seasonMap = new Map();
+
+    for (const j of jornadas) {
+        const jNum = j.numero ?? j.jornada;
+        if (!jNum) continue;
+
+        const { teams } = await computeMvpPorJornada(jNum);
+        if (!teams.length) continue;
+
+        for (const t of teams) {
+            let season = seasonMap.get(t.nombre);
+            if (!season) {
+                season = {
+                    nombre: t.nombre,
+                    jornadas: 0,
+                    mvpSum: 0,
+                    pj: 0,
+                    gf: 0,
+                    gc: 0
+                };
+                seasonMap.set(t.nombre, season);
+            }
+            season.jornadas += 1;
+            season.mvpSum += t.mvpScore;
+
+            season.pj += t.pj;
+            season.gf += t.gf;
+            season.gc += t.gc;
+        }
+    }
+
+    const seasonArr = Array.from(seasonMap.values());
+    seasonArr.forEach(s => {
+        s.mvpAvg = s.jornadas > 0 ? s.mvpSum / s.jornadas : 0;
+    });
+
+    seasonArr.sort((a, b) =>
+        (b.mvpAvg - a.mvpAvg) ||
+        a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" })
+    );
+
+    return seasonArr;
+};

@@ -6,7 +6,7 @@ import { getResultados, getPenaltyMap } from './stats-data.js';
 const _clasifCache = new Map(); // key: `${limit||'ALL'}|${useH2H?1:0}`
 
 // Diferencia de goles
-const dg = e => e.gf - e.gc;
+export const dg = e => e.gf - e.gc;
 
 // --------------------------
 // Clasificación con H2H

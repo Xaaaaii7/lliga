@@ -19,8 +19,10 @@ const CoreStats = {
     // Analysis
     computeRankingsPorEquipo: StatsAnalyze.computeRankingsPorEquipo,
     computeMvpPorJornada: StatsAnalyze.computeMvpPorJornada,
+    computeMvpTemporada: StatsAnalyze.computeMvpTemporada,
 
     // Helpers
+    dg: StatsCalc.dg,
     isNum,
     toNum,
     // Add internal helpers if needed, but preferably use them from modules directly
