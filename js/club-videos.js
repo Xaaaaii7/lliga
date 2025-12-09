@@ -1,11 +1,21 @@
+// js/club-videos.js
 (async () => {
-  const msgEl = document.getElementById("videos-msg");
+  const msgEl   = document.getElementById("videos-msg");
   const embedEl = document.getElementById("playlist-embed");
-  if (!msgEl || !embedEl) return;
 
-  // helper para leer query ?team=
-  const params = new URLSearchParams(location.search);
-  const team = params.get("team");
+  if (!msgEl || !embedEl) {
+    console.warn("[club-videos] No se han encontrado videos-msg o playlist-embed");
+    return;
+  }
+
+  // 1) Leemos el equipo: preferimos el global CLUB_NAME y si no, querystring
+  const params   = new URLSearchParams(location.search);
+  const qsTeam   = params.get("team");
+  const globalTeam = window.CLUB_NAME || null;
+  const team = globalTeam || qsTeam;
+
+  console.log("[club-videos] team (global/query):", { globalTeam, qsTeam, team });
+
   if (!team) {
     msgEl.textContent = "No se ha indicado equipo.";
     return;
@@ -13,63 +23,45 @@
 
   const playlistName = `Liga Voll Damm - ${team}`;
 
-  // carga playlists.json
-  // Carga desde Supabase
-  let playlistId = null;
-  const { getSupabaseClient } = window.AppUtils || {};
+  // 2) Preparamos acceso a Supabase
+  const AppUtils = window.AppUtils || {};
+  const getSupabaseClient = AppUtils.getSupabaseClient;
 
-  if (getSupabaseClient) {
-    try {
-      const supabase = await getSupabaseClient();
-      const season = (window.AppUtils && window.AppUtils.getActiveSeason)
-        ? window.AppUtils.getActiveSeason()
-        : (window.AppUtils.getSupabaseConfig().season || '');
-
-      // Traer todos los equipos de la temporada con su user asociado
-      let query = supabase
-        .from("league_teams")
-        .select(`
-          nickname,
-          display_name,
-          user:users!user_id(youtube_playlist_id)
-        `);
-
-      if (season) {
-        query = query.eq('season', season);
-      }
-
-      const { data, error } = await query;
-
-      if (!error && data) {
-        // Helper de slug local si no está en scope
-        const slug = (window.AppUtils && window.AppUtils.slugify)
-          ? window.AppUtils.slugify
-          : (s => String(s).toLowerCase().replace(/\s+/g, '-'));
-
-        const target = (team || '').toLowerCase();
-
-        // Buscar coincidencia por slug de nickname O display_name
-        const found = data.find(row => {
-          const sNick = slug(row.nickname || '');
-          const sDisp = slug(row.display_name || '');
-          // Probamos match exacto del slug (ej: "milan" == "milan")
-          return sNick === target || sDisp === target;
-        });
-
-        if (found && found.user) {
-          // found.user puede ser array o objeto segun relacion
-          const u = Array.isArray(found.user) ? found.user[0] : found.user;
-          if (u && u.youtube_playlist_id) {
-            playlistId = u.youtube_playlist_id;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Error cargando playlist desde DB:", e);
-    }
+  if (typeof getSupabaseClient !== "function") {
+    console.warn("[club-videos] No hay AppUtils.getSupabaseClient disponible");
+    msgEl.innerHTML = `
+      <p style="color:var(--muted)">
+        No se ha podido cargar la playlist de <b>${team}</b> (Supabase no está disponible).
+      </p>
+    `;
+    return;
   }
 
-  // Si no tenemos ID, mostramos error (sin fallback a JSON)
+  let playlistId = null;
+
+  try {
+    const supabase = await getSupabaseClient();
+
+    console.log("[club-videos] Lanzando query a Supabase para team:", team);
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("nickname, youtube_playlist_id")
+      .ilike("nickname", team) // case-insensitive exact match
+      .maybeSingle();
+
+    console.log("[club-videos] Resultado Supabase:", { data, error });
+
+    if (error) {
+      console.warn("[club-videos] Error en query a Supabase:", error);
+    } else if (data && data.youtube_playlist_id) {
+      playlistId = data.youtube_playlist_id;
+    }
+  } catch (e) {
+    console.warn("[club-videos] Excepción cargando playlist desde DB:", e);
+  }
+
+  // 3) Si no tenemos ID, mostramos mensaje
   if (!playlistId) {
     msgEl.innerHTML = `
       <p style="color:var(--muted)">
@@ -79,12 +71,7 @@
     return;
   }
 
-  // Ya tenemos el ID, seguimos...
-  // (Eliminamos la parte vieja de playlists[playlistName])
-
-
-
-  // pinta embed de playlist
+  // 4) Pintamos el embed
   msgEl.textContent = "";
   embedEl.innerHTML = `
     <div class="playlist-card">
@@ -103,7 +90,7 @@
           src="https://www.youtube.com/embed/videoseries?list=${playlistId}"
           title="${playlistName}"
           frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen>
         </iframe>
       </div>
