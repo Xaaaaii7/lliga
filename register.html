@@ -1,65 +1,68 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Registro de usuario</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-auth">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Registro para jugadores</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Registro para jugadores</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container auth-wrapper">
-  <section class="auth-card">
-    <h2>Crear cuenta</h2>
-    <p class="auth-subtitle">
-      Regístrate con tu email y asigna el equipo que vas a gestionar.
-      El admin deberá aprobar tu cuenta antes de habilitar el acceso completo.
-    </p>
+  <main class="container auth-wrapper">
+    <section class="auth-card">
+      <h2>Crear cuenta</h2>
+      <p class="auth-subtitle">
+        Regístrate con tu email y asigna el equipo que vas a gestionar.
+        El admin deberá aprobar tu cuenta antes de habilitar el acceso completo.
+      </p>
 
-    <form id="register-form" class="auth-form">
-      <label class="auth-field">
-        <span>Email</span>
-        <input type="email" id="reg-email" autocomplete="email" required />
-      </label>
+      <form id="register-form" class="auth-form">
+        <label class="auth-field">
+          <span>Email</span>
+          <input type="email" id="reg-email" autocomplete="email" required />
+        </label>
 
-      <label class="auth-field">
-        <span>Contraseña</span>
-        <input type="password" id="reg-password" autocomplete="new-password" required />
-      </label>
+        <label class="auth-field">
+          <span>Contraseña</span>
+          <input type="password" id="reg-password" autocomplete="new-password" required />
+        </label>
 
-      <label class="auth-field">
-        <span>Nombre / Nick visible</span>
-        <input type="text" id="reg-nickname" required />
-      </label>
+        <label class="auth-field">
+          <span>Nombre / Nick visible</span>
+          <input type="text" id="reg-nickname" required />
+        </label>
 
-      <label class="auth-field">
-        <span>Equipo (temporada actual)</span>
-        <select id="reg-team" required>
-          <option value="">Cargando equipos...</option>
-        </select>
-      </label>
+        <label class="auth-field">
+          <span>Equipo (temporada actual)</span>
+          <select id="reg-team" required>
+            <option value="">Cargando equipos...</option>
+          </select>
+        </label>
 
-      <button type="submit" class="btn btn-primary auth-submit">
-        Registrarme
-      </button>
+        <button type="submit" class="btn btn-primary auth-submit">
+          Registrarme
+        </button>
 
-      <p id="register-error" class="auth-error"></p>
-      <p id="register-success" class="auth-success"></p>
-    </form>
+        <p id="register-error" class="auth-error"></p>
+        <p id="register-success" class="auth-success"></p>
+      </form>
 
-    <p class="auth-back">
-      ¿Ya tienes cuenta?
-      <a href="login.html" class="link-muted">Inicia sesión</a>
-    </p>
-  </section>
-</main>
+      <p class="auth-back">
+        ¿Ya tienes cuenta?
+        <a href="login.html" class="link-muted">Inicia sesión</a>
+      </p>
+    </section>
+  </main>
 
-<script src="js/common.js"></script>
-<script src="js/register.js"></script>
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/register.js"></script>
 </body>
+
 </html>

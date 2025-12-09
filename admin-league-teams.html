@@ -1,103 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Admin Equipos Liga</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-admin">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Admin — Equipos de Liga</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Admin — Equipos de Liga</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container admin-wrapper">
-  <section class="admin-header-card">
-    <div class="admin-header-main">
-      <div>
-        <p class="admin-kicker">Gestión de sanciones</p>
-        <h2>Equipos de la temporada <span id="season-label"></span></h2>
-        <p class="admin-desc">
-          Ajusta los puntos de sanción y el motivo asociado para cada equipo.
-          Estos valores se tienen en cuenta en la clasificación del torneo.
-        </p>
+  <main class="container admin-wrapper">
+    <section class="admin-header-card">
+      <div class="admin-header-main">
+        <div>
+          <p class="admin-kicker">Gestión de sanciones</p>
+          <h2>Equipos de la temporada <span id="season-label"></span></h2>
+          <p class="admin-desc">
+            Ajusta los puntos de sanción y el motivo asociado para cada equipo.
+            Estos valores se tienen en cuenta en la clasificación del torneo.
+          </p>
+        </div>
+        <div class="admin-season-box">
+          <span class="admin-season-label">Temporada activa</span>
+          <span class="admin-season-value" id="admin-season">–</span>
+        </div>
       </div>
-      <div class="admin-season-box">
-        <span class="admin-season-label">Temporada activa</span>
-        <span class="admin-season-value" id="admin-season">–</span>
+    </section>
+
+    <section>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Club</th>
+            <th>Nickname</th>
+            <th>Display</th>
+            <th>Puntos sanción</th>
+            <th>Motivo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="league-teams-tbody">
+          <tr>
+            <td colspan="6">Cargando equipos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Modal edición sanción -->
+  <div id="penalty-modal-backdrop" class="modal-backdrop" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar sanción de equipo</h3>
+        <button type="button" class="modal-close" id="penalty-modal-close">×</button>
       </div>
-    </div>
-  </section>
+      <div class="modal-body">
+        <form id="penalty-form" class="admin-form">
+          <input type="hidden" id="penalty-team-id" />
 
-  <section>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Club</th>
-          <th>Nickname</th>
-          <th>Display</th>
-          <th>Puntos sanción</th>
-          <th>Motivo</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="league-teams-tbody">
-        <tr><td colspan="6">Cargando equipos...</td></tr>
-      </tbody>
-    </table>
-  </section>
-</main>
+          <div class="admin-form-row">
+            <label class="full-width">
+              Equipo
+              <input type="text" id="penalty-team-name" readonly />
+            </label>
+          </div>
 
-<!-- Modal edición sanción -->
-<div id="penalty-modal-backdrop" class="modal-backdrop" hidden>
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Editar sanción de equipo</h3>
-      <button type="button" class="modal-close" id="penalty-modal-close">×</button>
-    </div>
-    <div class="modal-body">
-      <form id="penalty-form" class="admin-form">
-        <input type="hidden" id="penalty-team-id" />
+          <div class="admin-form-row">
+            <label>
+              Puntos de sanción
+              <input type="number" id="penalty-points" />
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label class="full-width">
-            Equipo
-            <input type="text" id="penalty-team-name" readonly />
-          </label>
-        </div>
+          <div class="admin-form-row">
+            <label class="full-width">
+              Motivo
+              <textarea id="penalty-reason" rows="3"></textarea>
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label>
-            Puntos de sanción
-            <input type="number" id="penalty-points" />
-          </label>
-        </div>
+          <p id="penalty-error" class="auth-error"></p>
 
-        <div class="admin-form-row">
-          <label class="full-width">
-            Motivo
-            <textarea id="penalty-reason" rows="3"></textarea>
-          </label>
-        </div>
-
-        <p id="penalty-error" class="auth-error"></p>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="penalty-cancel-btn">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary" id="penalty-save-btn">
-            Guardar sanción
-          </button>
-        </div>
-      </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="penalty-cancel-btn">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="penalty-save-btn">
+              Guardar sanción
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="js/common.js"></script>
-<script src="js/admin-league-teams.js"></script>
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/admin-league-teams.js"></script>
 </body>
+
 </html>

@@ -1,69 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Club</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-club">
 
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1 id="club-title">Club</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1 id="club-title">Club</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container" id="club-root">
+  <main class="container" id="club-root">
 
-  <!-- Banner superior -->
-  <section id="club-banner" class="club-banner">
-    <img id="club-banner-logo" class="club-banner-logo" src="" alt="">
-    <div class="club-banner-info">
-      <h2 id="club-name"></h2>
-      <p id="club-description" class="club-description"></p>
+    <!-- Banner superior -->
+    <section id="club-banner" class="club-banner">
+      <img id="club-banner-logo" class="club-banner-logo" src="" alt="">
+      <div class="club-banner-info">
+        <h2 id="club-name"></h2>
+        <p id="club-description" class="club-description"></p>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs club-tabs">
+      <button data-tab="resumen" class="active">Resumen</button>
+      <button data-tab="plantilla">Plantilla</button>
+      <button data-tab="formacion">Formación</button>
+      <button data-tab="stats">Estadísticas</button>
+      <button data-tab="videos">Vídeos</button>
     </div>
-  </section>
 
-  <!-- Tabs -->
-  <div class="tabs club-tabs">
-    <button data-tab="resumen" class="active">Resumen</button>
-    <button data-tab="plantilla">Plantilla</button>
-    <button data-tab="formacion">Formación</button>
-    <button data-tab="stats">Estadísticas</button>
-    <button data-tab="videos">Vídeos</button>
-  </div>
+    <!-- Paneles -->
+    <section id="tab-resumen" class="tab-panel active"></section>
+    <section id="tab-plantilla" class="tab-panel"></section>
 
-<!-- Paneles -->
-<section id="tab-resumen" class="tab-panel active"></section>
-<section id="tab-plantilla" class="tab-panel"></section>
+    <!-- 🔥 Nueva pestaña Formación -->
+    <section id="tab-formacion" class="tab-panel"></section>
 
-<!-- 🔥 Nueva pestaña Formación -->
-<section id="tab-formacion" class="tab-panel"></section>
+    <section id="tab-stats" class="tab-panel"></section>
 
-<section id="tab-stats" class="tab-panel"></section>
+    <section id="tab-videos" class="tab-panel">
+      <div id="videos-wrap" class="videos-wrap">
+        <div id="videos-msg" style="color:var(--muted)"></div>
+        <div id="playlist-embed"></div>
+      </div>
+    </section>
 
-<section id="tab-videos" class="tab-panel">
-  <div id="videos-wrap" class="videos-wrap">
-    <div id="videos-msg" style="color:var(--muted)"></div>
-    <div id="playlist-embed"></div>
-  </div>
-</section>
+  </main>
 
-</main>
+  <footer class="site-footer">© Torneo entre amigos</footer>
 
-<footer class="site-footer">© Torneo entre amigos</footer>
+  <script>
+    // Lee el equipo desde ?team=Atalanta
+    const params = new URLSearchParams(window.location.search);
+    window.CLUB_NAME = params.get("team") || null;
+  </script>
 
-<script>
-  // Lee el equipo desde ?team=Atalanta
-  const params = new URLSearchParams(window.location.search);
-  window.CLUB_NAME = params.get("team") || null;
-</script>
-
-<script src="js/common.js"></script>
-<script src="js/core-stats.js"></script>
-<script src="js/club.js"></script>
-<script src="js/club-videos.js"></script>
-<script src="js/club_formacion.js"></script>
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/core-loader.js"></script>
+  <script type="module" src="js/club.js"></script>
+  <script type="module" src="js/club-videos.js"></script>
+  <script type="module" src="js/club_formacion.js"></script>
 </body>
+
 </html>

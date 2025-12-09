@@ -1,61 +1,65 @@
+
+import { logoPath, isNum } from './modules/utils.js';
+import { getResultados } from './modules/stats-data.js';
+import { computeClasificacion, dg } from './modules/stats-calc.js';
+import { computePartidosEquipo, computePosicionesEquipo } from './modules/stats-analyze.js';
+import * as Render from './modules/render.js';
+
 (async () => {
   const tbody = document.getElementById('tabla-clasificacion');
   if (!tbody) return;
 
-  const showMsg = (txt) => {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="10" style="text-align:center;color:#9fb3c8;padding:14px">
-          ${txt}
-        </td>
-      </tr>`;
-  };
-
-  // --- Core helpers ---
-  const isNum = CoreStats.isNum;
-  const norm  = CoreStats.norm;
-  const slug  = CoreStats.slug;
-  const dg    = CoreStats.dg;
-
-  const logoPath = (name) => `img/${slug(name)}.png`;
-
-  const jornadas = await CoreStats.getResultados().catch(() => null);
-  if (!Array.isArray(jornadas) || !jornadas.length) {
-    return showMsg('No se pudieron cargar los resultados.');
+  // --- Data Loading ---
+  let jornadas = [];
+  try {
+    jornadas = await getResultados();
+  } catch (e) {
+    console.error("Error loading matches:", e);
+    Render.renderError(tbody.parentElement, 'No se pudieron cargar los resultados.');
+    return;
   }
 
-  // detectar última jornada jugada
+  if (!Array.isArray(jornadas) || !jornadas.length) {
+    Render.renderError(tbody.parentElement, 'No hay jornadas disponibles.');
+    return;
+  }
+
+  // Detect last played match
   let lastPlayed = 0;
   jornadas.forEach((j, idx) => {
     if ((j.partidos || []).some(p => isNum(p.goles_local) && isNum(p.goles_visitante))) {
       lastPlayed = idx + 1;
     }
   });
-  if (lastPlayed === 0) return showMsg('Aún no se ha jugado ninguna jornada.');
 
-  // crea navegación por jornadas
+  if (lastPlayed === 0) {
+    Render.renderEmpty(tbody.parentElement, 'Aún no se ha jugado ninguna jornada.');
+    return;
+  }
+
+  // --- Create Navigation ---
   const navWrap = document.createElement('div');
   navWrap.className = 'jornada-nav';
   navWrap.innerHTML = `
-    <button id="prevJornada" class="nav-btn">◀</button>
-    <span id="jornadaLabel" class="jornada-label chip"></span>
-    <button id="nextJornada" class="nav-btn">▶</button>
-  `;
+        <button id="prevJornada" class="nav-btn">◀</button>
+        <span id="jornadaLabel" class="jornada-label chip"></span>
+        <button id="nextJornada" class="nav-btn">▶</button>
+    `;
   tbody.parentElement.insertAdjacentElement('beforebegin', navWrap);
 
-  const label   = document.getElementById('jornadaLabel');
+  const label = document.getElementById('jornadaLabel');
   const prevBtn = document.getElementById('prevJornada');
   const nextBtn = document.getElementById('nextJornada');
 
-  // ======== Modal refs ========
-  const teamBackdrop      = document.getElementById('team-backdrop');
-  const teamCloseBtn      = document.getElementById('team-modal-close');
-  const teamTitleEl       = document.getElementById('team-modal-title');
-  const teamSummaryEl     = document.getElementById('team-modal-summary');
-  const teamMetaEl        = document.getElementById('team-modal-meta');
-  const teamMatchesEl     = document.getElementById('team-modal-matches');
-  const teamBadgeImg      = document.getElementById('team-modal-badge');
-  const teamPosHistoryEl  = document.getElementById('team-modal-poshistory');
+  // --- Modal Refs ---
+  const teamBackdrop = document.getElementById('team-backdrop');
+  const teamCloseBtn = document.getElementById('team-modal-close');
+  const teamTitleEl = document.getElementById('team-modal-title');
+  const teamSummaryEl = document.getElementById('team-modal-summary');
+  const teamMetaEl = document.getElementById('team-modal-meta');
+  const teamMatchesEl = document.getElementById('team-modal-matches');
+  const teamBadgeImg = document.getElementById('team-modal-badge');
+  const teamPosHistoryEl = document.getElementById('team-modal-poshistory');
 
   const openTeamModal = () => {
     if (!teamBackdrop) return;
@@ -67,11 +71,11 @@
     if (!teamBackdrop) return;
     teamBackdrop.hidden = true;
     document.body.style.overflow = '';
-    if (teamTitleEl)       teamTitleEl.textContent    = '';
-    if (teamSummaryEl)     teamSummaryEl.textContent  = '';
-    if (teamMetaEl)        teamMetaEl.textContent     = '';
-    if (teamMatchesEl)     teamMatchesEl.innerHTML    = '';
-    if (teamPosHistoryEl)  teamPosHistoryEl.innerHTML = '';
+    if (teamTitleEl) teamTitleEl.textContent = '';
+    if (teamSummaryEl) teamSummaryEl.textContent = '';
+    if (teamMetaEl) teamMetaEl.textContent = '';
+    if (teamMatchesEl) teamMatchesEl.innerHTML = '';
+    if (teamPosHistoryEl) teamPosHistoryEl.innerHTML = '';
     if (teamBadgeImg) {
       teamBadgeImg.removeAttribute('src');
       teamBadgeImg.alt = '';
@@ -89,62 +93,11 @@
     }
   });
 
-  // ======== Historial de partidos del equipo hasta 'hasta' ========
-  const obtenerPartidosEquipo = (hasta, teamName) => {
-    const matches = [];
-    for (let i = 0; i < hasta; i++) {
-      const j = jornadas[i];
-      for (const p of (j?.partidos || [])) {
-        if (!p.local || !p.visitante) continue;
-        const gl = isNum(p.goles_local) ? p.goles_local : null;
-        const gv = isNum(p.goles_visitante) ? p.goles_visitante : null;
-        if (gl === null || gv === null) continue;
-
-        if (p.local === teamName || p.visitante === teamName) {
-          const isLocal = p.local === teamName;
-          const gf = isLocal ? gl : gv;
-          const gc = isLocal ? gv : gl;
-          let result = 'E';
-          if (gf > gc) result = 'V';
-          else if (gf < gc) result = 'D';
-
-          matches.push({
-            jornada: i + 1,
-            local: p.local,
-            visitante: p.visitante,
-            gl,
-            gv,
-            gf,
-            gc,
-            isLocal,
-            result
-          });
-        }
-      }
-    }
-    return matches;
-  };
-
-  // ======== Histórico de posiciones (usa el core) ========
-  const obtenerPosicionesEquipo = async (hasta, teamName) => {
-    const history = [];
-    for (let jNum = 1; jNum <= hasta; jNum++) {
-      const tabla = await CoreStats.computeClasificacion(jNum); // H2H incluido
-      const idx = tabla.findIndex(e => e.nombre === teamName);
-      if (idx === -1) continue;
-      history.push({
-        jornada: jNum,
-        pos: idx + 1,
-        pts: tabla[idx].pts
-      });
-    }
-    return history;
-  };
-
+  // --- Logic: Open Team History ---
   const abrirHistorialEquipo = async (equipos, hasta, teamName) => {
     const eq = equipos.find(e => e.nombre === teamName);
-    const partidos = obtenerPartidosEquipo(hasta, teamName);
-    const posHistory = await obtenerPosicionesEquipo(hasta, teamName);
+    const partidos = computePartidosEquipo(jornadas, hasta, teamName);
+    const posHistory = await computePosicionesEquipo(hasta, teamName);
 
     if (!eq && partidos.length === 0 && posHistory.length === 0) return;
 
@@ -168,26 +121,21 @@
 
     if (teamMetaEl) teamMetaEl.textContent = `Resultados hasta la jornada ${hasta}`;
 
-    // posiciones
+    // Render Positions
     if (teamPosHistoryEl) {
       if (!posHistory.length) {
         teamPosHistoryEl.innerHTML = '';
       } else {
-        teamPosHistoryEl.innerHTML = `
-          <h3 class="team-pos-title">Evolución en la clasificación</h3>
-          <div class="team-pos-list">
-            ${posHistory.map((h, idx) => {
-              const prev = idx > 0 ? posHistory[idx - 1].pos : null;
-              let trend = '';
-              if (prev !== null) {
-                if (h.pos < prev) trend = '↑';
-                else if (h.pos > prev) trend = '↓';
-              }
-              const trendClass =
-                !trend ? '' :
-                (trend === '↑' ? 'pos-up' : 'pos-down');
+        const historyHtml = posHistory.map((h, idx) => {
+          const prev = idx > 0 ? posHistory[idx - 1].pos : null;
+          let trend = '';
+          if (prev !== null) {
+            if (h.pos < prev) trend = '↑';
+            else if (h.pos > prev) trend = '↓';
+          }
+          const trendClass = !trend ? '' : (trend === '↑' ? 'pos-up' : 'pos-down');
 
-              return `
+          return `
                 <div class="team-pos-row">
                   <span class="chip chip-jornada">J${h.jornada}</span>
                   <span class="team-pos-value">
@@ -197,27 +145,23 @@
                   <span class="team-pos-points">${h.pts} pts</span>
                 </div>
               `;
-            }).join('')}
-          </div>
-        `;
+        }).join('');
+
+        Render.renderContent(teamPosHistoryEl, `
+                    <h3 class="team-pos-title">Evolución en la clasificación</h3>
+                    <div class="team-pos-list">${historyHtml}</div>
+                `);
       }
     }
 
-    // partidos
+    // Render Matches
     if (teamMatchesEl) {
       if (!partidos.length) {
-        teamMatchesEl.innerHTML =
-          `<p class="hint">Este equipo todavía no ha disputado partidos cerrados hasta la jornada ${hasta}.</p>`;
+        Render.renderEmpty(teamMatchesEl, `Este equipo todavía no ha disputado partidos cerrados hasta la jornada ${hasta}.`);
       } else {
-        teamMatchesEl.innerHTML = partidos.map(m => {
-          const resClass =
-            m.result === 'V' ? 'result-win' :
-            m.result === 'D' ? 'result-loss' :
-                               'result-draw';
-          const label =
-            m.result === 'V' ? 'Victoria' :
-            m.result === 'D' ? 'Derrota' : 'Empate';
-
+        const matchesHtml = partidos.map(m => {
+          const resClass = m.result === 'V' ? 'result-win' : m.result === 'D' ? 'result-loss' : 'result-draw';
+          const label = m.result === 'V' ? 'Victoria' : m.result === 'D' ? 'Derrota' : 'Empate';
           return `
             <div class="team-match-row ${resClass}">
               <div class="team-match-left">
@@ -231,16 +175,16 @@
               <div class="team-match-right">
                 <span class="result-pill">${label}</span>
               </div>
-            </div>
-          `;
+            </div>`;
         }).join('');
+        Render.renderContent(teamMatchesEl, matchesHtml);
       }
     }
 
     openTeamModal();
   };
 
-  // ======== Render tabla ========
+  // --- Render Table Logic ---
   let current = lastPlayed;
 
   const render = (equipos, jNum) => {
@@ -248,11 +192,11 @@
 
     const tierClass = (i, len) => (
       i < 8 ? 'tier-top' :
-      (i < 12 ? 'tier-mid' :
-      (i >= len - 4 ? 'tier-bottom' : ''))
+        (i < 12 ? 'tier-mid' :
+          (i >= len - 4 ? 'tier-bottom' : ''))
     );
 
-    tbody.innerHTML = equipos.map((e, i) => `
+    const rowsHtml = equipos.map((e, i) => `
       <tr class="${tierClass(i, equipos.length)}">
         <td class="pos-cell">
           <span class="pos-index">${i + 1}</span>
@@ -279,6 +223,8 @@
       </tr>
     `).join('');
 
+    tbody.innerHTML = rowsHtml;
+
     tbody.querySelectorAll('.team-name-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const teamName = btn.dataset.team;
@@ -289,7 +235,9 @@
   };
 
   const update = async () => {
-    const equipos = await CoreStats.computeClasificacion(current); // ✅ H2H ya en core
+    // Show loader on the table body would replace content, maybe just update opacity?
+    // for now simpler: just wait
+    const equipos = await computeClasificacion(current);
     render(equipos, current);
     prevBtn.disabled = current <= 1;
     nextBtn.disabled = current >= lastPlayed;
@@ -302,6 +250,7 @@
     if (current < lastPlayed) { current++; await update(); }
   });
 
-  // Por defecto última jornada
+  // Initial Render
   await update();
+
 })();
