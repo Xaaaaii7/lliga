@@ -1,0 +1,13 @@
+{
+    "name": "lliga-scripts",
+    "version": "1.0.0",
+    "description": "Scripts for Voll Damm Returns automation",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.49.1"
+    }
+}

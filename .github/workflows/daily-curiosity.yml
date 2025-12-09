@@ -1,0 +1,31 @@
+name: Daily Curiosity
+
+on:
+  schedule:
+    # Run daily at 10:00 AM UTC (adjust as needed)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  daily-curiosity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: ./scripts
+        run: npm install
+
+      - name: Run Most Scoring Team Script
+        working-directory: ./scripts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SEASON: '2025-26'
+        run: node curiosities/most-scoring-team.js
