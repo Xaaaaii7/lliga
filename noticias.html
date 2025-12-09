@@ -1,48 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Noticias</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-noticias">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Noticias</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Noticias</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container">
-  <!-- Hero carrusel destacadas -->
-  <section>
-    <div class="hero-carousel" id="hero-carousel">
-      <div class="hero-track" id="hero-track"></div>
-      <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
-      <button class="hero-nav next" id="hero-next" aria-label="Siguiente">›</button>
-      <div class="hero-dots" id="hero-dots"></div>
+  <main class="container">
+    <!-- Hero carrusel destacadas -->
+    <section>
+      <div class="hero-carousel" id="hero-carousel">
+        <div class="hero-track" id="hero-track"></div>
+        <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
+        <button class="hero-nav next" id="hero-next" aria-label="Siguiente">›</button>
+        <div class="hero-dots" id="hero-dots"></div>
+      </div>
+    </section>
+
+    <!-- Histórico -->
+    <section>
+      <h2>Histórico</h2>
+      <div class="news-grid" id="news-grid"></div>
+    </section>
+  </main>
+
+  <!-- Modal noticia -->
+  <div id="news-backdrop" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
+      <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
+      <h2 id="news-title"></h2>
+      <div class="meta" id="news-meta"></div>
+      <div id="news-content"></div>
     </div>
-  </section>
-
-  <!-- Histórico -->
-  <section>
-    <h2>Histórico</h2>
-    <div class="news-grid" id="news-grid"></div>
-  </section>
-</main>
-
-<!-- Modal noticia -->
-<div id="news-backdrop" class="modal-backdrop" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
-    <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
-    <h2 id="news-title"></h2>
-    <div class="meta" id="news-meta"></div>
-    <div id="news-content"></div>
   </div>
-</div>
 
-<footer class="site-footer">© Torneo entre amigos</footer>
-<script src="js/common.js"></script>
-<script src="js/noticias.js"></script>
+  <footer class="site-footer">© Torneo entre amigos</footer>
+  <script type="module" src="js/loader.js"></script>
+  <script src="js/noticias.js"></script>
 </body>
+
 </html>

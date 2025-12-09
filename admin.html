@@ -1,92 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Panel de administración</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-admin">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Panel de administración</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Panel de administración</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container admin-wrapper">
-  <section class="admin-header-card">
-    <div class="admin-header-main">
-      <div>
-        <p class="admin-kicker">Modo administrador</p>
-        <h2>Resumen de control del torneo</h2>
-        <p class="admin-desc">
-          Desde aquí puedes gestionar los partidos, sanciones de equipos y usuarios
-          registrados del torneo.
+  <main class="container admin-wrapper">
+    <section class="admin-header-card">
+      <div class="admin-header-main">
+        <div>
+          <p class="admin-kicker">Modo administrador</p>
+          <h2>Resumen de control del torneo</h2>
+          <p class="admin-desc">
+            Desde aquí puedes gestionar los partidos, sanciones de equipos y usuarios
+            registrados del torneo.
+          </p>
+        </div>
+        <div class="admin-season-box">
+          <span class="admin-season-label">Temporada activa</span>
+          <span class="admin-season-value" id="admin-season">–</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-grid">
+      <article class="admin-card">
+        <h3>Partidos (matches)</h3>
+        <p>
+          Consulta y edita partidos de la temporada: fecha, hora, goles, stream
+          y otras opciones. En un futuro podrás generar el calendario completo
+          desde aquí.
         </p>
-      </div>
-      <div class="admin-season-box">
-        <span class="admin-season-label">Temporada activa</span>
-        <span class="admin-season-value" id="admin-season">–</span>
-      </div>
-    </div>
-  </section>
+        <a href="admin-matches.html" class="btn btn-primary btn-full">
+          Gestionar partidos
+        </a>
+      </article>
 
-  <section class="admin-grid">
-    <article class="admin-card">
-      <h3>Partidos (matches)</h3>
+      <article class="admin-card">
+        <h3>Equipos de liga (league_teams)</h3>
+        <p>
+          Ajusta sanciones de los equipos (puntos restados y motivo), revisa
+          qué usuario controla cada club y mantén al día la liga.
+        </p>
+        <a href="admin-league-teams.html" class="btn btn-secondary btn-full">
+          Gestionar equipos y sanciones
+        </a>
+      </article>
+
+      <article class="admin-card">
+        <h3>Usuarios (profiles)</h3>
+        <p>
+          Revisa las cuentas registradas, aprueba o bloquea su acceso y consulta
+          qué equipo tiene asignado cada usuario.
+        </p>
+        <a href="admin-users.html" class="btn btn-secondary btn-full">
+          Gestionar usuarios
+        </a>
+      </article>
+    </section>
+
+    <section class="admin-note">
       <p>
-        Consulta y edita partidos de la temporada: fecha, hora, goles, stream
-        y otras opciones. En un futuro podrás generar el calendario completo
-        desde aquí.
+        Si algo no cuadra (clasificación, sanciones, etc.), revisa primero
+        los datos en <strong>matches</strong>, <strong>league_teams</strong> y
+        la asignación de usuarios en <strong>profiles</strong>.
       </p>
-      <a href="admin-matches.html" class="btn btn-primary btn-full">
-        Gestionar partidos
-      </a>
-    </article>
+    </section>
+  </main>
 
-    <article class="admin-card">
-      <h3>Equipos de liga (league_teams)</h3>
-      <p>
-        Ajusta sanciones de los equipos (puntos restados y motivo), revisa
-        qué usuario controla cada club y mantén al día la liga.
-      </p>
-      <a href="admin-league-teams.html" class="btn btn-secondary btn-full">
-        Gestionar equipos y sanciones
-      </a>
-    </article>
+  <script type="module" src="js/loader.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await AppUtils.ensureAdmin();
+      if (!ok) return;
 
-    <article class="admin-card">
-      <h3>Usuarios (profiles)</h3>
-      <p>
-        Revisa las cuentas registradas, aprueba o bloquea su acceso y consulta
-        qué equipo tiene asignado cada usuario.
-      </p>
-      <a href="admin-users.html" class="btn btn-secondary btn-full">
-        Gestionar usuarios
-      </a>
-    </article>
-  </section>
-
-  <section class="admin-note">
-    <p>
-      Si algo no cuadra (clasificación, sanciones, etc.), revisa primero
-      los datos en <strong>matches</strong>, <strong>league_teams</strong> y
-      la asignación de usuarios en <strong>profiles</strong>.
-    </p>
-  </section>
-</main>
-
-<script src="js/common.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
-  if (!ok) return;
-
-  const seasonEl = document.getElementById('admin-season');
-  if (seasonEl) {
-    seasonEl.textContent = AppUtils.getActiveSeason();
-  }
-});
-</script>
+      const seasonEl = document.getElementById('admin-season');
+      if (seasonEl) {
+        seasonEl.textContent = AppUtils.getActiveSeason();
+      }
+    });
+  </script>
 </body>
+
 </html>

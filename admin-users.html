@@ -1,72 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Admin Usuarios</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="page-admin">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Admin — Usuarios</h1>
-  <nav id="main-nav"></nav>
-</header>
 
-<main class="container admin-wrapper">
-  <section class="admin-header-card">
-    <div class="admin-header-main">
-      <div>
-        <p class="admin-kicker">Gestión de usuarios</p>
-        <h2>Cuentas registradas y aprobación</h2>
-        <p class="admin-desc">
-          Revisa los usuarios registrados, aprueba o marca como pendientes sus cuentas
-          y consulta qué equipo tienen asignado. El email se gestiona desde Supabase Auth.
-        </p>
+<body class="page-admin">
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Admin — Usuarios</h1>
+    <nav id="main-nav"></nav>
+  </header>
+
+  <main class="container admin-wrapper">
+    <section class="admin-header-card">
+      <div class="admin-header-main">
+        <div>
+          <p class="admin-kicker">Gestión de usuarios</p>
+          <h2>Cuentas registradas y aprobación</h2>
+          <p class="admin-desc">
+            Revisa los usuarios registrados, aprueba o marca como pendientes sus cuentas
+            y consulta qué equipo tienen asignado. El email se gestiona desde Supabase Auth.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nickname</th>
+            <th>Equipo (team_nickname)</th>
+            <th>Admin</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr>
+            <td colspan="6">Cargando usuarios...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Modal simple para ver detalles si hiciera falta (por ahora no editable extra) -->
+  <div id="user-modal-backdrop" class="modal-backdrop" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Detalles de usuario</h3>
+        <button type="button" class="modal-close" id="user-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Nickname:</strong> <span id="user-modal-nickname"></span></p>
+        <p><strong>Equipo:</strong> <span id="user-modal-team"></span></p>
+        <p><strong>Admin:</strong> <span id="user-modal-is-admin"></span></p>
+        <p><strong>Aprobado:</strong> <span id="user-modal-is-approved"></span></p>
+        <p><strong>Creado:</strong> <span id="user-modal-created"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="user-modal-close-btn">Cerrar</button>
       </div>
     </div>
-  </section>
-
-  <section>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Nickname</th>
-          <th>Equipo (team_nickname)</th>
-          <th>Admin</th>
-          <th>Estado</th>
-          <th>Creado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="users-tbody">
-        <tr><td colspan="6">Cargando usuarios...</td></tr>
-      </tbody>
-    </table>
-  </section>
-</main>
-
-<!-- Modal simple para ver detalles si hiciera falta (por ahora no editable extra) -->
-<div id="user-modal-backdrop" class="modal-backdrop" hidden>
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Detalles de usuario</h3>
-      <button type="button" class="modal-close" id="user-modal-close">×</button>
-    </div>
-    <div class="modal-body">
-      <p><strong>Nickname:</strong> <span id="user-modal-nickname"></span></p>
-      <p><strong>Equipo:</strong> <span id="user-modal-team"></span></p>
-      <p><strong>Admin:</strong> <span id="user-modal-is-admin"></span></p>
-      <p><strong>Aprobado:</strong> <span id="user-modal-is-approved"></span></p>
-      <p><strong>Creado:</strong> <span id="user-modal-created"></span></p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" id="user-modal-close-btn">Cerrar</button>
-    </div>
   </div>
-</div>
 
-<script src="js/common.js"></script>
-<script src="js/admin-users.js"></script>
+  <script type="module" src="js/loader.js"></script>
+  <script src="js/admin-users.js"></script>
 </body>
+
 </html>

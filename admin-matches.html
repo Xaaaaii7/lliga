@@ -1,135 +1,140 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Torneo — Admin Partidos</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="page-admin">
-<header class="site-header">
-  <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-  <h1>Admin — Partidos</h1>
-  <nav id="main-nav"></nav>
-</header>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Admin — Partidos</h1>
+    <nav id="main-nav"></nav>
+  </header>
 
-<main class="container admin-wrapper">
-  <section class="admin-header-card">
-    <div class="admin-header-main">
-      <div>
-        <p class="admin-kicker">Gestión de calendario</p>
-        <h2>Partidos de la temporada <span id="season-label"></span></h2>
-        <p class="admin-desc">
-          Edita fecha, hora, equipos, goles y enlace de stream de cada partido.
-          Los cambios se reflejan directamente en la web pública.
-        </p>
+  <main class="container admin-wrapper">
+    <section class="admin-header-card">
+      <div class="admin-header-main">
+        <div>
+          <p class="admin-kicker">Gestión de calendario</p>
+          <h2>Partidos de la temporada <span id="season-label"></span></h2>
+          <p class="admin-desc">
+            Edita fecha, hora, equipos, goles y enlace de stream de cada partido.
+            Los cambios se reflejan directamente en la web pública.
+          </p>
+        </div>
+        <div class="admin-season-box">
+          <span class="admin-season-label">Temporada activa</span>
+          <span class="admin-season-value" id="admin-season">–</span>
+        </div>
       </div>
-      <div class="admin-season-box">
-        <span class="admin-season-label">Temporada activa</span>
-        <span class="admin-season-value" id="admin-season">–</span>
+    </section>
+
+    <section>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Jornada</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Local</th>
+            <th>Visitante</th>
+            <th>Resultado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="matches-tbody">
+          <tr>
+            <td colspan="8">Cargando partidos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Modal edición partido -->
+  <div id="match-modal-backdrop" class="modal-backdrop" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar partido</h3>
+        <button type="button" class="modal-close" id="match-modal-close">×</button>
       </div>
-    </div>
-  </section>
+      <div class="modal-body">
+        <form id="match-form" class="admin-form">
+          <input type="hidden" id="match-id" />
 
-  <section>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Jornada</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Local</th>
-          <th>Visitante</th>
-          <th>Resultado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="matches-tbody">
-        <tr><td colspan="8">Cargando partidos...</td></tr>
-      </tbody>
-    </table>
-  </section>
-</main>
+          <div class="admin-form-row">
+            <label>
+              ID (solo lectura)
+              <input type="text" id="match-id-readonly" readonly />
+            </label>
+            <label>
+              Jornada
+              <input type="number" id="match-round" readonly />
+            </label>
+          </div>
 
-<!-- Modal edición partido -->
-<div id="match-modal-backdrop" class="modal-backdrop" hidden>
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Editar partido</h3>
-      <button type="button" class="modal-close" id="match-modal-close">×</button>
-    </div>
-    <div class="modal-body">
-      <form id="match-form" class="admin-form">
-        <input type="hidden" id="match-id" />
+          <div class="admin-form-row">
+            <label>
+              Local
+              <select id="match-home-team"></select>
+            </label>
+            <label>
+              Visitante
+              <select id="match-away-team"></select>
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label>
-            ID (solo lectura)
-            <input type="text" id="match-id-readonly" readonly />
-          </label>
-          <label>
-            Jornada
-            <input type="number" id="match-round" readonly />
-          </label>
-        </div>
+          <div class="admin-form-row">
+            <label>
+              Fecha
+              <input type="date" id="match-date" />
+            </label>
+            <label>
+              Hora
+              <input type="time" id="match-time" />
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label>
-            Local
-            <select id="match-home-team"></select>
-          </label>
-          <label>
-            Visitante
-            <select id="match-away-team"></select>
-          </label>
-        </div>
+          <div class="admin-form-row">
+            <label>
+              Goles local
+              <input type="number" id="match-home-goals" min="0" />
+            </label>
+            <label>
+              Goles visitante
+              <input type="number" id="match-away-goals" min="0" />
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label>
-            Fecha
-            <input type="date" id="match-date" />
-          </label>
-          <label>
-            Hora
-            <input type="time" id="match-time" />
-          </label>
-        </div>
+          <div class="admin-form-row">
+            <label class="full-width">
+              URL del stream (Twitch/YouTube, etc.)
+              <input type="text" id="match-stream-url" />
+            </label>
+          </div>
 
-        <div class="admin-form-row">
-          <label>
-            Goles local
-            <input type="number" id="match-home-goals" min="0" />
-          </label>
-          <label>
-            Goles visitante
-            <input type="number" id="match-away-goals" min="0" />
-          </label>
-        </div>
+          <p id="match-error" class="auth-error"></p>
 
-        <div class="admin-form-row">
-          <label class="full-width">
-            URL del stream (Twitch/YouTube, etc.)
-            <input type="text" id="match-stream-url" />
-          </label>
-        </div>
-
-        <p id="match-error" class="auth-error"></p>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="match-cancel-btn">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary" id="match-save-btn">
-            Guardar cambios
-          </button>
-        </div>
-      </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="match-cancel-btn">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="match-save-btn">
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="js/common.js"></script>
-<script src="js/admin-matches.js"></script>
+  <script type="module" src="js/loader.js"></script>
+  <script src="js/admin-matches.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,102 @@
+import { getCurrentUser, getCurrentProfile, logout } from './auth.js';
+import { escapeHtml } from './utils.js';
+
+export async function renderUserSection() {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+
+    let container = document.getElementById('user-section');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'user-section';
+        container.className = 'user-section';
+        header.appendChild(container);
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
+        container.innerHTML = `<a href="login.html">Login</a>`;
+        return;
+    }
+
+    const profile = await getCurrentProfile();
+    const safeName = escapeHtml(profile?.nickname || user.email);
+
+    let html = `<span class="user-name">${safeName}</span>`;
+    if (profile?.is_admin) {
+        html += ` | <a href="admin.html">Admin</a>`;
+    }
+    html += ` | <a href="#" id="logout-btn">Logout</a>`;
+
+    container.innerHTML = html;
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await logout();
+        });
+    }
+}
+
+export function initNavigation() {
+    // ✔ Convertir automáticamente el LOGO del header en enlace a index.html
+    const headerLogo = document.querySelector('.site-header .logo');
+    if (headerLogo && !headerLogo.closest('a')) {
+        const wrapper = document.createElement('a');
+        wrapper.href = 'index.html';
+        wrapper.style.display = 'inline-block';
+        headerLogo.parentNode.insertBefore(wrapper, headerLogo);
+        wrapper.appendChild(headerLogo);
+    }
+
+    const header = document.querySelector('.site-header');
+    const nav = document.getElementById('main-nav');
+    if (nav && header) {
+
+        // Menú principal
+        const links = [
+            ['index.html', 'Inicio'],
+            ['noticias.html', 'Noticias'],
+            ['clasificacion.html', 'Clasificación'],
+            ['resultados.html', 'Resultados'],
+            ['jugadores.html', 'Jugadores'],
+            ['pichichi.html', 'Pichichi'],
+            ['clubs.html', 'Clubs'],
+            ['jornada.html', 'Jornada'],
+            ['reglas.html', 'Reglas'],
+            ['directos.html', 'Directos']
+        ];
+
+        nav.innerHTML = links
+            .map(([href, label]) => `<a href="${href}" data-href="${href}">${label}</a>`)
+            .join('');
+
+        // Activar link
+        const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        nav.querySelectorAll('a').forEach(a => {
+            if ((a.getAttribute('data-href') || '').toLowerCase() === here) {
+                a.classList.add('active');
+            }
+        });
+
+        // Botón hamburguesa si no existe
+        if (!document.getElementById('menu-toggle')) {
+            const btn = document.createElement('button');
+            btn.id = 'menu-toggle';
+            btn.className = 'menu-toggle';
+            btn.setAttribute('aria-label', 'Abrir menú');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.innerHTML = '<span></span><span></span><span></span>';
+            header.insertBefore(btn, nav);
+
+            btn.addEventListener('click', () => {
+                const open = header.classList.toggle('open');
+                btn.setAttribute('aria-expanded', String(open));
+            });
+        }
+    }
+
+    // Renderizar info de usuario (login/admin/logout)
+    renderUserSection().catch(console.error);
+}
