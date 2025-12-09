@@ -1,14 +1,37 @@
 import { getSupabaseAdmin } from './utils/supabase-admin.js';
 
-// Import all curiosity scripts
+// Phase 1 & 2 imports
 import * as mostScoring from './curiosities/most-scoring-team.js';
 import * as leastConceded from './curiosities/least-conceded-team.js';
 import * as biggestWin from './curiosities/biggest-win.js';
 
+// Phase 3 imports
+import * as teamFouls from './curiosities/team-most-fouls.js';
+import * as teamSaves from './curiosities/team-most-saves.js';
+import * as matchPossession from './curiosities/match-highest-possession.js';
+import * as teamShotEff from './curiosities/team-shot-efficiency.js';
+import * as teamCorners from './curiosities/team-most-corners.js';
+import * as playerHattrick from './curiosities/player-hattrick.js';
+import * as teamCleanSheets from './curiosities/team-clean-sheets.js';
+import * as teamRedCards from './curiosities/team-red-cards.js';
+import * as teamInjuries from './curiosities/team-most-injuries.js';
+import * as playerEfficiency from './curiosities/player-pichichi-efficiency.js';
+
 const TASKS = [
     mostScoring,
     leastConceded,
-    biggestWin
+    biggestWin,
+    // Phase 3
+    teamFouls,
+    teamSaves,
+    matchPossession,
+    teamShotEff,
+    teamCorners,
+    playerHattrick,
+    teamCleanSheets,
+    teamRedCards,
+    teamInjuries,
+    playerEfficiency
 ];
 
 async function main() {
