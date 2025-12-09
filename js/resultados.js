@@ -505,27 +505,34 @@
         event_type
       `)
       .eq('match_id', matchId)
-      .eq('event_type', 'goal');
+      .in('event_type', ['goal', 'red_card']);
 
     if (errMatchEv) {
       console.warn('Error cargando goal_events del partido:', errMatchEv);
     }
 
-    const aggSide = { local: {}, visitante: {} };
+    const aggGoals = { local: {}, visitante: {} };
+    const aggRed = { local: [], visitante: [] }; // Set of player_ids
 
     (matchEvents || []).forEach(ev => {
       const pid = ev.player_id;
       if (!pid) return;
+
       const side = (ev.league_team_id === localTeamId)
         ? 'local'
         : (ev.league_team_id === visitTeamId ? 'visitante' : null);
       if (!side) return;
-      aggSide[side][pid] = (aggSide[side][pid] || 0) + 1;
+
+      if (ev.event_type === 'goal') {
+        aggGoals[side][pid] = (aggGoals[side][pid] || 0) + 1;
+      } else if (ev.event_type === 'red_card') {
+        aggRed[side].push(pid);
+      }
     });
 
     const buildSideArr = (side) => {
       const out = [];
-      const counts = aggSide[side] || {};
+      const counts = aggGoals[side] || {};
       Object.keys(counts).forEach(pidStr => {
         const pid = Number(pidStr);
         const goals = counts[pidStr];
@@ -543,6 +550,22 @@
       return out;
     };
 
+    const buildRedArr = (side) => {
+      const out = [];
+      const pids = aggRed[side] || [];
+      // Deduplicate just in case DB has multiples
+      const uniquePids = [...new Set(pids)];
+      uniquePids.forEach(pid => {
+        const meta = playerMeta[pid] || { name: `Jugador ${pid}` };
+        out.push({
+          player_id: pid,
+          name: meta.name
+        });
+      });
+      out.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      return out;
+    };
+
     const state = {
       meta: {
         ...matchMeta,
@@ -551,6 +574,8 @@
       },
       local: buildSideArr('local'),
       visitante: buildSideArr('visitante'),
+      redLocal: buildRedArr('local'),
+      redVisitante: buildRedArr('visitante'),
       playersLocal: localPlayers,
       playersVisitante: visitPlayers,
       playerMeta,
@@ -873,80 +898,145 @@
   // -----------------------------
   // Editor de tarjetas rojas
   // -----------------------------
-  const loadRedCardsForMatch = async (matchId, meta) => {
-    if (!hasSupabase || !matchId) return null;
-    const supa = await getSupa();
-    if (!supa) return null;
+  // -----------------------------
+  // Editor de tarjetas rojas
+  // -----------------------------
+  const renderRedCardsList = (sectionEl, side, state) => {
+    if (!sectionEl || !state) return;
+    const listEl = sectionEl.querySelector(`.redcards-list[data-side="${side}"]`);
+    if (!listEl) return;
 
-    const localTeamId = meta.local_team_id;
-    const visitTeamId = meta.visitante_team_id;
-
-    if (!localTeamId || !visitTeamId) {
-      console.warn('RedCards: faltan league_team_id en meta', meta);
-      return null;
+    const arr = (side === 'local' ? state.redLocal : state.redVisitante) || [];
+    if (!arr.length) {
+      listEl.innerHTML = `<li class="scorer-empty">Sin tarjetas rojas.</li>`;
+      return;
     }
 
-    const { data, error } = await supa
-      .from('match_team_stats')
-      .select('league_team_id, red_cards')
-      .eq('match_id', matchId)
-      .in('league_team_id', [localTeamId, visitTeamId]);
-
-    if (error) {
-      console.warn('Error cargando tarjetas rojas', error);
-      return null;
-    }
-
-    let local = 0;
-    let visitante = 0;
-
-    (data || []).forEach(row => {
-      if (row.league_team_id === localTeamId) {
-        local = typeof row.red_cards === 'number' ? row.red_cards : 0;
-      } else if (row.league_team_id === visitTeamId) {
-        visitante = typeof row.red_cards === 'number' ? row.red_cards : 0;
-      }
-    });
-
-    return { local, visitante };
+    listEl.innerHTML = arr.map(p => `
+      <li class="scorer-item" data-player-id="${p.player_id}">
+        <span class="scorer-name">${p.name}</span>
+        <button type="button" class="btn-remove-red" data-player-id="${p.player_id}" data-side="${side}">✕</button>
+      </li>
+    `).join('');
   };
 
-  const saveRedCardsForMatch = async (matchId, meta, localVal, visitVal) => {
-    if (!hasSupabase || !matchId) {
-      return { ok: false, msg: 'Supabase no configurado' };
-    }
+  const fillRedCardsSelects = (sectionEl, state) => {
+    if (!sectionEl || !state) return;
+
+    const fill = (side, allPlayers, currentRedPlayers) => {
+      const sel = sectionEl.querySelector(`select[data-side="${side}"]`);
+      if (!sel) return;
+
+      // Filtrar jugadores que YA tienen roja
+      const currentIds = new Set(currentRedPlayers.map(p => p.player_id));
+      const available = allPlayers.filter(p => !currentIds.has(p.player_id));
+
+      sel.innerHTML = `
+        <option value="">Añadir jug. con roja…</option>
+        ${available.map(p => `
+          <option value="${p.player_id}">${p.name}</option>
+        `).join('')}
+      `;
+    };
+
+    fill('local', state.playersLocal || [], state.redLocal || []);
+    fill('visitante', state.playersVisitante || [], state.redVisitante || []);
+  };
+
+  const addRedCardToState = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = (side === 'local' ? state.redLocal : state.redVisitante);
+    const pid = Number(playerId);
+    if (arr.some(p => p.player_id === pid)) return; // Ya existe
+
+    const meta = state.playerMeta[pid] || { name: `Jugador ${pid}` };
+    arr.push({ player_id: pid, name: meta.name });
+    // Sort
+    arr.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  };
+
+  const removeRedCardFromState = (matchId, side, playerId) => {
+    const state = scorerState[matchId];
+    if (!state) return;
+    const arr = (side === 'local' ? state.redLocal : state.redVisitante);
+    const pid = Number(playerId);
+    const idx = arr.findIndex(x => x.player_id === pid);
+    if (idx !== -1) arr.splice(idx, 1);
+  };
+
+  const saveRedCardsFull = async (matchId) => {
+    const state = scorerState[matchId];
+    if (!state) return { ok: false, msg: 'No hay datos' };
+
     const supa = await getSupa();
     if (!supa) return { ok: false, msg: 'Supabase no configurado' };
 
+    const meta = state.meta;
     const localTeamId = meta.local_team_id;
     const visitTeamId = meta.visitante_team_id;
 
-    if (!localTeamId || !visitTeamId) {
-      return { ok: false, msg: 'Faltan league_team_id en el partido' };
+    if (!localTeamId || !visitTeamId) return { ok: false, msg: 'Faltan IDs de equipo' };
+
+    // 1) Borrar rojas antiguas
+    const { error: errDel } = await supa
+      .from('goal_events')
+      .delete()
+      .eq('match_id', matchId)
+      .eq('event_type', 'red_card');
+
+    if (errDel) {
+      console.error('Error borrando rojas:', errDel);
+      return { ok: false, msg: 'Error al limpiar rojas antiguas' };
     }
 
-    const l = Math.max(0, Number(localVal) || 0);
-    const v = Math.max(0, Number(visitVal) || 0);
+    // 2) Insertar nuevas
+    const rows = [];
+    (state.redLocal || []).forEach(p => {
+      rows.push({
+        match_id: matchId,
+        league_team_id: localTeamId,
+        player_id: p.player_id,
+        event_type: 'red_card'
+      });
+    });
+    (state.redVisitante || []).forEach(p => {
+      rows.push({
+        match_id: matchId,
+        league_team_id: visitTeamId,
+        player_id: p.player_id,
+        event_type: 'red_card'
+      });
+    });
+
+    if (rows.length) {
+      const { error: errIns } = await supa.from('goal_events').insert(rows);
+      if (errIns) {
+        console.error('Error insertando rojas:', errIns);
+        return { ok: false, msg: 'Error guardando detalle tarjetas' };
+      }
+    }
+
+    // 3) Actualizar match_team_stats.red_cards (numérico)
+    const lCount = (state.redLocal || []).length;
+    const vCount = (state.redVisitante || []).length;
 
     const [resL, resV] = await Promise.all([
-      supa
-        .from('match_team_stats')
-        .update({ red_cards: l })
+      supa.from('match_team_stats')
+        .update({ red_cards: lCount })
         .eq('match_id', matchId)
         .eq('league_team_id', localTeamId),
-      supa
-        .from('match_team_stats')
-        .update({ red_cards: v })
+      supa.from('match_team_stats')
+        .update({ red_cards: vCount })
         .eq('match_id', matchId)
         .eq('league_team_id', visitTeamId)
     ]);
 
     if (resL.error || resV.error) {
-      console.error('Error guardando tarjetas rojas', resL.error, resV.error);
-      return { ok: false, msg: 'No se pudieron guardar las tarjetas rojas' };
+      console.warn('Error actualizando contador rojas', resL.error, resV.error);
     }
 
-    return { ok: true, msg: 'Tarjetas rojas guardadas' };
+    return { ok: true, msg: 'Tarjetas rojas guardadas correctamente' };
   };
 
   const initRedCardsEditor = async (matchId, meta) => {
@@ -956,34 +1046,63 @@
     const section = bodyEl.querySelector('.redcards-editor');
     if (!section) return;
 
-    const inputLocal = section.querySelector('input[data-side="local"]');
-    const inputVisit = section.querySelector('input[data-side="visitante"]');
-    const saveBtn = section.querySelector('.btn-save-redcards');
     const statusEl = section.querySelector('.redcards-status');
+    const saveBtn = section.querySelector('.btn-save-redcards');
 
-    if (statusEl) statusEl.textContent = 'Cargando tarjetas rojas...';
-
-    const current = await loadRedCardsForMatch(matchId, meta);
-    if (current) {
-      if (inputLocal) inputLocal.value = current.local ?? 0;
-      if (inputVisit) inputVisit.value = current.visitante ?? 0;
-    } else {
-      if (inputLocal && !inputLocal.value) inputLocal.value = 0;
-      if (inputVisit && !inputVisit.value) inputVisit.value = 0;
+    // We already loaded data in scorerState (reused as matchState)
+    // Wait for it if it's not ready? usually initScorersEditor triggered it.
+    // Let's call loadScorerStateForMatch again, it returns cached promise/obj if existing
+    const state = await loadScorerStateForMatch(meta);
+    if (!state) {
+      if (statusEl) statusEl.textContent = 'Error cargando datos.';
+      return;
     }
 
-    if (statusEl) statusEl.textContent = '';
+    const refreshUI = () => {
+      fillRedCardsSelects(section, state);
+      renderRedCardsList(section, 'local', state);
+      renderRedCardsList(section, 'visitante', state);
+    };
 
+    refreshUI();
+
+    // Event Listeners
+
+    // Add buttons
+    section.querySelectorAll('.btn-add-red').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const side = btn.getAttribute('data-side');
+        const sel = section.querySelector(`select[data-side="${side}"]`);
+        if (!sel) return;
+        const val = sel.value;
+        if (!val) return;
+        addRedCardToState(matchId, side, val);
+        refreshUI();
+      });
+    });
+
+    // Remove buttons (delegated)
+    section.addEventListener('click', (e) => {
+      const target = e.target;
+      const btnRem = target.closest && target.closest('.btn-remove-red');
+      if (btnRem) {
+        e.preventDefault();
+        const side = btnRem.getAttribute('data-side');
+        const pid = btnRem.getAttribute('data-player-id');
+        if (side && pid) {
+          removeRedCardFromState(matchId, side, pid);
+          refreshUI();
+        }
+      }
+    });
+
+    // Save
     if (saveBtn) {
       saveBtn.addEventListener('click', async () => {
-        if (!inputLocal || !inputVisit) return;
-        const lVal = inputLocal.value;
-        const vVal = inputVisit.value;
-
         if (statusEl) statusEl.textContent = 'Guardando...';
         saveBtn.disabled = true;
         try {
-          const res = await saveRedCardsForMatch(matchId, meta, lVal, vVal);
+          const res = await saveRedCardsFull(matchId);
           if (statusEl) statusEl.textContent = res.msg || '';
         } finally {
           saveBtn.disabled = false;
@@ -1106,35 +1225,31 @@
       <hr class="stats-divider" />
       <section class="redcards-editor" data-match-id="${matchId}">
         <h3>Tarjetas rojas</h3>
-        <div class="redcards-row">
-          <label>
-            ${localName}
-            <input
-              type="number"
-              min="0"
-              step="1"
-              class="input-redcards"
-              data-side="local"
-              value="0"
-            />
-          </label>
-        </div>
-        <div class="redcards-row">
-          <label>
-            ${visitName}
-            <input
-              type="number"
-              min="0"
-              step="1"
-              class="input-redcards"
-              data-side="visitante"
-              value="0"
-            />
-          </label>
+        <div class="scorers-columns">
+          <div class="scorers-col" data-side="local">
+            <h4>${localName}</h4>
+            <ul class="scorers-list redcards-list" data-side="local"></ul>
+            <div class="scorers-add">
+              <select data-side="local">
+                <option value="">Añadir jug. con roja…</option>
+              </select>
+              <button type="button" class="btn-add-red" data-side="local">＋</button>
+            </div>
+          </div>
+          <div class="scorers-col" data-side="visitante">
+            <h4>${visitName}</h4>
+            <ul class="scorers-list redcards-list" data-side="visitante"></ul>
+            <div class="scorers-add">
+              <select data-side="visitante">
+                <option value="">Añadir jug. con roja…</option>
+              </select>
+              <button type="button" class="btn-add-red" data-side="visitante">＋</button>
+            </div>
+          </div>
         </div>
         <div class="redcards-actions">
-          <button type="button" class="btn-save-redcards">Guardar rojas</button>
-          <span class="redcards-status" aria-live="polite"></span>
+           <span class="redcards-status" aria-live="polite"></span>
+           <button type="button" class="btn-save-redcards">Guardar rojas</button>
         </div>
       </section>
       `
