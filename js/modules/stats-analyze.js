@@ -276,23 +276,17 @@ export const computeMvpPorJornada = async (jornadaNumero) => {
         const sShot = getScore(scoreShot, t);
         const sDef = getScore(scoreDef, t);
 
-        // Pesos
-        // Goles y ganar pesan mucho (30%, 25%)
-        // Juego (pase, posesión) ~ 15%
-        // Efectividad (tiro, defensa) ~ 15%
-        // Fair play ~ 5%
-        // Esto es subjetivo, ajustable
-        let finalScore =
-            sWin * 2.0 +
-            sPich * 1.5 +
-            sZam * 1.0 +
-            sShot * 1.0 +
-            sDef * 1.0 +
-            sPass * 0.8 +
-            sPos * 0.5 +
-            sFair * 0.5;
-
-        t.mvpScore = finalScore;
+        // Pesos originales de core-stats.old.js
+        t.mvpScore = (
+            0.20 * sPich +
+            0.20 * sZam +
+            0.20 * sWin +
+            0.05 * sPos +
+            0.05 * sPass +
+            0.10 * sFair +
+            0.10 * sShot +
+            0.10 * sDef
+        );
     }
 
     // Ordenar por mvpScore
