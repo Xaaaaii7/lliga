@@ -345,3 +345,212 @@ export const computeMvpTemporada = async () => {
 
     return seasonArr;
 };
+
+// ==========================
+// TEAM OF THE MOMENT (3 equipos)
+// ==========================
+export const computeTeamsFormTop = async (limit = 3) => {
+    const jornadas = await getResultados();
+    if (!Array.isArray(jornadas) || !jornadas.length) return [];
+
+    const porEquipo = new Map(); // nombre -> [{jornada, mvpScore, pj}]
+
+    for (const j of jornadas) {
+        const jNum = j.numero ?? j.jornada;
+        if (!jNum) continue;
+
+        const { teams } = await computeMvpPorJornada(jNum);
+        for (const t of (teams || [])) {
+            const arr = porEquipo.get(t.nombre) || [];
+            arr.push({
+                jornada: jNum,
+                mvpScore: t.mvpScore || 0,
+                pj: t.pj || 0
+            });
+            porEquipo.set(t.nombre, arr);
+        }
+    }
+
+    const ranking = [];
+    porEquipo.forEach((arr, name) => {
+        if (!arr.length) return;
+        arr.sort((a, b) => a.jornada - b.jornada);
+        const last3 = arr.slice(-3);
+        const n = last3.length;
+        if (!n) return;
+
+        const sumScore = last3.reduce((acc, x) => acc + (x.mvpScore || 0), 0);
+        const pjTotal = last3.reduce((acc, x) => acc + (x.pj || 0), 0);
+        const avgScore = sumScore / n;
+        const lastJornada = last3[last3.length - 1].jornada;
+
+        ranking.push({
+            nombre: name,
+            avgScore,
+            pjTotal,
+            lastJornada
+        });
+    });
+
+    ranking.sort((a, b) =>
+        (b.avgScore - a.avgScore) ||
+        (b.pjTotal - a.pjTotal) ||
+        (b.lastJornada - a.lastJornada) ||
+        a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+    );
+
+    return ranking.slice(0, limit);
+};
+
+// ==========================
+// GOLEADOR DEL MOMENTO
+// ==========================
+import { getSupabaseClient } from './supabase-client.js';
+import { slugify } from './utils.js';
+
+export const computeGoleadorMomento = async () => {
+    const jornadas = await getResultados();
+    if (!Array.isArray(jornadas) || !jornadas.length) {
+        return { error: 'No hay jornadas todavía.' };
+    }
+
+    // 1) Buscar la última jornada con al menos un partido jugado
+    let lastIndex = -1;
+    for (let i = jornadas.length - 1; i >= 0; i--) {
+        const j = jornadas[i];
+        const partidos = j.partidos || [];
+        const hasPlayed = partidos.some(p =>
+            isNum(p.goles_local) && isNum(p.goles_visitante)
+        );
+        if (hasPlayed) {
+            lastIndex = i;
+            break;
+        }
+    }
+
+    if (lastIndex === -1) {
+        return { error: 'Todavía no hay jornadas con partidos jugados.' };
+    }
+
+    // 2) Cogemos esa jornada y las dos anteriores (si existen)
+    const startIndex = Math.max(0, lastIndex - 2);
+    const selectedJornadas = jornadas.slice(startIndex, lastIndex + 1);
+
+    // Para el label (Jx–Jy)
+    const jNums = selectedJornadas
+        .map(j => j.numero ?? j.jornada)
+        .filter(n => n != null)
+        .sort((a, b) => a - b);
+
+    const badgeLabel = (() => {
+        if (!jNums.length) return 'Jornadas recientes';
+        if (jNums.length === 1) return `J${jNums[0]}`;
+        return `J${jNums[0]}–J${jNums[jNums.length - 1]}`;
+    })();
+
+    // 3) Sacar todos los match_id de partidos jugados en esas jornadas
+    const matchIds = [];
+    for (const j of selectedJornadas) {
+        for (const p of (j.partidos || [])) {
+            if (!isNum(p.goles_local) || !isNum(p.goles_visitante)) continue;
+            if (!p.id) continue; // p.id viene de matches.id
+            matchIds.push(p.id);
+        }
+    }
+
+    if (!matchIds.length) {
+        return { error: 'No hay partidos disputados en las últimas jornadas.' };
+    }
+
+    // 4) Leer goal_events de esos partidos
+    const supabase = await getSupabaseClient();
+    let q = supabase
+        .from('goal_events')
+        .select(`
+      match_id,
+      event_type,
+      player:players (
+        id,
+        name
+      ),
+      team:league_teams (
+        id,
+        nickname,
+        display_name
+      )
+    `)
+        .in('match_id', matchIds)
+        .eq('event_type', 'goal');
+
+    const { data, error } = await q;
+    if (error) {
+        console.error('Error goal_events:', error);
+        return { error: 'Error al leer los eventos de gol.' };
+    }
+
+    const eventos = data || [];
+    if (!eventos.length) {
+        return { error: 'No hay goles registrados en las jornadas seleccionadas.' };
+    }
+
+    // 5) Agregar goles por jugador + nº de partidos (match_id distintos) en los que marca
+    const byPlayer = new Map();
+    for (const ev of eventos) {
+        const player = ev.player;
+        if (!player || !player.id) continue;
+
+        const pid = player.id;
+        let rec = byPlayer.get(pid);
+        if (!rec) {
+            const team = ev.team || {};
+            const teamName =
+                team.nickname ||
+                team.display_name ||
+                'Equipo';
+
+            rec = {
+                playerId: pid,
+                nombre: player.name || 'Jugador',
+                equipo: teamName,
+                goles: 0,
+                matchSet: new Set()   // partidos en los que ha marcado
+            };
+            byPlayer.set(pid, rec);
+        }
+        rec.goles += 1;
+        if (ev.match_id) {
+            rec.matchSet.add(ev.match_id);
+        }
+    }
+
+    let lista = Array.from(byPlayer.values());
+    if (!lista.length) {
+        return { error: 'No hay jugadores con goles registrados en las jornadas seleccionadas.' };
+    }
+
+    // Calculamos partidos del tramo (partidos con gol) para desempatar
+    lista = lista.map(p => ({
+        ...p,
+        partidosTramo: p.matchSet.size || 1 // mínimo 1 para evitar 0
+    }));
+
+    // 6) Ordenar:
+    //   1) más goles
+    //   2) a igualdad de goles, MENOS partidos en el tramo
+    //   3) nombre alfabético
+    lista.sort((a, b) =>
+        (b.goles - a.goles) ||
+        (a.partidosTramo - b.partidosTramo) ||
+        a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+    );
+
+    const ganador = lista[0];
+    const top5 = lista.slice(0, 5);
+
+    return {
+        badgeLabel,
+        ganador,
+        top5,
+        jNums
+    };
+};
