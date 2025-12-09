@@ -396,38 +396,40 @@ const CoreStats = {
         }
 
         row = res2.data && res2.data[0] ? res2.data[0] : null;
-        if (!row) {
-          Render.renderEmpty(box, 'Todavía no hay curiosidades generadas en <code>daily_curiosities</code>.');
-          return;
-        }
+      }
 
-        const { tipo, titulo, descripcion } = row;
-        const payload = row.payload || {};
+      if (!row) {
+        Render.renderEmpty(box, 'Todavía no hay curiosidades generadas en <code>daily_curiosities</code>.');
+        return;
+      }
 
-        const nickname = payload.nickname || payload.teamNickname || '';
-        const displayName = payload.display_name || payload.teamLabel || nickname || '';
+      const { tipo, titulo, descripcion } = row;
+      const payload = row.payload || {};
 
-        let badge = payload.badge || '';
-        if (!badge && nickname) {
-          badge = `img/${slug(nickname.toLowerCase())}.png`;
-        }
+      const nickname = payload.nickname || payload.teamNickname || '';
+      const displayName = payload.display_name || payload.teamLabel || nickname || '';
 
-        const rawCategory = payload.category || (typeof tipo === 'string' ? tipo.split('_')[0] : '');
-        const categoriaLabel = (() => {
-          const c = (rawCategory || '').toLowerCase();
-          if (c === 'equipos' || c === 'equipo') return 'Equipos';
-          if (c === 'partidos' || c === 'partido') return 'Partidos';
-          if (c === 'jugadores' || c === 'jugador') return 'Jugadores';
-          if (c === 'estadisticas' || c === 'stats') return 'Estadísticas';
-          return 'Curiosidad';
-        })();
+      let badge = payload.badge || '';
+      if (!badge && nickname) {
+        badge = `img/${slug(nickname.toLowerCase())}.png`;
+      }
 
-        const categoriaClass = (rawCategory && rawCategory.toLowerCase()) || 'generica';
-        const maybeBadge = badge
-          ? `<div class="curio-badge-wrap"><img src="${badge}" alt="${displayName}" onerror="this.style.visibility='hidden'"></div>`
-          : '';
+      const rawCategory = payload.category || (typeof tipo === 'string' ? tipo.split('_')[0] : '');
+      const categoriaLabel = (() => {
+        const c = (rawCategory || '').toLowerCase();
+        if (c === 'equipos' || c === 'equipo') return 'Equipos';
+        if (c === 'partidos' || c === 'partido') return 'Partidos';
+        if (c === 'jugadores' || c === 'jugador') return 'Jugadores';
+        if (c === 'estadisticas' || c === 'stats') return 'Estadísticas';
+        return 'Curiosidad';
+      })();
 
-        const contentHtml = `
+      const categoriaClass = (rawCategory && rawCategory.toLowerCase()) || 'generica';
+      const maybeBadge = badge
+        ? `<div class="curio-badge-wrap"><img src="${badge}" alt="${displayName}" onerror="this.style.visibility='hidden'"></div>`
+        : '';
+
+      const contentHtml = `
         <article class="curio-card curio-${categoriaClass}">
           <header class="curio-header">
             ${maybeBadge}
@@ -439,71 +441,71 @@ const CoreStats = {
           <p class="curio-desc">${descripcion}</p>
         </article>
       `;
-        Render.renderContent(box, contentHtml);
+      Render.renderContent(box, contentHtml);
 
-      } catch (err) {
-        console.error('Error cargando curiosidad del día:', err);
-        Render.renderError(box, 'No se ha podido cargar la curiosidad del día.');
-      }
+    } catch (err) {
+      console.error('Error cargando curiosidad del día:', err);
+      Render.renderError(box, 'No se ha podido cargar la curiosidad del día.');
     }
+  }
 
-    // ==========================
-    // FORMACIÓN DEL DÍA (uso de formation.js)
-    // ==========================
-    async function renderFormacionDia() {
-      const box = document.querySelector('#home-formacion-dia .box-body');
-      if (!box) return;
+  // ==========================
+  // FORMACIÓN DEL DÍA (uso de formation.js)
+  // ==========================
+  async function renderFormacionDia() {
+    const box = document.querySelector('#home-formacion-dia .box-body');
+    if (!box) return;
 
-      Render.renderLoader(box, 'Cargando formación aleatoria…');
+    Render.renderLoader(box, 'Cargando formación aleatoria…');
 
-      try {
-        // Ejemplo rápido: coger un club aleatorio y pintar su formación
-        // Nota: Esto es simplificado, en el original era más complejo.
-        // Para mantener fidelidad, podríamos reimplementar la lógica completa de escoger aleatorio,
-        // pero para esta refactorización, mostraré cómo usar el módulo Formation.
+    try {
+      // Ejemplo rápido: coger un club aleatorio y pintar su formación
+      // Nota: Esto es simplificado, en el original era más complejo.
+      // Para mantener fidelidad, podríamos reimplementar la lógica completa de escoger aleatorio,
+      // pero para esta refactorización, mostraré cómo usar el módulo Formation.
 
-        const supabase = await getSupabaseClient();
-        const { data: clubs } = await supabase.from('league_teams').select('club_id, nickname').limit(20);
+      const supabase = await getSupabaseClient();
+      const { data: clubs } = await supabase.from('league_teams').select('club_id, nickname').limit(20);
 
-        if (!clubs || !clubs.length) {
-          Render.renderEmpty(box, 'No hay clubs disponibles.');
-          return;
-        }
+      if (!clubs || !clubs.length) {
+        Render.renderEmpty(box, 'No hay clubs disponibles.');
+        return;
+      }
 
-        // Pick random club
-        const randomClub = clubs[Math.floor(Math.random() * clubs.length)];
-        const clubId = randomClub.club_id;
+      // Pick random club
+      const randomClub = clubs[Math.floor(Math.random() * clubs.length)];
+      const clubId = randomClub.club_id;
 
-        if (!clubId) {
-          Render.renderEmpty(box, 'El club seleccionado no tiene ID.');
-          return;
-        }
+      if (!clubId) {
+        Render.renderEmpty(box, 'El club seleccionado no tiene ID.');
+        return;
+      }
 
-        const [squad, formation] = await Promise.all([
-          Formation.loadSquadForClub(clubId),
-          Formation.loadFormationForClub(clubId)
-        ]);
+      const [squad, formation] = await Promise.all([
+        Formation.loadSquadForClub(clubId),
+        Formation.loadFormationForClub(clubId)
+      ]);
 
-        const system = formation ? (formation.system || Formation.DEFAULT_SYSTEM) : Formation.DEFAULT_SYSTEM;
-        const slots = formation ? (formation.slots || new Map()) : new Map();
-        const template = Formation.FORMATION_TEMPLATES[system];
+      const system = formation ? (formation.system || Formation.DEFAULT_SYSTEM) : Formation.DEFAULT_SYSTEM;
+      const slots = formation ? (formation.slots || new Map()) : new Map();
+      const template = Formation.FORMATION_TEMPLATES[system];
 
-        const findPlayerName = (playerId) => {
-          const p = squad.find(x => x.id === playerId);
-          return p ? p.name : "";
-        };
+      const findPlayerName = (playerId) => {
+        const p = squad.find(x => x.id === playerId);
+        return p ? p.name : "";
+      };
 
-        const slotsHtml = template.map(slot => {
-          const playerId = slots.get(slot.index);
-          const name = findPlayerName(playerId) || "";
-          const label = name || slot.line;
-          return `
+      const slotsHtml = template.map(slot => {
+        const playerId = slots.get(slot.index);
+        const name = findPlayerName(playerId) || "";
+        const label = name || slot.line;
+        return `
         <div class="club-formation-slot" style="top:${slot.y}%;left:${slot.x}%">
           <div>${label}</div>
         </div>`;
-        }).join("");
+      }).join("");
 
-        const contentHtml = `
+      const contentHtml = `
         <div class="club-formation-wrapper">
           <div class="club-formation-field">
             <img src="img/campo-vertical.png" alt="Campo" class="club-formation-bg">
@@ -516,24 +518,24 @@ const CoreStats = {
           </div>
         </div>
       `;
-        Render.renderContent(box, contentHtml);
+      Render.renderContent(box, contentHtml);
 
-      } catch (e) {
-        console.error('Error formación del día:', e);
-        Render.renderError(box, 'Error cargando formación.');
-      }
+    } catch (e) {
+      console.error('Error formación del día:', e);
+      Render.renderError(box, 'Error cargando formación.');
     }
+  }
 
-    // INIT
-    await Promise.all([
-      renderMvpTemporada(),
-      renderMvpJornada(),
-      renderTeamForm(),
-      renderGoleadorMomento(),
-      renderPichichiMini(),
-      renderClasificacionTop10(),
-      renderCuriosidad(),
-      renderFormacionDia()
-    ]);
+  // INIT
+  await Promise.all([
+    renderMvpTemporada(),
+    renderMvpJornada(),
+    renderTeamForm(),
+    renderGoleadorMomento(),
+    renderPichichiMini(),
+    renderClasificacionTop10(),
+    renderCuriosidad(),
+    renderFormacionDia()
+  ]);
 
-  }) ();
+})();
