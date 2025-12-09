@@ -15,21 +15,24 @@ export function genAlineacionFromEsquema(esquema) {
         ...fila(mid, 3, 'MED'),
         ...fila(def, 4, 'DEF'),
         { slot: 'POR1', posicion: 'POR', fila: 5, col: 3 }
+    ];
+}
+
 // Resolver nombre de equipo
 export function teamNameFromObj(teamObj = {}, fallbackId = null, teamMap = null) {
-        let name =
-            teamObj.nickname ||
-            teamObj.display_name ||
-            (teamObj.club && teamObj.club.name);
+    let name =
+        teamObj.nickname ||
+        teamObj.display_name ||
+        (teamObj.club && teamObj.club.name);
 
-        if (!name && fallbackId != null && teamMap && teamMap.has(fallbackId)) {
-            const fromMap = teamMap.get(fallbackId);
-            name =
-                fromMap.nickname ||
-                fromMap.display_name ||
-                (fromMap.club && fromMap.club.name);
-        }
-
-        const fallbackLabel = fallbackId != null ? `Equipo ${fallbackId}` : 'Equipo';
-        return (name || fallbackLabel).toString().trim();
+    if (!name && fallbackId != null && teamMap && teamMap.has(fallbackId)) {
+        const fromMap = teamMap.get(fallbackId);
+        name =
+            fromMap.nickname ||
+            fromMap.display_name ||
+            (fromMap.club && fromMap.club.name);
     }
+
+    const fallbackLabel = fallbackId != null ? `Equipo ${fallbackId}` : 'Equipo';
+    return (name || fallbackLabel).toString().trim();
+}
