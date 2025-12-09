@@ -17,18 +17,15 @@ import * as teamRedCards from './curiosities/team-red-cards.js';
 import * as teamInjuries from './curiosities/team-most-injuries.js';
 import * as playerEfficiency from './curiosities/player-pichichi-efficiency.js';
 
-// Phase 4 - Replacements for Time-Based
+// Phase 4
 import * as teamGiantKillers from './curiosities/team-giant-killers.js';
 import * as teamUniqueScorers from './curiosities/team-unique-scorers.js';
 import * as teamBestDuo from './curiosities/team-best-duo.js';
 import * as playerDependency from './curiosities/player-dependency.js';
-
-// Phase 4 - Simple
 import * as teamDraws from './curiosities/team-most-draws.js';
 import * as teamWinStreak from './curiosities/team-winning-streak.js';
 import * as teamUnbeaten from './curiosities/team-unbeaten-streak.js';
 import * as matchMostGoals from './curiosities/match-most-goals.js';
-// playerFastestGoal removed (replaced by playerDependency)
 import * as teamHomeDef from './curiosities/team-best-home-defense.js';
 import * as teamAwayAtt from './curiosities/team-best-away-attack.js';
 import * as teamPass from './curiosities/team-pass-masters.js';
@@ -37,18 +34,49 @@ import * as teamTackles from './curiosities/team-tackle-kings.js';
 import * as teamInterceptions from './curiosities/team-interception-masters.js';
 import * as playerOwnGoals from './curiosities/player-own-goals.js';
 
+// Phase 5 Complex
+import * as teamFairPlay from './curiosities/team-fair-play.js';
+import * as teamPtsPerGoal from './curiosities/team-points-per-goal.js';
+import * as teamNarrowMargins from './curiosities/team-narrow-margins.js';
+import * as teamHomeAwayContrast from './curiosities/team-home-away-contrast.js';
+import * as teamTopHalfKiller from './curiosities/team-top-half-killer.js';
+import * as teamSavePct from './curiosities/team-save-percentage.js';
+import * as playerMultiTeamScorer from './curiosities/player-multi-team-scorer.js';
+
+// Phase 5 Medium
+import * as teamEntertainers from './curiosities/team-entertainers.js';
+import * as teamSnoozefest from './curiosities/team-snoozefest.js';
+import * as teamScoringStreak from './curiosities/team-scoring-streak.js';
+import * as teamConcedingStreak from './curiosities/team-conceding-streak.js';
+import * as teamCleanSheetStreak from './curiosities/team-clean-sheet-streak.js';
+import * as teamDrySpell from './curiosities/team-dry-spell.js';
+// REPLACED: playerPenaltyKing -> teamConsistency
+import * as teamConsistency from './curiosities/team-scoring-consistency.js';
+
+// Phase 5 Basic
+import * as teamMostLosses from './curiosities/team-most-losses.js';
+import * as teamFewestWins from './curiosities/team-fewest-wins.js';
+import * as teamBenOGs from './curiosities/team-most-benefited-ogs.js';
+import * as matchMostReds from './curiosities/match-most-red-cards.js';
+import * as playerBadBoy from './curiosities/player-bad-boy.js';
+import * as matchMostFouls from './curiosities/match-most-fouls.js';
+
+
 const TASKS = [
-    // P1-2
+    // P1-2 (3)
     mostScoring, leastConceded, biggestWin,
-    // P3
+    // P3 (10)
     teamFouls, teamSaves, matchPossession, teamShotEff, teamCorners,
     playerHattrick, teamCleanSheets, teamRedCards, teamInjuries, playerEfficiency,
-    // P4 New Complex
+    // P4 (15)
     teamGiantKillers, teamUniqueScorers, teamBestDuo, playerDependency,
-    // P4 Simple
     teamDraws, teamWinStreak, teamUnbeaten, matchMostGoals,
     teamHomeDef, teamAwayAtt, teamPass,
-    teamOffside, teamTackles, teamInterceptions, playerOwnGoals
+    teamOffside, teamTackles, teamInterceptions, playerOwnGoals,
+    // P5 (20)
+    teamFairPlay, teamPtsPerGoal, teamNarrowMargins, teamHomeAwayContrast, teamTopHalfKiller, teamSavePct, playerMultiTeamScorer,
+    teamEntertainers, teamSnoozefest, teamScoringStreak, teamConcedingStreak, teamCleanSheetStreak, teamDrySpell, teamConsistency,
+    teamMostLosses, teamFewestWins, teamBenOGs, matchMostReds, playerBadBoy, matchMostFouls
 ];
 
 async function main() {

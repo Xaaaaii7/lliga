@@ -2,8 +2,8 @@ name: Daily Curiosity
 
 on:
   schedule:
-    # Run daily at 10:00 AM UTC (adjust as needed)
-    - cron: '0 10 * * *'
+    # Run twice daily at 08:00 and 20:00 UTC
+    - cron: '0 8,20 * * *'
   workflow_dispatch:
 
 jobs:
