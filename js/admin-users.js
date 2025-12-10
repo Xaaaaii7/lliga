@@ -1,3 +1,5 @@
+import { Modal } from './modules/modal.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const ok = await AppUtils.ensureAdmin();
   if (!ok) return;
@@ -131,10 +133,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       row.children[3].innerHTML = renderStatus(profile);
       // acciones
       row.children[5].innerHTML = `
-        ${
-          profile.is_approved
-            ? `<button class="btn btn-secondary btn-sm btn-mark-pending" data-id="${profile.id}">Marcar pendiente</button>`
-            : `<button class="btn btn-primary btn-sm btn-approve" data-id="${profile.id}">Aprobar</button>`
+        ${profile.is_approved
+          ? `<button class="btn btn-secondary btn-sm btn-mark-pending" data-id="${profile.id}">Marcar pendiente</button>`
+          : `<button class="btn btn-primary btn-sm btn-approve" data-id="${profile.id}">Aprobar</button>`
         }
         <button class="btn btn-secondary btn-sm btn-user-details" data-id="${profile.id}">
           Detalles
@@ -146,15 +147,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ─────────────────────────────
   // Modal de detalles
   // ─────────────────────────────
-  const backdrop = document.getElementById('user-modal-backdrop');
-  const closeBtn = document.getElementById('user-modal-close');
-  const closeBtn2 = document.getElementById('user-modal-close-btn');
-
   const nickSpan = document.getElementById('user-modal-nickname');
   const teamSpan = document.getElementById('user-modal-team');
   const adminSpan = document.getElementById('user-modal-is-admin');
   const approvedSpan = document.getElementById('user-modal-is-approved');
   const createdSpan = document.getElementById('user-modal-created');
+  const closeBtn2 = document.getElementById('user-modal-close-btn');
+
+  // Create modal using Modal class
+  const userModal = new Modal('user-modal-backdrop', 'user-modal-close');
+
+  // Override body.style.overflow behavior to use classList instead
+  userModal.onOpen = () => {
+    document.body.classList.add('modal-open');
+  };
+  userModal.onClose = () => {
+    document.body.classList.remove('modal-open');
+  };
 
   function openDetailsModal(id, profilesArr) {
     const p = profilesArr.find(x => x.id === id);
@@ -166,18 +175,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     approvedSpan.textContent = p.is_approved ? 'Aprobado' : 'Pendiente';
     createdSpan.textContent = fmtDate(p.created_at);
 
-    backdrop.hidden = false;
-    document.body.classList.add('modal-open');
+    userModal.open();
   }
 
-  function closeDetailsModal() {
-    backdrop.hidden = true;
-    document.body.classList.remove('modal-open');
-  }
-
-  closeBtn.addEventListener('click', closeDetailsModal);
-  closeBtn2.addEventListener('click', closeDetailsModal);
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) closeDetailsModal();
-  });
+  closeBtn2.addEventListener('click', () => userModal.close());
 });

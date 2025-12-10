@@ -1,3 +1,5 @@
+import { Modal } from './modules/modal.js';
+
 (async () => {
   // Carga segura desde Supabase
   let data = [];
@@ -25,27 +27,19 @@
   visibles.sort((a, b) => b.fechaObj - a.fechaObj);
 
   // ====== MODAL (refs + helpers) ======
-  const backdrop = document.getElementById('news-backdrop');
-  const closeBtn = document.getElementById('news-close');
   const titleEl = document.getElementById('news-title');
   const metaEl = document.getElementById('news-meta');
   const bodyEl = document.getElementById('news-content');
 
-  const openModal = () => { if (backdrop) { backdrop.hidden = false; document.body.style.overflow = 'hidden'; } };
-  const closeModal = () => {
-    if (!backdrop) return;
-    backdrop.hidden = true;
-    document.body.style.overflow = '';
+  // Create modal using new Modal module
+  const newsModal = new Modal('news-backdrop', 'news-close');
+
+  // Set cleanup hook
+  newsModal.onClose = () => {
     if (titleEl) titleEl.textContent = '';
     if (metaEl) metaEl.textContent = '';
     if (bodyEl) bodyEl.innerHTML = '';
   };
-
-  // asegura cerrado y listeners
-  closeModal();
-  closeBtn?.addEventListener('click', closeModal);
-  backdrop?.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal(); });
 
   // ====== HERO CARRUSEL (destacadas) ======
   try {
@@ -153,7 +147,7 @@
     if (titleEl) titleEl.textContent = n.titulo || '';
     if (metaEl) metaEl.textContent = fmtDate(n.fecha) || '';
 
-    // Imágenes: usamos la primera como “hero”
+    // Imágenes: usamos la primera como "hero"
     const imgs = Array.isArray(n.imagenes) ? n.imagenes : (n.img ? [n.img] : []);
     const hero = imgs.length ? `
       <figure class="news-hero">
@@ -172,6 +166,6 @@
       <div class="news-article">${cuerpoHTML}</div>
     `;
 
-    openModal();
+    newsModal.open();
   }
 })();

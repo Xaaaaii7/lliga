@@ -1,3 +1,17 @@
+
+import {
+  isNum,
+  normalizeText as norm,
+  slugify as slug,
+  logoPath
+} from './modules/utils.js';
+
+import {
+  loadPlantillaFromDb,
+  resolvePlaylistIdForClub,
+  fetchPlaylistItemsRSS
+} from './modules/club-data.js';
+
 (async () => {
   // --------------------------
   // CLUB target
@@ -9,44 +23,9 @@
     return;
   }
 
-  // --------------------------
-  // Helpers desde CoreStats
-  // --------------------------
-  const isNum = CoreStats.isNum;
-  const norm = CoreStats.norm;
-  const slug = CoreStats.slug;
-
-  const logoPath = (team) => `img/${slug(team)}.png`;
+  // Helpers locales derivados de módulos (para compatibilidad de uso en el código)
   const formationPath = (team) => `img/formacion/${slug(team)}.png`;
   const playerPhotoPath = (nombre) => `img/jugadores/${slug(nombre)}.jpg`;
-  const plantillaPath = (team) => `data/plantillas/${slug(team)}.json`;
-
-  // --------------------------
-  // Helpers Supabase (users)
-  // --------------------------
-  const AppUtils = window.AppUtils || {};
-  const { getSupabaseClient, loadJSON, getSupabaseConfig } = AppUtils;
-  const hasSupabase = typeof getSupabaseClient === "function";
-
-  async function getUserRowByNickname(nickname) {
-    if (!hasSupabase || !nickname) return null;
-    try {
-      const supabase = await getSupabaseClient();
-      const { data, error } = await supabase
-        .from("users")
-        .select("id,nickname,youtube_playlist_id,twitch_channel")
-        .ilike("nickname", nickname); // case-insensitive
-
-      if (error) {
-        console.warn("Supabase users error:", error);
-        return null;
-      }
-      return (data && data[0]) || null;
-    } catch (e) {
-      console.warn("Supabase users exception:", e);
-      return null;
-    }
-  }
 
   // --------------------------
   // HERO
@@ -60,9 +39,20 @@
 
   // --------------------------
   // Datos base (core cache)
+  // Utilizamos window.CoreStats por ahora ya que no está modularizado
   // --------------------------
+  const CoreStats = window.CoreStats || {
+    getResultados: async () => [],
+    getStatsIndex: async () => ({}),
+    computeClasificacion: async () => [],
+    getPichichiRows: async () => [],
+    computePichichiPlayers: () => [],
+    computeRankingsPorEquipo: async () => ({}),
+    computeTeamTotals: async () => []
+  };
+
   const resultados = await CoreStats.getResultados();
-  const statsIndex = await CoreStats.getStatsIndex();
+  await CoreStats.getStatsIndex(); // Ensure index is loaded if needed internally
 
   resultados.sort((a, b) => (a.numero || 0) - (b.numero || 0));
 
@@ -281,118 +271,9 @@
       ${goleadorHTML}
     </div>
   `;
-  // --------------------------
-  // PLANTILLA desde Supabase
-  // --------------------------
-  async function loadPlantillaFromDb(clubNickname) {
-    if (!hasSupabase || !clubNickname) return null;
-
-    const supabase = await getSupabaseClient();
-    const cfg = (typeof getSupabaseConfig === "function") ? getSupabaseConfig() : {};
-    const season = cfg?.season || null;
-
-    // 1) Resolver club_id a partir de league_teams.nickname (y season)
-    let ltQuery = supabase
-      .from("league_teams")
-      .select("club_id, season, nickname")
-      .ilike("nickname", clubNickname)      // case-insensitive
-      .limit(1);
-
-    if (season) ltQuery = ltQuery.eq("season", season);
-
-    const { data: ltRows, error: ltError } = await ltQuery;
-    if (ltError) {
-      console.warn("Supabase league_teams error:", ltError);
-      return null;
-    }
-
-    const lt = ltRows && ltRows[0];
-    if (!lt || !lt.club_id) {
-      console.warn("No se encontró league_team para", clubNickname, "season:", season);
-      return null;
-    }
-
-    const clubId = lt.club_id;
-
-    // 2) Leer memberships + players para ese club_id
-    const baseSelect = `
-      id,
-      season,
-      from_round,
-      to_round,
-      is_current,
-      club:clubs (
-        id,
-        name,
-        short_name,
-        crest_url,
-        country,
-        venue
-      ),
-      player:players (
-        id,
-        name,
-        position,
-        date_of_birth,
-        nationality
-      )
-    `;
-
-    // Preferimos is_current = true; si no hay, tiramos de fallback
-    let membQuery = supabase
-      .from("player_club_memberships")
-      .select(baseSelect)
-      .eq("club_id", clubId)
-      .eq("is_current", true);
-
-    if (season) membQuery = membQuery.eq("season", season);
-
-    let { data: membs, error: membErr } = await membQuery;
-    if (membErr) {
-      console.warn("Supabase memberships error:", membErr);
-      return null;
-    }
-
-    if (!membs || !membs.length) {
-      // Fallback: cualquier membership de ese club en la season
-      let fbQuery = supabase
-        .from("player_club_memberships")
-        .select(baseSelect)
-        .eq("club_id", clubId);
-
-      if (season) fbQuery = fbQuery.eq("season", season);
-
-      const { data: fbData, error: fbErr } = await fbQuery;
-      if (fbErr) {
-        console.warn("Supabase memberships fallback error:", fbErr);
-        return null;
-      }
-      membs = fbData || [];
-    }
-
-    if (!membs.length) {
-      console.warn("Sin memberships para club_id", clubId, "season", season);
-      return null;
-    }
-
-    const club = membs[0].club || null;
-
-    return {
-      club,
-      squad: membs
-        .filter(m => m.player) // por si acaso
-        .map(m => ({
-          id: m.player.id,
-          name: m.player.name,
-          position: m.player.position,
-          dateOfBirth: m.player.date_of_birth,
-          nationality: m.player.nationality
-        }))
-    };
-  }
 
   // --------------------------
-  // TAB PLANTILLA (Supabase + fallback JSON)
+  // TAB PLANTILLA (Supabase)
   // --------------------------
   const plantillaEl = document.getElementById("tab-plantilla");
 
@@ -487,7 +368,6 @@
     try {
       let teamData = null;
 
-      // 1) Intentar Supabase
       try {
         const plantillaDb = await loadPlantillaFromDb(CLUB);
         if (plantillaDb && Array.isArray(plantillaDb.squad) && plantillaDb.squad.length) {
@@ -499,10 +379,6 @@
       } catch (e) {
         console.warn("Error cargando plantilla desde Supabase:", e);
       }
-
-      // 2) Sin Fallback a JSON antiguo
-      // if (!teamData) ...
-
 
       if (!teamData) {
         plantillaEl.innerHTML = `
@@ -691,49 +567,12 @@
   }
 
   // --------------------------
-  // TAB VIDEOS (playlist desde Supabase.users + fallback JSON)
+  // TAB VIDEOS (playlist desde Supabase.users)
   // --------------------------
   const videosMsgEl = document.getElementById("videos-msg");
   const playlistEl = document.getElementById("playlist-embed");
 
   const setVideosMsg = (t) => { if (videosMsgEl) videosMsgEl.textContent = t || ""; };
-
-  async function resolvePlaylistIdForClub(clubName) {
-    if (!clubName) return null;
-
-    // 1) Supabase: tabla users, nickname = CLUB
-    if (hasSupabase) {
-      const userRow = await getUserRowByNickname(clubName);
-      if (userRow && userRow.youtube_playlist_id) {
-        return userRow.youtube_playlist_id;
-      }
-    }
-
-    // 2) Sin Fallback a JSON
-    // try { const playlists = await loadJSON("data/playlists.json")... }
-
-    return null;
-  }
-
-  // RSS público de YouTube (no requiere API key)
-  async function fetchPlaylistItemsRSS(playlistId) {
-    const url = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const xmlText = await res.text();
-
-    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
-    const entries = Array.from(doc.querySelectorAll("entry"));
-
-    return entries.map(e => {
-      const videoId = e.querySelector("yt\\:videoId, videoId")?.textContent?.trim();
-      const title = e.querySelector("title")?.textContent?.trim() || "Vídeo";
-      const thumbEl = e.querySelector("media\\:thumbnail, thumbnail");
-      const thumb = thumbEl?.getAttribute("url") || "";
-
-      return { videoId, title, thumb };
-    }).filter(x => x.videoId);
-  }
 
   function renderVideosUI({ playlistId, items }) {
     if (!playlistEl) return;
@@ -799,21 +638,21 @@
   async function renderPlaylist() {
     if (!playlistEl) return;
 
-    setVideosMsg("Cargando playlist del club…");
-
+    // 1) Intentar Supabase
     const playlistId = await resolvePlaylistIdForClub(CLUB);
-
     if (!playlistId) {
+      setVideosMsg("No hay playlist asociada a este club en la base de datos.");
       playlistEl.innerHTML = "";
-      setVideosMsg("No hay playlist configurada para este klub.");
       return;
     }
 
+    // 2) Cargar videos RSS
     try {
+      setVideosMsg("Cargando vídeos...");
       const items = await fetchPlaylistItemsRSS(playlistId);
       renderVideosUI({ playlistId, items });
     } catch (e) {
-      console.warn("Error cargando RSS playlist:", e);
+      console.warn("Error leyendo RSS playlist:", e);
       playlistEl.innerHTML = `
         <div class="video-frame">
           <iframe
@@ -829,6 +668,7 @@
     }
   }
 
+  // Cargar playlist
   renderPlaylist();
 
   // --------------------------
@@ -843,7 +683,11 @@
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
       document.getElementById("tab-" + t).classList.add("active");
 
-      if (t === "videos") renderPlaylist();
+      // Cargar playlist explícitamente si se hace click en videos, aunque ya se carga al inicio
+      if (t === "videos" && playlistEl && !playlistEl.innerHTML) {
+        renderPlaylist();
+      }
     });
   });
+
 })();

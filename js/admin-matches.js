@@ -1,3 +1,5 @@
+import { Modal } from './modules/modal.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const ok = await AppUtils.ensureAdmin();
   if (!ok) return;
@@ -91,11 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ─────────────────────────────
   // Modal
   // ─────────────────────────────
-  const backdrop = document.getElementById('match-modal-backdrop');
-  const closeBtn = document.getElementById('match-modal-close');
-  const cancelBtn = document.getElementById('match-cancel-btn');
   const form = document.getElementById('match-form');
   const errorEl = document.getElementById('match-error');
+  const cancelBtn = document.getElementById('match-cancel-btn');
 
   const idHidden = document.getElementById('match-id');
   const idRead = document.getElementById('match-id-readonly');
@@ -107,6 +107,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const homeGoalsInput = document.getElementById('match-home-goals');
   const awayGoalsInput = document.getElementById('match-away-goals');
   const streamInput = document.getElementById('match-stream-url');
+
+  // Create modal using Modal class
+  const matchModal = new Modal('match-modal-backdrop', 'match-modal-close');
+
+  // Override body.style.overflow behavior to use classList instead
+  matchModal.onOpen = () => {
+    document.body.classList.add('modal-open');
+  };
+  matchModal.onClose = () => {
+    document.body.classList.remove('modal-open');
+  };
 
   const renderTeamOptions = () => {
     const opts =
@@ -139,22 +150,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     streamInput.value = match.stream_url || '';
 
-    backdrop.hidden = false;
-    document.body.classList.add('modal-open');
+    matchModal.open();
   }
 
-  function closeModal() {
-    backdrop.hidden = true;
-    document.body.classList.remove('modal-open');
-  }
-
-  closeBtn.addEventListener('click', closeModal);
-  cancelBtn.addEventListener('click', closeModal);
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) {
-      closeModal();
-    }
-  });
+  cancelBtn.addEventListener('click', () => matchModal.close());
 
   tbody.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-edit-match');
@@ -189,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const awayGoals = agStr === '' ? null : Number(agStr);
 
     if ((homeGoals !== null && (Number.isNaN(homeGoals) || homeGoals < 0)) ||
-        (awayGoals !== null && (Number.isNaN(awayGoals) || awayGoals < 0))) {
+      (awayGoals !== null && (Number.isNaN(awayGoals) || awayGoals < 0))) {
       errorEl.textContent = 'Los goles deben ser ≥ 0 o vacíos para "no jugado".';
       form.classList.remove('is-loading');
       return;
@@ -245,6 +244,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     form.classList.remove('is-loading');
-    closeModal();
+    matchModal.close();
   });
 });
