@@ -20,15 +20,11 @@ import {
   if (!root) return;
 
   // Modal refs
-  const backdrop = document.getElementById('stats-backdrop');
   const bodyEl = document.getElementById('stats-body');
-  const closeBtn = document.getElementById('stats-close');
   const titleEl = document.getElementById('stats-title');
 
-  // Helpers init
-  initModalRefs(backdrop, bodyEl, closeBtn, titleEl);
-  // Close initially
-  if (backdrop) backdrop.hidden = true;
+  // Helpers init - pass IDs instead of DOM elements
+  initModalRefs('stats-backdrop', 'stats-close', bodyEl, titleEl);
 
   // Cargar datos
   root.innerHTML = `<p class="hint">Cargando resultados...</p>`;
