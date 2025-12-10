@@ -182,3 +182,60 @@ export async function loadFormationForClub(clubId) {
         slots
     };
 }
+
+export async function saveFormationToDb(clubId, season, system, slotsMap, formationId = null) {
+    if (!clubId) return { ok: false, msg: "Faltan datos (clubId)" };
+
+    const template = FORMATION_TEMPLATES[system];
+    if (!template) return { ok: false, msg: "Sistema de juego no válido" };
+
+    const supabase = await getSupabaseClient();
+
+    // 1) Upsert de formations
+    let newFormationId = formationId;
+
+    if (!newFormationId) {
+        let ins = supabase.from("formations").insert({
+            club_id: clubId,
+            season: season,
+            system: system
+        }).select("id").single();
+
+        const { data, error } = await ins;
+        if (error) {
+            console.error("Error insert formations:", error);
+            return { ok: false, msg: "No se pudo crear la formación" };
+        }
+        newFormationId = data.id;
+    } else {
+        let upd = supabase.from("formations").update({
+            system: system,
+            season: season
+        }).eq("id", newFormationId).select("id").single();
+
+        const { data, error } = await upd;
+        if (error) {
+            console.error("Error update formations:", error);
+            return { ok: false, msg: "No se pudo actualizar la formación" };
+        }
+        newFormationId = data.id;
+    }
+
+    // 2) Upsert de slots
+    const rows = template.map(slot => ({
+        formation_id: newFormationId,
+        slot_index: slot.index,
+        player_id: slotsMap.get(slot.index) || null
+    }));
+
+    const { error: slotsError } = await supabase
+        .from("formation_slots")
+        .upsert(rows, { onConflict: "formation_id,slot_index" });
+
+    if (slotsError) {
+        console.error("Error upsert formation_slots:", slotsError);
+        return { ok: false, msg: "La formación se guardó parcialmente (error en slots)", formationId: newFormationId };
+    }
+
+    return { ok: true, msg: "Formación guardada", formationId: newFormationId };
+}
