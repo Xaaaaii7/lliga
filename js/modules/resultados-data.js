@@ -1,5 +1,5 @@
 import { getSupabaseClient } from './supabase-client.js';
-import { getActiveSeason } from './config.js';
+import { SUPABASE_CONFIG } from './config.js';
 
 const CoreStats = window.CoreStats || {};
 
@@ -19,7 +19,7 @@ export const getSupa = async () => {
 };
 
 export const getActiveSeasonSafe = () => {
-    if (typeof getActiveSeason === 'function') return getActiveSeason();
+    if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.season) return SUPABASE_CONFIG.season;
     const cfg = (window.AppUtils && window.AppUtils.getSupabaseConfig) ? window.AppUtils.getSupabaseConfig() : {};
     return cfg.season || '';
 };
