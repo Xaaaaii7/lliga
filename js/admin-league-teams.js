@@ -1,3 +1,5 @@
+import { Modal } from './modules/modal.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const ok = await AppUtils.ensureAdmin();
   if (!ok) return;
@@ -71,16 +73,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ─────────────────────────────
   // Modal de sanciones
   // ─────────────────────────────
-  const backdrop = document.getElementById('penalty-modal-backdrop');
-  const closeBtn = document.getElementById('penalty-modal-close');
-  const cancelBtn = document.getElementById('penalty-cancel-btn');
   const form = document.getElementById('penalty-form');
   const errorEl = document.getElementById('penalty-error');
+  const cancelBtn = document.getElementById('penalty-cancel-btn');
 
   const teamIdInput = document.getElementById('penalty-team-id');
   const teamNameInput = document.getElementById('penalty-team-name');
   const pointsInput = document.getElementById('penalty-points');
   const reasonInput = document.getElementById('penalty-reason');
+
+  // Create modal using Modal class
+  const penaltyModal = new Modal('penalty-modal-backdrop', 'penalty-modal-close');
+
+  // Override body.style.overflow behavior to use classList instead
+  penaltyModal.onOpen = () => {
+    document.body.classList.add('modal-open');
+  };
+  penaltyModal.onClose = () => {
+    document.body.classList.remove('modal-open');
+  };
 
   function openPenaltyModal(teamId) {
     const team = leagueTeams.find(t => t.id === teamId);
@@ -97,22 +108,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     pointsInput.value = team.penalty_points;
     reasonInput.value = team.penalty_reason || '';
 
-    backdrop.hidden = false;
-    document.body.classList.add('modal-open');
+    penaltyModal.open();
   }
 
-  function closePenaltyModal() {
-    backdrop.hidden = true;
-    document.body.classList.remove('modal-open');
-  }
-
-  closeBtn.addEventListener('click', closePenaltyModal);
-  cancelBtn.addEventListener('click', closePenaltyModal);
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) {
-      closePenaltyModal();
-    }
-  });
+  cancelBtn.addEventListener('click', () => penaltyModal.close());
 
   tbody.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-edit-penalty');
@@ -176,6 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     form.classList.remove('is-loading');
-    closePenaltyModal();
+    penaltyModal.close();
   });
 });
