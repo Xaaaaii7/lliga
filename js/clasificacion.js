@@ -1,9 +1,11 @@
 
+
 import { logoPath, isNum } from './modules/utils.js';
 import { getResultados } from './modules/stats-data.js';
 import { computeClasificacion, dg } from './modules/stats-calc.js';
 import { computePartidosEquipo, computePosicionesEquipo } from './modules/stats-analyze.js';
 import * as Render from './modules/render.js';
+import { Modal } from './modules/modal.js';
 
 (async () => {
   const tbody = document.getElementById('tabla-clasificacion');
@@ -52,8 +54,6 @@ import * as Render from './modules/render.js';
   const nextBtn = document.getElementById('nextJornada');
 
   // --- Modal Refs ---
-  const teamBackdrop = document.getElementById('team-backdrop');
-  const teamCloseBtn = document.getElementById('team-modal-close');
   const teamTitleEl = document.getElementById('team-modal-title');
   const teamSummaryEl = document.getElementById('team-modal-summary');
   const teamMetaEl = document.getElementById('team-modal-meta');
@@ -61,16 +61,11 @@ import * as Render from './modules/render.js';
   const teamBadgeImg = document.getElementById('team-modal-badge');
   const teamPosHistoryEl = document.getElementById('team-modal-poshistory');
 
-  const openTeamModal = () => {
-    if (!teamBackdrop) return;
-    teamBackdrop.hidden = false;
-    document.body.style.overflow = 'hidden';
-  };
+  // Create team modal using Modal module
+  const teamModal = new Modal('team-backdrop', 'team-modal-close');
 
-  const closeTeamModal = () => {
-    if (!teamBackdrop) return;
-    teamBackdrop.hidden = true;
-    document.body.style.overflow = '';
+  // Set cleanup hook
+  teamModal.onClose = () => {
     if (teamTitleEl) teamTitleEl.textContent = '';
     if (teamSummaryEl) teamSummaryEl.textContent = '';
     if (teamMetaEl) teamMetaEl.textContent = '';
@@ -82,16 +77,6 @@ import * as Render from './modules/render.js';
       teamBadgeImg.style.visibility = '';
     }
   };
-
-  teamCloseBtn?.addEventListener('click', closeTeamModal);
-  teamBackdrop?.addEventListener('click', (e) => {
-    if (e.target === teamBackdrop) closeTeamModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && teamBackdrop && !teamBackdrop.hidden) {
-      closeTeamModal();
-    }
-  });
 
   // --- Logic: Open Team History ---
   const abrirHistorialEquipo = async (equipos, hasta, teamName) => {
@@ -181,7 +166,7 @@ import * as Render from './modules/render.js';
       }
     }
 
-    openTeamModal();
+    teamModal.open();
   };
 
   // --- Render Table Logic ---
