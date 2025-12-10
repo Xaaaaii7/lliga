@@ -205,6 +205,5 @@ import { createNavigationControls } from './modules/navigation.js';
 
   // Initial Render
   await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-  updateNav();
 
 })();
