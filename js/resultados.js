@@ -92,6 +92,9 @@ import {
     formatLabel: (val) => `Jornada ${val}`
   });
 
+  // Initial render
+  await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
+
   // Global handler for clicks in root (upload, cards)
   root.addEventListener('click', async (e) => {
     const target = e.target;
