@@ -661,4 +661,23 @@ import {
   // Cargar playlist
   renderPlaylist();
 
+  // --------------------------
+  // Tabs click
+  // --------------------------
+  document.querySelectorAll(".tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const t = btn.dataset.tab;
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("tab-" + t).classList.add("active");
+
+      // Cargar playlist explícitamente si se hace click en videos, aunque ya se carga al inicio
+      if (t === "videos" && playlistEl && !playlistEl.innerHTML) {
+        renderPlaylist();
+      }
+    });
+  });
+
 })();
