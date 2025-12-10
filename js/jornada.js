@@ -2,6 +2,9 @@
   const root = document.getElementById('jornada');
   if (!root) return;
 
+  // Import navigation helper
+  const { createNavigationControls } = await import('./modules/navigation.js');
+
   // Helpers utilidades (loadJSON ya no es principal, usamos getSupabaseClient)
   const AppUtils = window.AppUtils || {};
   const { getSupabaseClient } = AppUtils;
@@ -249,18 +252,19 @@
     if (nextBtn) nextBtn.disabled = currentIndex >= jornadas.length - 1;
   };
 
-  prevBtn?.addEventListener('click', () => {
-    if (currentIndex > 0) {
-      currentIndex--;
+  // Create navigation controls
+  createNavigationControls({
+    prevBtn,
+    nextBtn,
+    labelEl: label,
+    minValue: 0,
+    maxValue: jornadas.length - 1,
+    initialValue: jornadas.length - 1,
+    onUpdate: (newValue) => {
+      currentIndex = newValue;
       render();
-    }
-  });
-
-  nextBtn?.addEventListener('click', () => {
-    if (currentIndex < jornadas.length - 1) {
-      currentIndex++;
-      render();
-    }
+    },
+    formatLabel: (val) => `Jornada ${jornadas[val]?.jornada ?? val + 1}`
   });
 
   render(); // inicial

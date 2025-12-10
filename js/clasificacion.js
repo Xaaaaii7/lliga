@@ -6,6 +6,7 @@ import { computeClasificacion, dg } from './modules/stats-calc.js';
 import { computePartidosEquipo, computePosicionesEquipo } from './modules/stats-analyze.js';
 import * as Render from './modules/render.js';
 import { Modal } from './modules/modal.js';
+import { createNavigationControls } from './modules/navigation.js';
 
 (async () => {
   const tbody = document.getElementById('tabla-clasificacion');
@@ -219,23 +220,26 @@ import { Modal } from './modules/modal.js';
     });
   };
 
-  const update = async () => {
-    // Show loader on the table body would replace content, maybe just update opacity?
-    // for now simpler: just wait
-    const equipos = await computeClasificacion(current);
-    render(equipos, current);
-    prevBtn.disabled = current <= 1;
-    nextBtn.disabled = current >= lastPlayed;
-  };
+  // --- Navigation Controls ---
+  const labelEl = document.getElementById('jornadaLabel');
 
-  prevBtn.addEventListener('click', async () => {
-    if (current > 1) { current--; await update(); }
-  });
-  nextBtn.addEventListener('click', async () => {
-    if (current < lastPlayed) { current++; await update(); }
+  createNavigationControls({
+    prevBtn,
+    nextBtn,
+    labelEl,
+    minValue: 1,
+    maxValue: lastPlayed,
+    initialValue: lastPlayed,
+    onUpdate: async (newValue) => {
+      current = newValue;
+      const equipos = await computeClasificacion(current);
+      render(equipos, current);
+    },
+    formatLabel: (val) => `Jornada ${val}`
   });
 
   // Initial Render
-  await update();
+  const equiposInicial = await computeClasificacion(current);
+  render(equiposInicial, current);
 
 })();

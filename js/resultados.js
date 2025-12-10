@@ -15,20 +15,18 @@ import {
   renderStats
 } from './modules/resultados-modal.js';
 
+import { createNavigationControls } from './modules/navigation.js';
+
 (async () => {
   const root = document.getElementById('resultados');
   if (!root) return;
 
   // Modal refs
-  const backdrop = document.getElementById('stats-backdrop');
   const bodyEl = document.getElementById('stats-body');
-  const closeBtn = document.getElementById('stats-close');
   const titleEl = document.getElementById('stats-title');
 
-  // Helpers init
-  initModalRefs(backdrop, bodyEl, closeBtn, titleEl);
-  // Close initially
-  if (backdrop) backdrop.hidden = true;
+  // Helpers init - pass IDs instead of DOM elements
+  initModalRefs('stats-backdrop', 'stats-close', bodyEl, titleEl);
 
   // Cargar datos
   root.innerHTML = `<p class="hint">Cargando resultados...</p>`;
@@ -81,26 +79,23 @@ import {
 
   let current = lastPlayed;
 
-  const updateNav = () => {
-    if (prevBtn) prevBtn.disabled = current <= minJornada;
-    if (nextBtn) nextBtn.disabled = current >= maxJornada;
-  };
-
-  prevBtn?.addEventListener('click', async () => {
-    if (current > minJornada) {
-      current--;
+  // Create navigation controls
+  createNavigationControls({
+    prevBtn,
+    nextBtn,
+    labelEl,
+    minValue: minJornada,
+    maxValue: maxJornada,
+    initialValue: lastPlayed,
+    onUpdate: async (newValue) => {
+      current = newValue;
       await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-      updateNav();
-    }
+    },
+    formatLabel: (val) => `Jornada ${val}`
   });
 
-  nextBtn?.addEventListener('click', async () => {
-    if (current < maxJornada) {
-      current++;
-      await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-      updateNav();
-    }
-  });
+  // Initial render
+  await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
 
   // Global handler for clicks in root (upload, cards)
   root.addEventListener('click', async (e) => {
@@ -210,6 +205,5 @@ import {
 
   // Initial Render
   await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-  updateNav();
 
 })();

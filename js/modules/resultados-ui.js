@@ -191,6 +191,10 @@ export const renderJornada = async (jornadas, num, jornadaWrap, labelEl, current
                     const statusLine = cardBtn.querySelector('.result-status-line');
                     if (!statusLine) return;
 
+                    // Check if suspensions already exist to prevent duplicates
+                    const existing = cardBtn.querySelector('.result-suspensions');
+                    if (existing) return;
+
                     const div = document.createElement('div');
                     div.className = 'result-suspensions';
                     div.style.marginTop = '8px';

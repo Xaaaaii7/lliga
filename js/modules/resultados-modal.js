@@ -23,39 +23,32 @@ import {
     getSupa
 } from './resultados-data.js';
 
-let backdrop = null;
+import { Modal } from './modal.js';
+
+let statsModal = null;
 let bodyEl = null;
-let closeBtn = null;
 let titleEl = null;
 
-export const initModalRefs = (bDrop, bEl, cBtn, tEl) => {
-    backdrop = bDrop;
+export const initModalRefs = (backdropId, closeId, bEl, tEl) => {
     bodyEl = bEl;
-    closeBtn = cBtn;
     titleEl = tEl;
 
-    // Listeners
-    closeBtn?.addEventListener('click', closeModal);
-    backdrop?.addEventListener('click', (e) => {
-        if (e.target === backdrop) closeModal();
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && backdrop && !backdrop.hidden) closeModal();
-    });
+    // Create modal using Modal class
+    statsModal = new Modal(backdropId, closeId);
+
+    // Set cleanup hook
+    statsModal.onClose = () => {
+        if (bodyEl) bodyEl.innerHTML = '';
+        if (titleEl) titleEl.textContent = 'Estadísticas del partido';
+    };
 };
 
 export const openModal = () => {
-    if (!backdrop) return;
-    backdrop.hidden = false;
-    document.body.style.overflow = 'hidden';
+    statsModal?.open();
 };
 
 export const closeModal = () => {
-    if (!backdrop) return;
-    backdrop.hidden = true;
-    document.body.style.overflow = '';
-    if (bodyEl) bodyEl.innerHTML = '';
-    if (titleEl) titleEl.textContent = 'Estadísticas del partido';
+    statsModal?.close();
 };
 
 // -----------------------------
