@@ -653,8 +653,18 @@ import {
       renderVideosUI({ playlistId, items });
     } catch (e) {
       console.warn("Error leyendo RSS playlist:", e);
-      setVideosMsg("No se pudieron cargar los vídeos (error RSS).");
-      playlistEl.innerHTML = "";
+      playlistEl.innerHTML = `
+        <div class="video-frame">
+          <iframe
+            class="video"
+            src="https://www.youtube.com/embed/videoseries?list=${playlistId}&playsinline=1"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      `;
+      setVideosMsg("No pude cargar la lista, pero te dejo el reproductor de la playlist.");
     }
   }
 
