@@ -15,6 +15,8 @@ import {
   renderStats
 } from './modules/resultados-modal.js';
 
+import { createNavigationControls } from './modules/navigation.js';
+
 (async () => {
   const root = document.getElementById('resultados');
   if (!root) return;
