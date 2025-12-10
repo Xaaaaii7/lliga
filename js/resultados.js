@@ -77,25 +77,19 @@ import {
 
   let current = lastPlayed;
 
-  const updateNav = () => {
-    if (prevBtn) prevBtn.disabled = current <= minJornada;
-    if (nextBtn) nextBtn.disabled = current >= maxJornada;
-  };
-
-  prevBtn?.addEventListener('click', async () => {
-    if (current > minJornada) {
-      current--;
+  // Create navigation controls
+  createNavigationControls({
+    prevBtn,
+    nextBtn,
+    labelEl,
+    minValue: minJornada,
+    maxValue: maxJornada,
+    initialValue: lastPlayed,
+    onUpdate: async (newValue) => {
+      current = newValue;
       await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-      updateNav();
-    }
-  });
-
-  nextBtn?.addEventListener('click', async () => {
-    if (current < maxJornada) {
-      current++;
-      await renderJornada(jornadas, current, jornadaWrap, labelEl, () => current);
-      updateNav();
-    }
+    },
+    formatLabel: (val) => `Jornada ${val}`
   });
 
   // Global handler for clicks in root (upload, cards)
