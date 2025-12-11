@@ -64,7 +64,7 @@ async function loadFeaturedCompetitions() {
             </div>
           </div>
           <div class="competition-preview-footer">
-            <a href="${buildURLWithCompetition('clasificacion.html', comp.slug)}" 
+            <a href="${buildURLWithCompetition('liga/clasificacion.html', comp.slug)}" 
                class="btn btn-primary btn-small">
               Ver competición
             </a>

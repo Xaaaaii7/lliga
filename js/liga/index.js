@@ -1,10 +1,10 @@
-import { getSupabaseClient, getSupabaseConfig } from './modules/supabase-client.js';
-import { slugify, isNum } from './modules/utils.js';
-import * as StatsCalc from './modules/stats-calc.js';
-import * as StatsAnalyze from './modules/stats-analyze.js'; // TeamsForm, GoleadorMomento
-import * as StatsData from './modules/stats-data.js'; // getResultados, getPichichiRows
-import * as Formation from './modules/formation.js'; // Formación del día
-import * as Render from './modules/render.js';
+import { getSupabaseClient, getSupabaseConfig } from '../modules/supabase-client.js';
+import { slugify, isNum } from '../modules/utils.js';
+import * as StatsCalc from '../modules/stats-calc.js';
+import * as StatsAnalyze from '../modules/stats-analyze.js'; // TeamsForm, GoleadorMomento
+import * as StatsData from '../modules/stats-data.js'; // getResultados, getPichichiRows
+import * as Formation from '../modules/formation.js'; // Formación del día
+import * as Render from '../modules/render.js';
 
 // Aggregate CoreStats functionality needed for index
 const CoreStats = {

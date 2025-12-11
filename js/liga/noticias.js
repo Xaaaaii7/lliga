@@ -1,5 +1,5 @@
-import { Modal } from './modules/modal.js';
-import { queryTable, withErrorHandling } from './modules/db-helpers.js';
+import { Modal } from '../modules/modal.js';
+import { queryTable, withErrorHandling } from '../modules/db-helpers.js';
 
 (async () => {
   // Carga segura desde Supabase usando el nuevo helper

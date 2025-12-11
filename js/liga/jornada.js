@@ -1,6 +1,6 @@
-import { createNavigationControls } from './modules/navigation.js';
-import { queryTable } from './modules/db-helpers.js';
-import { slugify } from './modules/utils.js';
+import { createNavigationControls } from '../modules/navigation.js';
+import { queryTable } from '../modules/db-helpers.js';
+import { slugify } from '../modules/utils.js';
 
 (async () => {
   const root = document.getElementById('jornada');

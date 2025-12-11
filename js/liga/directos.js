@@ -1,4 +1,4 @@
-import { queryTable, withErrorHandling } from './modules/db-helpers.js';
+import { queryTable, withErrorHandling } from '../modules/db-helpers.js';
 
 const API_URL = "https://d39ra5ecf4.execute-api.eu-west-1.amazonaws.com/prod/live-channel";
 const PARENT_DOMAIN = "xaaaaii7.github.io";

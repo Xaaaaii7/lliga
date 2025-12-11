@@ -1,12 +1,12 @@
 
 
-import { logoPath, isNum } from './modules/utils.js';
-import { getResultados } from './modules/stats-data.js';
-import { computeClasificacion, dg } from './modules/stats-calc.js';
-import { computePartidosEquipo, computePosicionesEquipo } from './modules/stats-analyze.js';
-import * as Render from './modules/render.js';
-import { Modal } from './modules/modal.js';
-import { createNavigationControls } from './modules/navigation.js';
+import { logoPath, isNum } from '../modules/utils.js';
+import { getResultados } from '../modules/stats-data.js';
+import { computeClasificacion, dg } from '../modules/stats-calc.js';
+import { computePartidosEquipo, computePosicionesEquipo } from '../modules/stats-analyze.js';
+import * as Render from '../modules/render.js';
+import { Modal } from '../modules/modal.js';
+import { createNavigationControls } from '../modules/navigation.js';
 
 (async () => {
   const tbody = document.getElementById('tabla-clasificacion');

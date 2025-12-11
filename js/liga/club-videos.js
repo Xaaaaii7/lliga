@@ -1,5 +1,5 @@
 // js/club-videos.js
-import { getSupabaseClient } from './modules/supabase-client.js';
+import { getSupabaseClient } from '../modules/supabase-client.js';
 
 (async () => {
   const msgEl = document.getElementById("videos-msg");

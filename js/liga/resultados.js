@@ -3,19 +3,19 @@ import {
   getJornadas,
   getPartidoMeta,
   loadCitiesMap
-} from './modules/resultados-data.js';
+} from '../modules/resultados-data.js';
 
 import {
   renderJornada
-} from './modules/resultados-ui.js';
+} from '../modules/resultados-ui.js';
 
 import {
   initModalRefs,
   openModal,
   renderStats
-} from './modules/resultados-modal.js';
+} from '../modules/resultados-modal.js';
 
-import { createNavigationControls } from './modules/navigation.js';
+import { createNavigationControls } from '../modules/navigation.js';
 
 (async () => {
   const root = document.getElementById('resultados');

@@ -4,13 +4,13 @@ import {
   normalizeText as norm,
   slugify as slug,
   logoPath
-} from './modules/utils.js';
+} from '../modules/utils.js';
 
 import {
   loadPlantillaFromDb,
   resolvePlaylistIdForClub,
   fetchPlaylistItemsRSS
-} from './modules/club-data.js';
+} from '../modules/club-data.js';
 
 (async () => {
   // --------------------------

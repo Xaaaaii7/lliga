@@ -6,8 +6,8 @@ import {
   loadSquadForClub,
   loadFormationForClub,
   saveFormationToDb
-} from './modules/formation.js';
-import { getSupabaseConfig } from './modules/supabase-client.js';
+} from '../modules/formation.js';
+import { getSupabaseConfig } from '../modules/supabase-client.js';
 
 (async () => {
   const CLUB = window.CLUB_NAME;

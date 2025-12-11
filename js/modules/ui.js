@@ -63,25 +63,36 @@ export function initNavigation() {
             // Menú para landing page (público, neutral - sin acceso directo a liga)
             links = [
                 ['index.html', 'Inicio'],
-                ['competitions.html', 'Competiciones'],
-                ['noticias.html', 'Noticias'],
-                ['reglas.html', 'Reglas']
+                ['competitions.html', 'Competiciones']
             ];
         } else {
-            // Menú completo para páginas internas
-            links = [
-                ['index.html', 'Inicio'],
-                ['liga.html', 'Liga'],
-                ['noticias.html', 'Noticias'],
-                ['clasificacion.html', 'Clasificación'],
-                ['resultados.html', 'Resultados'],
-                ['jugadores.html', 'Jugadores'],
-                ['pichichi.html', 'Pichichi'],
-                ['clubs.html', 'Clubs'],
-                ['jornada.html', 'Jornada'],
-                ['reglas.html', 'Reglas'],
-                ['directos.html', 'Directos']
-            ];
+            // Detectar si estamos en una página dentro de liga/
+            const isInLigaFolder = window.location.pathname.includes('/liga/');
+            
+            if (isInLigaFolder) {
+                // Menú para páginas dentro de liga/
+                links = [
+                    ['../index.html', 'Inicio'],
+                    ['index.html', 'Liga'],
+                    ['noticias.html', 'Noticias'],
+                    ['clasificacion.html', 'Clasificación'],
+                    ['resultados.html', 'Resultados'],
+                    ['jugadores.html', 'Jugadores'],
+                    ['pichichi.html', 'Pichichi'],
+                    ['clubs.html', 'Clubs'],
+                    ['jornada.html', 'Jornada'],
+                    ['reglas.html', 'Reglas'],
+                    ['directos.html', 'Directos']
+                ];
+            } else {
+                // Menú para páginas en raíz (dashboard, admin, etc.)
+                links = [
+                    ['index.html', 'Inicio'],
+                    ['liga/index.html', 'Liga'],
+                    ['dashboard.html', 'Dashboard'],
+                    ['competitions.html', 'Competiciones']
+                ];
+            }
         }
 
         nav.innerHTML = links

@@ -1,4 +1,4 @@
-import { Modal } from './modules/modal.js';
+import { Modal } from '../modules/modal.js';
 
 (() => {
   const modal = new Modal('stream-backdrop', 'stream-close');
