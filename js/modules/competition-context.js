@@ -9,7 +9,9 @@
  */
 export function getCompetitionFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('comp') || null;
+  const comp = params.get('comp');
+  console.log('[Competition Context] URL params:', window.location.search, 'comp value:', comp);
+  return comp || null;
 }
 
 /**

@@ -80,9 +80,9 @@ export const ensureStatsIndex = async () => {
     return statsIndexPromise;
 };
 
-export const getResultados = async () => {
+export const getResultados = async (competitionId = null) => {
     try {
-        return await CoreStats.getResultados();
+        return await CoreStats.getResultados(competitionId);
     } catch (e) {
         console.error('Error getResultados:', e);
         return [];

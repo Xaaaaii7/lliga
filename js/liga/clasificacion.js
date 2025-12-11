@@ -21,12 +21,17 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
 
   try {
     competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    console.log('[Clasificación] Competition slug from URL:', competitionSlug);
     if (competitionSlug) {
       const competition = await getCompetitionBySlug(competitionSlug);
+      console.log('[Clasificación] Competition found:', competition);
       if (competition) {
         competitionId = competition.id;
         competitionName = competition.name;
+        console.log('[Clasificación] Using competition ID:', competitionId, 'Name:', competitionName);
       }
+    } else {
+      console.log('[Clasificación] No competition slug found, using all competitions');
     }
   } catch (e) {
     console.warn('Error obteniendo contexto de competición:', e);

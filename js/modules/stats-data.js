@@ -5,8 +5,11 @@ import { isNum } from './utils.js';
 
 // Carga + caché de datos
 let _resultadosCache = null;
+let _resultadosCacheKey = null; // Guardar el competitionId usado en el caché
 let _statsIndexCache = null;
+let _statsIndexCacheKey = null; // Guardar el competitionId usado en el caché
 let _pichichiRowsCache = null;
+let _pichichiRowsCacheKey = null; // Guardar el competitionId usado en el caché
 
 // Mapa interno de equipos por id de league_teams (para casar stats)
 let _teamMapCache = null;
@@ -201,20 +204,18 @@ const loadStatsIndexFromSupabase = async (competitionId = null) => {
 // APIs públicas de carga
 // --------------------------
 export const getResultados = async (competitionId = null) => {
-    // Si cambia el competitionId, invalidar caché
+    // Si el caché existe y es para el mismo competitionId, usarlo
     const cacheKey = competitionId || 'all';
-    if (_resultadosCache && cacheKey === 'all') {
-        // Solo usar caché si no hay filtro de competición
+    if (_resultadosCache && _resultadosCacheKey === cacheKey) {
         return _resultadosCache;
     }
 
     try {
         const jornadas = await loadResultadosFromSupabase(competitionId);
         const result = Array.isArray(jornadas) ? jornadas : [];
-        // Solo cachear si no hay filtro de competición (compatibilidad)
-        if (!competitionId) {
-            _resultadosCache = result;
-        }
+        // Guardar en caché con su clave
+        _resultadosCache = result;
+        _resultadosCacheKey = cacheKey;
         return result;
     } catch (e) {
         console.warn('Fallo cargando resultados desde Supabase:', e);
@@ -224,20 +225,18 @@ export const getResultados = async (competitionId = null) => {
 };
 
 export const getStatsIndex = async (competitionId = null) => {
-    // Si cambia el competitionId, invalidar caché
+    // Si el caché existe y es para el mismo competitionId, usarlo
     const cacheKey = competitionId || 'all';
-    if (_statsIndexCache && cacheKey === 'all') {
-        // Solo usar caché si no hay filtro de competición
+    if (_statsIndexCache && _statsIndexCacheKey === cacheKey) {
         return _statsIndexCache;
     }
 
     try {
         const idx = await loadStatsIndexFromSupabase(competitionId);
         const result = idx && typeof idx === "object" ? idx : {};
-        // Solo cachear si no hay filtro de competición (compatibilidad)
-        if (!competitionId) {
-            _statsIndexCache = result;
-        }
+        // Guardar en caché con su clave
+        _statsIndexCache = result;
+        _statsIndexCacheKey = cacheKey;
         return result;
     } catch (e) {
         console.warn('Fallo cargando stats desde Supabase:', e);
@@ -303,10 +302,9 @@ const loadPichichiFromSupabase = async () => {
 
 
 export const getPichichiRows = async (competitionId = null) => {
-    // Si cambia el competitionId, invalidar caché
+    // Si el caché existe y es para el mismo competitionId, usarlo
     const cacheKey = competitionId || 'all';
-    if (_pichichiRowsCache && cacheKey === 'all') {
-        // Solo usar caché si no hay filtro de competición
+    if (_pichichiRowsCache && _pichichiRowsCacheKey === cacheKey) {
         return _pichichiRowsCache;
     }
 
@@ -315,10 +313,9 @@ export const getPichichiRows = async (competitionId = null) => {
         const rowsDb = await loadPichichiFromSupabase(competitionId);
         if (Array.isArray(rowsDb) && rowsDb.length) {
             const result = rowsDb;
-            // Solo cachear si no hay filtro de competición (compatibilidad)
-            if (!competitionId) {
-                _pichichiRowsCache = result;
-            }
+            // Guardar en caché con su clave
+            _pichichiRowsCache = result;
+            _pichichiRowsCacheKey = cacheKey;
             return result;
         }
     } catch (e) {
@@ -331,12 +328,17 @@ export const getPichichiRows = async (competitionId = null) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const txt = await res.text();
         const { rows } = parseTSV(txt);
-        _pichichiRowsCache = Array.isArray(rows) ? rows : [];
-        return _pichichiRowsCache;
+        const result = Array.isArray(rows) ? rows : [];
+        // Guardar en caché con su clave
+        _pichichiRowsCache = result;
+        _pichichiRowsCacheKey = cacheKey;
+        return result;
     } catch (e) {
         console.warn('No se pudo cargar TSV pichichi:', e);
-        _pichichiRowsCache = [];
-        return _pichichiRowsCache;
+        const result = [];
+        _pichichiRowsCache = result;
+        _pichichiRowsCacheKey = cacheKey;
+        return result;
     }
 };
 
