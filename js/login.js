@@ -1,3 +1,6 @@
+import { login, getCurrentUser, getCurrentProfile } from './modules/auth.js';
+import { getSupabaseClient } from './modules/supabase-client.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('login-form');
   const emailInput = document.getElementById('login-email');
@@ -22,17 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const password = passInput.value;
 
     try {
-      await AppUtils.login(email, password);
+      await login(email, password);
 
       // Después de login, decidir destino según profile
-      const user = await AppUtils.getCurrentUser();
+      const user = await getCurrentUser();
       if (!user) {
         errorEl.textContent = 'No se pudo obtener el usuario tras el login.';
         form.classList.remove('is-loading');
         return;
       }
 
-      const profile = await AppUtils.getCurrentProfile();
+      const profile = await getCurrentProfile();
 
       // Admin => panel admin
       if (profile?.is_admin) {
@@ -101,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const supabase = await AppUtils.getSupabaseClient();
+        const supabase = await getSupabaseClient();
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) {
           console.error(error);

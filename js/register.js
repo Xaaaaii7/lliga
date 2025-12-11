@@ -1,6 +1,10 @@
+import { loadLeagueTeams } from './modules/db-helpers.js';
+import { getSupabaseClient, getActiveSeason } from './modules/supabase-client.js';
+import { getCurrentUser } from './modules/auth.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const supabase = await AppUtils.getSupabaseClient();
-  const season = AppUtils.getActiveSeason();
+  const supabase = await getSupabaseClient();
+  const season = getActiveSeason();
 
   const form = document.getElementById('register-form');
   const emailInput = document.getElementById('reg-email');
@@ -10,38 +14,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorEl = document.getElementById('register-error');
   const successEl = document.getElementById('register-success');
 
-  // Si ya está logueado, redirigir (por ejemplo al index o admin)
-  const currentUser = await AppUtils.getCurrentUser();
+  // Si ya está logueado, redirigir
+  const currentUser = await getCurrentUser();
   if (currentUser) {
     window.location.href = 'index.html';
     return;
   }
 
-  // 1) Cargar equipos de la temporada actual
+  // 1) Cargar equipos usando helper
   async function loadTeams() {
-    const { data, error } = await supabase
-      .from('league_teams')
-      .select('id, nickname')
-      .eq('season', season)
-      .order('nickname', { ascending: true });
+    try {
+      const data = await loadLeagueTeams({
+        select: 'id, nickname',
+        orderByNickname: true
+      });
 
-    if (error) {
+      if (!data || !data.length) {
+        teamSelect.innerHTML = '<option value="">No hay equipos para esta temporada</option>';
+        teamSelect.disabled = true;
+        return;
+      }
+
+      teamSelect.innerHTML =
+        '<option value="">Selecciona tu equipo</option>' +
+        data.map(t => `<option value="${t.nickname}">${t.nickname}</option>`).join('');
+      teamSelect.disabled = false;
+    } catch (error) {
       console.error(error);
       teamSelect.innerHTML = '<option value="">Error cargando equipos</option>';
       teamSelect.disabled = true;
-      return;
     }
-
-    if (!data || !data.length) {
-      teamSelect.innerHTML = '<option value="">No hay equipos para esta temporada</option>';
-      teamSelect.disabled = true;
-      return;
-    }
-
-    teamSelect.innerHTML =
-      '<option value="">Selecciona tu equipo</option>' +
-      data.map(t => `<option value="${t.nickname}">${t.nickname}</option>`).join('');
-    teamSelect.disabled = false;
   }
 
   await loadTeams();
