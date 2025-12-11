@@ -125,7 +125,7 @@ function renderUserCompetitions(competitions) {
           </div>
         </div>
         <div class="competition-card-footer">
-          <a href="${buildURLWithCompetition('liga/clasificacion.html', comp.slug)}" 
+          <a href="${buildURLWithCompetition('clasificacion.html', comp.slug)}" 
              class="btn btn-primary">
             Ver competición
           </a>

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Voll Damm Returns — Plataforma de Competiciones</title>
+  <title>Voll Damm Returns â€” Plataforma de Competiciones</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/landing.css" />
 </head>
@@ -16,52 +16,52 @@
     <nav id="main-nav"></nav>
   </header>
 
-  <main class="container landing-container">
+  <main class="landing-container">
     <!-- Hero Section -->
     <section class="landing-hero">
       <div class="landing-hero-content">
-        <h2 class="landing-hero-title">Gestiona tus competiciones de fútbol</h2>
+        <h1 class="landing-hero-title">Bienvenido a la Plataforma de Competiciones</h1>
         <p class="landing-hero-subtitle">
-          Crea y gestiona torneos, ligas y competiciones. Sigue estadísticas en tiempo real,
-          gestiona equipos y disfruta del fútbol como nunca antes.
+          Gestiona tus ligas, sigue las estadÃ­sticas en tiempo real y compite con tus amigos.
+          Ãšnete a competiciones oficiales o crea las tuyas propias.
         </p>
         <div class="landing-hero-actions">
-        <a href="competitions.html" class="btn btn-primary btn-large">Explorar competiciones</a>
-        <a href="liga/index.html" class="btn btn-outline btn-large">Ver liga principal</a>
+          <a href="register.html" class="btn btn-primary btn-large">Registrarse</a>
+          <a href="competitions.html" class="btn btn-outline btn-large">Explorar Competiciones</a>
         </div>
       </div>
     </section>
 
     <!-- Features Section -->
     <section class="landing-features">
-      <h2 class="landing-section-title">¿Qué puedes hacer?</h2>
+      <h2 class="landing-section-title">CaracterÃ­sticas</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">🏆</div>
-          <h3>Crear competiciones</h3>
-          <p>Crea tus propias ligas y torneos. Configura reglas, equipos y calendarios.</p>
+          <div class="feature-icon">ðŸ†</div>
+          <h3>Competiciones MÃºltiples</h3>
+          <p>Participa en varias competiciones simultÃ¡neamente, oficiales y no oficiales.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Estadísticas en tiempo real</h3>
-          <p>Sigue clasificaciones, goleadores, MVP y estadísticas detalladas de cada partido.</p>
+          <div class="feature-icon">ðŸ“Š</div>
+          <h3>EstadÃ­sticas Detalladas</h3>
+          <p>Sigue tus resultados, clasificaciones y estadÃ­sticas en tiempo real.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">👥</div>
-          <h3>Gestiona equipos</h3>
-          <p>Administra plantillas, formaciones y toda la información de tus equipos.</p>
+          <div class="feature-icon">ðŸ‘¥</div>
+          <h3>GestiÃ³n de Equipos</h3>
+          <p>Administra tu plantilla, formaciones y estrategias para cada competiciÃ³n.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>Únete a competiciones</h3>
-          <p>Descubre competiciones públicas y únete a las que más te interesen.</p>
+          <div class="feature-icon">ðŸ””</div>
+          <h3>Notificaciones</h3>
+          <p>Mantente al dÃ­a con las Ãºltimas noticias y actualizaciones de tus competiciones.</p>
         </div>
       </div>
     </section>
 
     <!-- Competiciones Destacadas -->
-    <section class="landing-competitions" id="landing-competitions">
-      <h2 class="landing-section-title">Competiciones destacadas</h2>
+    <section class="landing-competitions">
+      <h2 class="landing-section-title">Competiciones Destacadas</h2>
       <div id="featured-competitions" class="competitions-preview">
         <p class="muted">Cargando competiciones...</p>
       </div>
@@ -70,46 +70,24 @@
       </div>
     </section>
 
-    <!-- Noticias Destacadas -->
-    <section class="landing-news">
-      <h2 class="landing-section-title">Últimas noticias</h2>
-      <div class="hero-carousel" id="hero-carousel">
-        <div class="hero-track" id="hero-track"></div>
-        <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
-        <button class="hero-nav next" id="hero-next" aria-label="Siguiente">›</button>
-        <div class="hero-dots" id="hero-dots"></div>
-      </div>
-    </section>
-
     <!-- CTA Section -->
     <section class="landing-cta">
       <div class="cta-content">
-        <h2>¿Listo para empezar?</h2>
-        <p>Únete a una competición existente o crea la tuya propia</p>
+        <h2>Â¿Listo para empezar?</h2>
+        <p>Ãšnete a nuestra plataforma y comienza a competir hoy mismo.</p>
         <div class="cta-actions">
           <a href="register.html" class="btn btn-primary btn-large">Crear cuenta</a>
-          <a href="login.html" class="btn btn-outline btn-large">Iniciar sesión</a>
+          <a href="login.html" class="btn btn-outline btn-large">Iniciar sesiÃ³n</a>
         </div>
       </div>
     </section>
   </main>
-
-  <!-- Modal noticia -->
-  <div id="news-backdrop" class="modal-backdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
-      <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
-      <h2 id="news-title"></h2>
-      <div class="meta" id="news-meta"></div>
-      <div id="news-content"></div>
-    </div>
-  </div>
 
   <footer class="site-footer">
     <p>&copy; Voll Damm Returns</p>
   </footer>
 
   <script type="module" src="js/loader.js"></script>
-  <script type="module" src="js/liga/noticias.js"></script>
   <script type="module" src="js/index.js"></script>
 </body>
 

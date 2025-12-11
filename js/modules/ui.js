@@ -40,16 +40,11 @@ export async function renderUserSection() {
 }
 
 export function initNavigation() {
-    // Detectar si estamos en una página dentro de liga/
-    const isInLigaFolder = window.location.pathname.includes('/liga/');
-    
     // ✔ Convertir automáticamente el LOGO del header en enlace
     const headerLogo = document.querySelector('.site-header .logo');
     if (headerLogo && !headerLogo.closest('a')) {
         const wrapper = document.createElement('a');
-        // Si estamos en liga/, el logo apunta a liga/index.html (relativo)
-        // Si estamos en raíz, apunta a index.html
-        wrapper.href = isInLigaFolder ? 'index.html' : 'index.html';
+        wrapper.href = 'index.html';
         wrapper.style.display = 'inline-block';
         headerLogo.parentNode.insertBefore(wrapper, headerLogo);
         wrapper.appendChild(headerLogo);
@@ -58,24 +53,30 @@ export function initNavigation() {
     const header = document.querySelector('.site-header');
     const nav = document.getElementById('main-nav');
     if (nav && header) {
-        // Detectar si estamos en la landing page (index.html)
+        // Detectar si estamos en la landing page (index.html con clase page-landing)
         const currentPage = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing') && !isInLigaFolder;
+        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing');
 
         let links;
 
         if (isLandingPage) {
-            // Menú para landing page (público, neutral - sin acceso directo a liga)
+            // Menú para landing page (público, neutral)
             links = [
                 ['index.html', 'Inicio'],
                 ['competitions.html', 'Competiciones']
             ];
         } else {
+            // Menú para páginas de liga (clasificacion, resultados, etc.)
+            // Verificar si es una página de liga por el nombre del archivo
+            const ligaPages = ['clasificacion.html', 'resultados.html', 'jornada.html', 'club.html', 
+                              'pichichi.html', 'clubs.html', 'jugadores.html', 'noticias.html', 
+                              'reglas.html', 'directos.html'];
+            const isLigaPage = ligaPages.includes(currentPage);
             
-            if (isInLigaFolder) {
-                // Menú para páginas dentro de liga/
+            if (isLigaPage) {
+                // Menú para páginas de liga
                 links = [
-                    ['index.html', 'Inicio'],
+                    ['liga.html', 'Inicio'],
                     ['noticias.html', 'Noticias'],
                     ['clasificacion.html', 'Clasificación'],
                     ['resultados.html', 'Resultados'],
@@ -87,10 +88,10 @@ export function initNavigation() {
                     ['directos.html', 'Directos']
                 ];
             } else {
-                // Menú para páginas en raíz (dashboard, admin, etc.)
+                // Menú para otras páginas (dashboard, admin, competitions, etc.)
                 links = [
                     ['index.html', 'Inicio'],
-                    ['liga/index.html', 'Liga'],
+                    ['liga.html', 'Liga'],
                     ['dashboard.html', 'Dashboard'],
                     ['competitions.html', 'Competiciones']
                 ];
@@ -102,15 +103,12 @@ export function initNavigation() {
             .join('');
 
         // Activar link
-        // Para páginas en liga/, comparar solo el nombre del archivo
-        const pageToCompare = isInLigaFolder 
-            ? currentPage 
-            : (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const pageToCompare = currentPage;
         
         nav.querySelectorAll('a').forEach(a => {
             const href = a.getAttribute('data-href') || '';
             const hrefFile = href.split('/').pop().toLowerCase();
-            if (hrefFile === pageToCompare || href.toLowerCase() === currentPage) {
+            if (hrefFile === pageToCompare) {
                 a.classList.add('active');
             }
         });

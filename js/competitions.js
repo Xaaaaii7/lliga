@@ -251,7 +251,7 @@ function renderCompetitionCard(comp) {
       </div>
       <div class="competition-card-footer">
         ${enrollmentButton}
-        <a href="${buildURLWithCompetition('liga/clasificacion.html', comp.slug)}" 
+        <a href="${buildURLWithCompetition('clasificacion.html', comp.slug)}" 
            class="btn btn-outline">
           Ver detalles
         </a>
