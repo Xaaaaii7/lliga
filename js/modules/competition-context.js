@@ -105,9 +105,11 @@ export async function getCurrentCompetitionSlug() {
 export function buildBreadcrumb(competitionSlug, competitionName, currentPage) {
   const basePath = getBasePath();
   const dashboardPath = basePath === '/' ? 'dashboard.html' : basePath + 'dashboard.html';
+  const competitionsPath = basePath === '/' ? 'competitions.html' : basePath + 'competitions.html';
   
   const items = [
-    { label: 'Dashboard', url: dashboardPath },
+    { label: 'Inicio', url: basePath === '/' ? 'index.html' : basePath + 'index.html' },
+    { label: 'Competiciones', url: competitionsPath },
   ];
 
   if (competitionSlug && competitionName) {

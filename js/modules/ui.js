@@ -1,6 +1,7 @@
 import { getCurrentUser, getCurrentProfile, logout } from './auth.js';
 import { escapeHtml } from './utils.js';
 import { getCompetitionFromURL, buildURLWithCompetition } from './competition-context.js';
+import { renderCompetitionSelector } from './competition-selector.js';
 
 export async function renderUserSection() {
     const header = document.querySelector('.site-header');
@@ -160,4 +161,9 @@ export function initNavigation() {
     // Renderizar info de usuario (login/admin/logout)
     // En la landing page, solo mostrar si está logueado
     renderUserSection().catch(console.error);
+
+    // Renderizar selector de competición en páginas de liga
+    if (!isLandingPage) {
+        renderCompetitionSelector().catch(console.error);
+    }
 }
