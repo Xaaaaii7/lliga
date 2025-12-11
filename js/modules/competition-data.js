@@ -106,21 +106,12 @@ export async function getUserCompetitions(userId = null) {
   if (!userId) {
     const user = await getCurrentUser();
     if (!user) return [];
-
-    // Buscar el user_id en la tabla users usando el email del usuario autenticado
-    const { data: userRow } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', user.email)
-      .maybeSingle();
-
-    if (!userRow) return [];
-    userId = userRow.id;
+    // competition_teams.user_id referencia auth.users.id directamente
+    userId = user.id;
   }
 
   // Buscar competiciones donde el usuario tiene equipos inscritos
-  // competition_teams.user_id se refiere directamente a users.id
-  // y coincide con league_teams.user_id
+  // competition_teams.user_id referencia auth.users.id
   const { data, error } = await supabase
     .from('competition_teams')
     .select(`

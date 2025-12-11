@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Competiciones — Voll Damm Returns</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/competitions.css" />
+</head>
+
+<body class="page-competitions">
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Competiciones</h1>
+    <nav id="main-nav"></nav>
+  </header>
+
+  <main class="container competitions-container">
+    <!-- Filtros y búsqueda -->
+    <section class="competitions-filters">
+      <div class="filters-row">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Buscar competición..." />
+          <span class="search-icon">🔍</span>
+        </div>
+        
+        <div class="filters-group">
+          <select id="filter-type" class="filter-select">
+            <option value="">Todas</option>
+            <option value="official">Oficiales</option>
+            <option value="unofficial">No Oficiales</option>
+          </select>
+
+          <select id="filter-status" class="filter-select">
+            <option value="">Todos los estados</option>
+            <option value="open">Inscripciones abiertas</option>
+            <option value="active">Activas</option>
+            <option value="finished">Finalizadas</option>
+          </select>
+
+          <select id="filter-season" class="filter-select">
+            <option value="">Todas las temporadas</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de competiciones -->
+    <section class="competitions-list-section">
+      <div id="competitions-loading" class="loading-message">
+        <p>Cargando competiciones...</p>
+      </div>
+      
+      <div id="competitions-empty" class="empty-state" style="display: none;">
+        <p>No se encontraron competiciones con los filtros seleccionados.</p>
+      </div>
+
+      <div id="competitions-grid" class="competitions-grid">
+        <!-- Las competiciones se cargarán aquí -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; Voll Damm Returns</p>
+  </footer>
+
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/competitions.js"></script>
+</body>
+
+</html>
+
