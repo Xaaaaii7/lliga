@@ -3,7 +3,7 @@
  * Muestra información general, competiciones destacadas y CTAs
  */
 
-import { getPublicCompetitions } from './modules/competition-data.js';
+import { getPublicCompetitions } from './modules/competitions.js';
 import { buildURLWithCompetition } from './modules/competition-context.js';
 import { escapeHtml } from './modules/utils.js';
 
