@@ -1,5 +1,6 @@
 import { getCurrentUser, getCurrentProfile, logout } from './auth.js';
 import { escapeHtml } from './utils.js';
+import { getCompetitionFromURL, buildURLWithCompetition } from './competition-context.js';
 
 export async function renderUserSection() {
     const header = document.querySelector('.site-header');
@@ -23,6 +24,7 @@ export async function renderUserSection() {
     const safeName = escapeHtml(profile?.nickname || user.email);
 
     // Dashboard solo aparece si está logueado, al lado del nombre
+    // Dashboard nunca debe tener el parámetro comp
     let html = `<span class="user-name">${safeName}</span>`;
     html += ` | <a href="dashboard.html">Dashboard</a>`;
     if (profile?.is_admin) {
@@ -42,10 +44,14 @@ export async function renderUserSection() {
 }
 
 export function initNavigation() {
+    // Obtener el parámetro comp de la URL si existe (lo necesitamos para el logo también)
+    const competitionSlug = getCompetitionFromURL();
+    
     // ✔ Convertir automáticamente el LOGO del header en enlace
     const headerLogo = document.querySelector('.site-header .logo');
     if (headerLogo && !headerLogo.closest('a')) {
         const wrapper = document.createElement('a');
+        // El logo siempre va a index.html (sin comp)
         wrapper.href = 'index.html';
         wrapper.style.display = 'inline-block';
         headerLogo.parentNode.insertBefore(wrapper, headerLogo);
@@ -82,7 +88,7 @@ export function initNavigation() {
         } else {
             // Menú para páginas de liga (clasificacion, resultados, etc.)
             // Verificar si es una página de liga por el nombre del archivo
-            const ligaPages = ['clasificacion.html', 'resultados.html', 'jornada.html', 'club.html', 
+            const ligaPages = ['liga.html', 'clasificacion.html', 'resultados.html', 'jornada.html', 'club.html', 
                               'pichichi.html', 'clubs.html', 'jugadores.html', 'noticias.html', 
                               'reglas.html', 'directos.html'];
             const isLigaPage = ligaPages.includes(currentPage);
@@ -110,8 +116,17 @@ export function initNavigation() {
             }
         }
 
+        // Construir los enlaces, manteniendo el parámetro comp si existe
+        // Excepto para dashboard e index.html que nunca deben tener comp
         nav.innerHTML = links
-            .map(([href, label]) => `<a href="${href}" data-href="${href}">${label}</a>`)
+            .map(([href, label]) => {
+                let finalHref = href;
+                // Si hay un competitionSlug y no es dashboard/index.html y estamos en páginas de liga, mantener el parámetro comp
+                if (competitionSlug && href !== 'dashboard.html' && href !== 'index.html' && !isLandingPage) {
+                    finalHref = buildURLWithCompetition(href, competitionSlug);
+                }
+                return `<a href="${finalHref}" data-href="${href}">${label}</a>`;
+            })
             .join('');
 
         // Activar link
