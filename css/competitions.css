@@ -1,7 +1,8 @@
 /* Competitions Page Styles */
 
 .page-competitions {
-  background: var(--bg, #f5f5f5);
+  background: var(--bg, #050812);
+  color: var(--text, #e8eef9);
 }
 
 .competitions-container {
@@ -12,10 +13,10 @@
 
 /* Filtros */
 .competitions-filters {
-  background: white;
+  background: var(--card, #151a22);
+  border: 1px solid var(--border-subtle, #202735);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
   margin-bottom: 2rem;
 }
 
@@ -35,9 +36,21 @@
 .search-box input {
   width: 100%;
   padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 1px solid var(--border, #e0e0e0);
-  border-radius: 4px;
+  border: 1px solid var(--border-subtle, #202735);
+  border-radius: 8px;
   font-size: 1rem;
+  background: var(--bg-elevated, #101522);
+  color: var(--text, #e8eef9);
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--accent, #1fbf4a);
+  box-shadow: 0 0 0 2px rgba(31, 191, 74, 0.15);
+}
+
+.search-box input::placeholder {
+  color: var(--muted, #9fb3c8);
 }
 
 .search-icon {
@@ -56,22 +69,23 @@
 
 .filter-select {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border, #e0e0e0);
-  border-radius: 4px;
+  border: 1px solid var(--border-subtle, #202735);
+  border-radius: 8px;
   font-size: 0.9rem;
-  background: white;
+  background: var(--bg-elevated, #101522);
+  color: var(--text, #e8eef9);
   cursor: pointer;
   min-width: 150px;
 }
 
 .filter-select:hover {
-  border-color: var(--primary, #007bff);
+  border-color: var(--accent, #1fbf4a);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--primary, #007bff);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: var(--accent, #1fbf4a);
+  box-shadow: 0 0 0 2px rgba(31, 191, 74, 0.15);
 }
 
 /* Lista de competiciones */
@@ -82,19 +96,19 @@
 .loading-message {
   text-align: center;
   padding: 3rem;
-  color: var(--muted, #666);
+  color: var(--muted, #9fb3c8);
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--card, #151a22);
+  border: 1px solid var(--border-subtle, #202735);
+  border-radius: 16px;
 }
 
 .empty-state p {
-  color: var(--muted, #666);
+  color: var(--muted, #9fb3c8);
   font-size: 1.1rem;
 }
 
@@ -106,29 +120,30 @@
 
 /* Cards de competición */
 .competition-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--card, #151a22);
+  border: 1px solid var(--border-subtle, #202735);
+  border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
 }
 
 .competition-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent, #1fbf4a);
+  box-shadow: 0 8px 24px rgba(31, 191, 74, 0.15);
 }
 
 .competition-card-header {
   padding: 1.5rem 1.5rem 1rem 1.5rem;
-  border-bottom: 1px solid var(--border, #e0e0e0);
+  border-bottom: 1px solid var(--border-subtle, #202735);
 }
 
 .competition-card-header h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
-  color: var(--text, #333);
+  color: var(--text, #e8eef9);
 }
 
 .competition-badges {
@@ -144,7 +159,7 @@
 
 .competition-description {
   margin: 0 0 1rem 0;
-  color: var(--muted, #666);
+  color: var(--muted, #9fb3c8);
   font-size: 0.9rem;
   line-height: 1.5;
 }
@@ -152,7 +167,7 @@
 .competition-meta {
   margin-bottom: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border, #e0e0e0);
+  border-top: 1px solid var(--border-subtle, #202735);
 }
 
 .meta-row {
@@ -163,20 +178,20 @@
 }
 
 .meta-label {
-  color: var(--muted, #666);
+  color: var(--muted, #9fb3c8);
   font-weight: 500;
 }
 
 .meta-value {
-  color: var(--text, #333);
+  color: var(--text, #e8eef9);
 }
 
 .competition-stats {
   display: flex;
   gap: 1.5rem;
   padding: 1rem;
-  background: var(--bg, #f9f9f9);
-  border-radius: 4px;
+  background: var(--bg-elevated, #101522);
+  border-radius: 8px;
   margin-top: 1rem;
 }
 
@@ -188,7 +203,7 @@
 
 .stat-label {
   font-size: 0.75rem;
-  color: var(--muted, #666);
+  color: var(--muted, #9fb3c8);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -196,13 +211,13 @@
 .stat-value {
   font-size: 1.1rem;
   font-weight: bold;
-  color: var(--primary, #007bff);
+  color: var(--accent, #1fbf4a);
 }
 
 .competition-card-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border, #e0e0e0);
-  background: var(--bg, #f9f9f9);
+  border-top: 1px solid var(--border-subtle, #202735);
+  background: var(--bg-elevated, #101522);
   display: flex;
   gap: 0.75rem;
 }
@@ -222,33 +237,33 @@
 }
 
 .badge-official {
-  background: #007bff;
-  color: white;
+  background: var(--accent, #1fbf4a);
+  color: var(--bg, #050812);
 }
 
 .badge-unofficial {
-  background: #6c757d;
-  color: white;
+  background: var(--muted, #9fb3c8);
+  color: var(--bg, #050812);
 }
 
 .badge-active {
-  background: #28a745;
-  color: white;
+  background: var(--accent, #1fbf4a);
+  color: var(--bg, #050812);
 }
 
 .badge-finished {
-  background: #6c757d;
-  color: white;
+  background: var(--muted, #9fb3c8);
+  color: var(--bg, #050812);
 }
 
 .badge-open {
   background: #ffc107;
-  color: #333;
+  color: var(--bg, #050812);
 }
 
 .badge-draft {
-  background: #e0e0e0;
-  color: #666;
+  background: var(--border-subtle, #202735);
+  color: var(--muted, #9fb3c8);
 }
 
 /* Buttons */
@@ -266,30 +281,31 @@
 }
 
 .btn-primary {
-  background: var(--primary, #007bff);
-  color: white;
+  background: var(--accent, #1fbf4a);
+  color: var(--bg, #050812);
 }
 
 .btn-primary:hover {
-  background: #0056b3;
+  background: #1aa83d;
   transform: translateY(-1px);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--primary, #007bff);
-  border: 1px solid var(--primary, #007bff);
+  color: var(--accent, #1fbf4a);
+  border: 1px solid var(--accent, #1fbf4a);
 }
 
 .btn-outline:hover {
-  background: var(--primary, #007bff);
-  color: white;
+  background: var(--accent, #1fbf4a);
+  color: var(--bg, #050812);
 }
 
 .btn-disabled {
-  background: #e0e0e0;
-  color: #999;
+  background: var(--border-subtle, #202735);
+  color: var(--muted, #9fb3c8);
   cursor: not-allowed;
+  border: 1px solid var(--border-subtle, #202735);
 }
 
 .btn-disabled:hover {
@@ -298,12 +314,12 @@
 
 /* Error message */
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
+  background: rgba(220, 53, 69, 0.15);
+  color: #ff6b7a;
   padding: 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   margin: 1rem 0;
-  border: 1px solid #f5c6cb;
+  border: 1px solid rgba(220, 53, 69, 0.3);
 }
 
 /* Responsive */
