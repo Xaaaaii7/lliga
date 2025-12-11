@@ -1,20 +1,27 @@
 import { Modal } from './modules/modal.js';
+import { queryTable } from './modules/db-helpers.js';
+import { getSupabaseClient } from './modules/supabase-client.js';
+import { ensureAdmin } from './modules/auth.js';
+import { escapeHtml } from './modules/utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
+  const ok = await ensureAdmin();
   if (!ok) return;
 
-  const supabase = await AppUtils.getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const tbody = document.getElementById('users-tbody');
-  const escapeHtml = AppUtils.escapeHtml || ((v) => String(v ?? ''));
 
-  // 1) Cargar profiles
-  const { data: profiles, error } = await supabase
-    .from('profiles')
-    .select('id, nickname, team_nickname, is_admin, is_approved, created_at')
-    .order('created_at', { ascending: true });
-
-  if (error) {
+  // 1) Cargar profiles usando helper
+  let profiles = [];
+  try {
+    profiles = await queryTable('profiles',
+      'id, nickname, team_nickname, is_admin, is_approved, created_at',
+      {
+        useSeason: false,
+        order: { column: 'created_at', ascending: true }
+      }
+    );
+  } catch (error) {
     console.error(error);
     tbody.innerHTML = '<tr><td colspan="6">Error cargando usuarios.</td></tr>';
     return;

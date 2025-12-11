@@ -1,26 +1,30 @@
 import { Modal } from './modules/modal.js';
+import { loadLeagueTeams, loadMatches } from './modules/db-helpers.js';
+import { getSupabaseClient, getActiveSeason } from './modules/supabase-client.js';
+import { ensureAdmin } from './modules/auth.js';
+import { fmtDate } from './modules/utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
+  const ok = await ensureAdmin();
   if (!ok) return;
 
-  const season = AppUtils.getActiveSeason();
+  const season = getActiveSeason();
   const seasonLabelEl = document.getElementById('season-label');
   const adminSeasonEl = document.getElementById('admin-season');
   if (seasonLabelEl) seasonLabelEl.textContent = season;
   if (adminSeasonEl) adminSeasonEl.textContent = season;
 
-  const supabase = await AppUtils.getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const tbody = document.getElementById('matches-tbody');
 
-  // 1) Cargar league_teams de la temporada para combos
-  const { data: teams, error: teamsError } = await supabase
-    .from('league_teams')
-    .select('id, nickname')
-    .eq('season', season)
-    .order('nickname', { ascending: true });
-
-  if (teamsError) {
+  // 1) Cargar league_teams usando helper
+  let teams = [];
+  try {
+    teams = await loadLeagueTeams({
+      select: 'id, nickname',
+      orderByNickname: true
+    });
+  } catch (teamsError) {
     console.error(teamsError);
     tbody.innerHTML = '<tr><td colspan="8">Error cargando equipos.</td></tr>';
     return;
@@ -29,28 +33,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const teamsById = {};
   (teams || []).forEach(t => { teamsById[t.id] = t; });
 
-  // 2) Cargar partidos
-  const { data: matches, error: matchesError } = await supabase
-    .from('matches')
-    .select(`
-      id,
-      season,
-      round_id,
-      match_date,
-      match_time,
-      home_goals,
-      away_goals,
-      stream_url,
-      home_league_team_id,
-      away_league_team_id,
-      home:league_teams!matches_home_league_team_id_fkey ( id, nickname ),
-      away:league_teams!matches_away_league_team_id_fkey ( id, nickname )
-    `)
-    .eq('season', season)
-    .order('round_id', { ascending: true })
-    .order('match_date', { ascending: true });
-
-  if (matchesError) {
+  // 2) Cargar partidos usando helper
+  let matches = [];
+  try {
+    matches = await loadMatches({
+      select: `
+        id,
+        season,
+        round_id,
+        match_date,
+        match_time,
+        home_goals,
+        away_goals,
+        stream_url,
+        home_league_team_id,
+        away_league_team_id,
+        home:league_teams!matches_home_league_team_id_fkey ( id, nickname ),
+        away:league_teams!matches_away_league_team_id_fkey ( id, nickname )
+      `
+    });
+  } catch (matchesError) {
     console.error(matchesError);
     tbody.innerHTML = '<tr><td colspan="8">Error cargando partidos.</td></tr>';
     return;
@@ -60,8 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     tbody.innerHTML = '<tr><td colspan="8">No hay partidos para esta temporada.</td></tr>';
     return;
   }
-
-  const fmtDate = AppUtils.fmtDate;
 
   tbody.innerHTML = matches.map(m => {
     const fecha = m.match_date ? fmtDate(m.match_date) : '';
