@@ -1,27 +1,32 @@
 import { Modal } from './modules/modal.js';
+import { queryTable, getSupabaseClient } from './modules/db-helpers.js';
+import { ensureAdmin, getActiveSeason } from './modules/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await AppUtils.ensureAdmin();
+  const ok = await ensureAdmin();
   if (!ok) return;
 
-  const season = AppUtils.getActiveSeason();
+  const season = getActiveSeason();
   const seasonLabelEl = document.getElementById('season-label');
   const adminSeasonEl = document.getElementById('admin-season');
   if (seasonLabelEl) seasonLabelEl.textContent = season;
   if (adminSeasonEl) adminSeasonEl.textContent = season;
 
-  const supabase = await AppUtils.getSupabaseClient();
+  const supabase = await getSupabaseClient();
   const tbody = document.getElementById('league-teams-tbody');
 
-  // 1) Cargar league_teams
-  const { data: leagueTeams, error: ltError } = await supabase
-    .from('league_teams')
-    .select('id, season, nickname, display_name, penalty_points, penalty_reason, club_id')
-    .eq('season', season)
-    .order('id', { ascending: true });
-
-  if (ltError) {
-    console.error(ltError);
+  // 1) Cargar league_teams usando helper
+  let leagueTeams = [];
+  try {
+    leagueTeams = await queryTable('league_teams',
+      'id, season, nickname, display_name, penalty_points, penalty_reason, club_id',
+      {
+        useSeason: true,
+        order: { column: 'id', ascending: true }
+      }
+    );
+  } catch (error) {
+    console.error(error);
     tbody.innerHTML = '<tr><td colspan="6">Error cargando equipos de liga.</td></tr>';
     return;
   }
@@ -36,15 +41,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let clubsById = {};
   if (clubIds.length) {
-    const { data: clubs, error: clubsError } = await supabase
-      .from('clubs')
-      .select('id, name')
-      .in('id', clubIds);
+    try {
+      const clubs = await queryTable('clubs', 'id, name', {
+        useSeason: false,
+        filters: {} // Usar .in() manualmente vía supabase directo para casos especiales
+      });
 
-    if (clubsError) {
+      // Filtrar manualmente
+      clubs.filter(c => clubIds.includes(c.id)).forEach(c => { clubsById[c.id] = c; });
+    } catch (clubsError) {
       console.warn('Error cargando clubs, se mostrarán IDs.', clubsError);
-    } else {
-      (clubs || []).forEach(c => { clubsById[c.id] = c; });
     }
   }
 

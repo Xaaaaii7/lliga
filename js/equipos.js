@@ -1,39 +1,16 @@
+import { loadLeagueTeams } from './modules/db-helpers.js';
+import { slugify } from './modules/utils.js';
+
 (async () => {
   const root = document.getElementById('equipos');
   if (!root) return;
 
-  const AppUtils = window.AppUtils || {};
-  const {
-    getSupabaseClient,
-    getSupabaseConfig,
-    getActiveSeason,
-    slugify
-  } = AppUtils;
-
-  const slug = slugify || (s => String(s).toLowerCase().replace(/\s+/g, '-'));
-
-  if (typeof getSupabaseClient !== 'function') {
-    root.innerHTML = '<p style="text-align:center;color:#9fb3c8">Error: Supabase no configurado.</p>';
-    return;
-  }
-
   try {
-    const supabase = await getSupabaseClient();
-    const season = getActiveSeason ? getActiveSeason() : (getSupabaseConfig().season || '');
-
-    // Fetch teams from league_teams
-    let query = supabase
-      .from('league_teams')
-      .select('id, nickname, display_name, club:clubs(name)')
-      .order('nickname', { ascending: true });
-
-    if (season) {
-      query = query.eq('season', season);
-    }
-
-    const { data: teams, error } = await query;
-
-    if (error) throw error;
+    // Usar el nuevo helper para cargar equipos
+    const teams = await loadLeagueTeams({
+      select: 'id, nickname, display_name, club:clubs(name)',
+      orderByNickname: true
+    });
 
     if (!teams || !teams.length) {
       root.innerHTML = '<p style="text-align:center;color:#9fb3c8">No hay equipos registrados para esta temporada.</p>';
@@ -45,8 +22,8 @@
         <div class="team-grid">
           ${teams.map(t => {
       const name = t.nickname || t.display_name || (t.club && t.club.name) || 'Equipo';
-      const link = `equipo.html?team=${encodeURIComponent(slug(name))}`;
-      const imgPath = `img/${slug(name)}.png`;
+      const link = `equipo.html?team=${encodeURIComponent(slugify(name))}`;
+      const imgPath = `img/${slugify(name)}.png`;
 
       return `
               <a class="player-card" href="${link}">

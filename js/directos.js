@@ -1,54 +1,45 @@
+import { queryTable, withErrorHandling } from './modules/db-helpers.js';
+
 const API_URL = "https://d39ra5ecf4.execute-api.eu-west-1.amazonaws.com/prod/live-channel";
 const PARENT_DOMAIN = "xaaaaii7.github.io";
 
 let CHANNEL_TEAM_MAP = {};
 
-// CARGAR MAPPING CANAL → EQUIPO DESDE JSON
 // CARGAR MAPPING CANAL → EQUIPO DESDE SUPABASE
 async function loadChannelTeamMap() {
-  const { getSupabaseClient } = window.AppUtils || {};
-  if (!getSupabaseClient) {
-    console.warn("No se puede cargar mapa de canales: falta Supabase Client");
+  const data = await withErrorHandling(
+    () => queryTable('league_teams', `
+      display_name,
+      nickname,
+      user:users!user_id(twitch_channel)
+    `, { useSeason: false }),
+    {
+      errorMessage: "Error cargando mapa de canales desde DB",
+      fallback: null
+    }
+  );
+
+  if (!data) {
+    CHANNEL_TEAM_MAP = {};
     return;
   }
 
-  try {
-    const supabase = await getSupabaseClient();
-    // Consultamos users y league_teams para obtener canal y nombre de equipo
-    // Hacemos el join manual o via query si hay FK.
-    // league_teams tiene user_id -> users.id
-    const { data, error } = await supabase
-      .from('league_teams')
-      .select(`
-        display_name,
-        nickname,
-        user:users!user_id(twitch_channel)
-      `);
+  const normalized = {};
+  data.forEach(row => {
+    const list = Array.isArray(row.user) ? row.user : [row.user];
+    const user = list[0]; // La relación es 1:1 habitualmente
 
-    if (error) throw error;
-
-    const normalized = {};
-    if (data) {
-      data.forEach(row => {
-        const list = Array.isArray(row.user) ? row.user : [row.user];
-        const user = list[0]; // La relación es 1:1 habitualmente
-
-        if (user && user.twitch_channel) {
-          const ch = String(user.twitch_channel).toLowerCase().trim();
-          // Prioridad: display_name (equipo) > nickname (manager)
-          const teamName = row.display_name || row.nickname;
-          if (ch && teamName) {
-            normalized[ch] = teamName;
-          }
-        }
-      });
+    if (user && user.twitch_channel) {
+      const ch = String(user.twitch_channel).toLowerCase().trim();
+      // Prioridad: display_name (equipo) > nickname (manager)
+      const teamName = row.display_name || row.nickname;
+      if (ch && teamName) {
+        normalized[ch] = teamName;
+      }
     }
-    CHANNEL_TEAM_MAP = normalized;
+  });
 
-  } catch (e) {
-    console.warn("Error cargando mapa de canales desde DB:", e);
-    CHANNEL_TEAM_MAP = {};
-  }
+  CHANNEL_TEAM_MAP = normalized;
 }
 
 (async () => {

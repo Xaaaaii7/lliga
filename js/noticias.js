@@ -1,23 +1,15 @@
 import { Modal } from './modules/modal.js';
+import { queryTable, withErrorHandling } from './modules/db-helpers.js';
 
 (async () => {
-  // Carga segura desde Supabase
-  let data = [];
-  try {
-    const supabase = await AppUtils.getSupabaseClient();
-    const { data: result, error } = await supabase
-      .from('noticias')
-      .select('*');
-
-    if (error) {
-      throw error;
+  // Carga segura desde Supabase usando el nuevo helper
+  const data = await withErrorHandling(
+    () => queryTable('noticias', '*', { useSeason: false }),
+    {
+      errorMessage: 'No se pudo cargar noticias desde Supabase',
+      fallback: []
     }
-    data = result;
-  } catch (e) {
-    console.error('No se pudo cargar noticias desde Supabase', e);
-    // Fallback opcional a JSON local si falla Supabase?
-    data = [];
-  }
+  );
 
   // Filtra ocultas: { "oculta": true } -> no se muestran
   const visibles = (data || []).filter(n => !n.oculta);
