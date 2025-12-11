@@ -4,7 +4,7 @@
  */
 
 import { getSupabaseClient } from './supabase-client.js';
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, getCurrentProfile } from './auth.js';
 import { getActiveSeason } from './supabase-client.js';
 
 /**
@@ -20,11 +20,12 @@ async function getUserLeagueTeams(options = {}) {
 
   const supabase = await getSupabaseClient();
 
-  // competition_teams.user_id referencia auth.users.id directamente
+  // competition_teams.user_id puede ser UUID o INTEGER dependiendo de si se aplicó la migración
   // user.id es el UUID de auth.users
   const userId = user.id;
 
   // Construir query para obtener competition_teams del usuario
+  // Intentamos primero con UUID
   let query = supabase
     .from('competition_teams')
     .select(`
@@ -47,7 +48,62 @@ async function getUserLeagueTeams(options = {}) {
     .eq('user_id', userId)
     .in('status', ['approved', 'active']);
 
-  const { data, error } = await query;
+  let { data, error } = await query;
+
+  // Si el error es de tipo (UUID vs INTEGER), intentar método alternativo
+  if (error && error.code === '22P02') {
+    // competition_teams.user_id es INTEGER, usar método alternativo
+    const profile = await getCurrentProfile();
+    if (!profile || !profile.team_nickname) {
+      console.warn('No se puede obtener league_teams: falta team_nickname en el perfil');
+      return [];
+    }
+    
+    // Buscar league_teams por nickname
+    const { data: leagueTeams, error: ltError } = await supabase
+      .from('league_teams')
+      .select('id')
+      .eq('nickname', profile.team_nickname)
+      .limit(1);
+    
+    if (ltError || !leagueTeams || leagueTeams.length === 0) {
+      console.warn('No se encontraron league_teams para el usuario');
+      return [];
+    }
+    
+    const leagueTeamId = leagueTeams[0].id;
+    
+    // Buscar competition_teams con este league_team_id
+    const { data: compTeams, error: ctError } = await supabase
+      .from('competition_teams')
+      .select(`
+        competition_id,
+        league_team_id,
+        competition:competitions(
+          id,
+          name,
+          slug,
+          season,
+          is_official,
+          status
+        ),
+        league_team:league_teams(
+          id,
+          nickname,
+          display_name
+        )
+      `)
+      .eq('league_team_id', leagueTeamId)
+      .in('status', ['approved', 'active']);
+    
+    if (ctError) {
+      console.error('Error obteniendo league_teams del usuario (método alternativo):', ctError);
+      return [];
+    }
+    
+    data = compTeams;
+    error = null;
+  }
 
   if (error) {
     console.error('Error obteniendo league_teams del usuario:', error);

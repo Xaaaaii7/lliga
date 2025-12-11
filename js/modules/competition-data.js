@@ -4,7 +4,7 @@
  */
 
 import { getSupabaseClient } from './supabase-client.js';
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, getCurrentProfile } from './auth.js';
 
 /**
  * Obtiene una competición por su slug
@@ -96,7 +96,7 @@ export async function getCompetitions(filters = {}) {
 
 /**
  * Obtiene las competiciones en las que está inscrito el usuario actual
- * @param {number|null} userId - ID del usuario de la tabla users (si es null, intenta obtenerlo del usuario actual)
+ * @param {string|null} userId - UUID del usuario de auth.users (si es null, intenta obtenerlo del usuario actual)
  * @returns {Promise<Array>} Array de competiciones con información de inscripción
  */
 export async function getUserCompetitions(userId = null) {
@@ -106,13 +106,16 @@ export async function getUserCompetitions(userId = null) {
   if (!userId) {
     const user = await getCurrentUser();
     if (!user) return [];
-    // competition_teams.user_id referencia auth.users.id directamente
-    userId = user.id;
+    userId = user.id; // UUID de auth.users
   }
 
-  // Buscar competiciones donde el usuario tiene equipos inscritos
-  // competition_teams.user_id referencia auth.users.id
-  const { data, error } = await supabase
+  // NOTA: Si competition_teams.user_id es INTEGER y referencia users.id,
+  // necesitamos hacer un JOIN indirecto a través de league_teams.
+  // Primero obtenemos los league_team_id del usuario, luego buscamos competition_teams.
+  
+  // Opción 1: Si competition_teams.user_id es UUID (como debería ser según la migración)
+  // Intentamos primero con UUID
+  let { data, error } = await supabase
     .from('competition_teams')
     .select(`
       id,
@@ -123,6 +126,52 @@ export async function getUserCompetitions(userId = null) {
     .eq('user_id', userId)
     .in('status', ['approved', 'active'])
     .order('joined_at', { ascending: false });
+
+  // Si el error es de tipo (UUID vs INTEGER), intentamos método alternativo
+  if (error && error.code === '22P02') {
+    // competition_teams.user_id es INTEGER, necesitamos obtener el users.id
+    // Buscamos a través de league_teams usando el nickname del perfil
+    const profile = await getCurrentProfile();
+    if (!profile || !profile.team_nickname) {
+      console.warn('No se puede obtener competiciones: falta team_nickname en el perfil');
+      return [];
+    }
+    
+    // Buscar league_teams por nickname (que corresponde al team_nickname del usuario)
+    const { data: leagueTeams, error: ltError } = await supabase
+      .from('league_teams')
+      .select('id')
+      .eq('nickname', profile.team_nickname)
+      .limit(1);
+    
+    if (ltError || !leagueTeams || leagueTeams.length === 0) {
+      console.warn('No se encontraron league_teams para el usuario');
+      return [];
+    }
+    
+    const leagueTeamId = leagueTeams[0].id;
+    
+    // Ahora buscar competition_teams que tengan este league_team_id
+    const { data: compTeams, error: ctError } = await supabase
+      .from('competition_teams')
+      .select(`
+        id,
+        status,
+        joined_at,
+        competition:competitions(*)
+      `)
+      .eq('league_team_id', leagueTeamId)
+      .in('status', ['approved', 'active'])
+      .order('joined_at', { ascending: false });
+    
+    if (ctError) {
+      console.error('Error obteniendo competiciones del usuario (método alternativo):', ctError);
+      return [];
+    }
+    
+    data = compTeams;
+    error = null;
+  }
 
   if (error) {
     console.error('Error obteniendo competiciones del usuario:', error);
@@ -162,13 +211,52 @@ export async function isUserInCompetition(competitionId, userId = null) {
   if (!user) return false;
 
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase
+  
+  // Intentar primero con UUID
+  let { data, error } = await supabase
     .from('competition_teams')
     .select('id')
     .eq('competition_id', competitionId)
     .eq('user_id', userId || user.id)
     .in('status', ['approved', 'active'])
     .maybeSingle();
+
+  // Si el error es de tipo (UUID vs INTEGER), intentar método alternativo
+  if (error && error.code === '22P02') {
+    const profile = await getCurrentProfile();
+    if (!profile || !profile.team_nickname) {
+      return false;
+    }
+    
+    // Buscar league_teams por nickname
+    const { data: leagueTeams, error: ltError } = await supabase
+      .from('league_teams')
+      .select('id')
+      .eq('nickname', profile.team_nickname)
+      .limit(1);
+    
+    if (ltError || !leagueTeams || leagueTeams.length === 0) {
+      return false;
+    }
+    
+    const leagueTeamId = leagueTeams[0].id;
+    
+    // Buscar competition_teams con este league_team_id y competition_id
+    const { data: compTeam, error: ctError } = await supabase
+      .from('competition_teams')
+      .select('id')
+      .eq('competition_id', competitionId)
+      .eq('league_team_id', leagueTeamId)
+      .in('status', ['approved', 'active'])
+      .maybeSingle();
+    
+    if (ctError) {
+      console.error('Error verificando inscripción (método alternativo):', ctError);
+      return false;
+    }
+    
+    return !!compTeam;
+  }
 
   if (error) {
     console.error('Error verificando inscripción:', error);
