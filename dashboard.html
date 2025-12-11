@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — Voll Damm Returns</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+
+<body class="page-dashboard">
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Torneo" class="logo" />
+    <h1>Mi Dashboard</h1>
+    <nav id="main-nav"></nav>
+  </header>
+
+  <main class="container dashboard-container">
+    <!-- Header del usuario -->
+    <section class="dashboard-header" id="dashboard-header">
+      <div class="dashboard-user-info">
+        <h2 id="user-name">Cargando...</h2>
+        <p class="muted" id="user-email"></p>
+      </div>
+      <div class="dashboard-actions">
+        <a href="competitions.html" class="btn btn-secondary">Ver todas las competiciones</a>
+        <button id="logout-btn" class="btn btn-outline">Cerrar sesión</button>
+      </div>
+    </section>
+
+    <!-- Resumen Global -->
+    <section class="dashboard-section" id="dashboard-summary">
+      <h2>Resumen Global</h2>
+      <div class="summary-grid" id="summary-grid">
+        <div class="summary-card">
+          <div class="summary-label">Competiciones activas</div>
+          <div class="summary-value" id="summary-active-competitions">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Partidos jugados</div>
+          <div class="summary-value" id="summary-matches-played">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Goles marcados</div>
+          <div class="summary-value" id="summary-goals-scored">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Victorias</div>
+          <div class="summary-value" id="summary-wins">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mis Competiciones -->
+    <section class="dashboard-section" id="dashboard-competitions">
+      <h2>Mis Competiciones</h2>
+      <div id="competitions-list" class="competitions-grid">
+        <p class="muted">Cargando competiciones...</p>
+      </div>
+    </section>
+
+    <!-- Competiciones Disponibles (Preview) -->
+    <section class="dashboard-section" id="dashboard-available">
+      <h2>Competiciones Disponibles</h2>
+      <div id="available-competitions" class="competitions-grid">
+        <p class="muted">Cargando competiciones disponibles...</p>
+      </div>
+      <div class="dashboard-section-footer">
+        <a href="competitions.html" class="btn btn-primary">Ver todas las competiciones</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; Voll Damm Returns</p>
+  </footer>
+
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+
+</html>
+

@@ -1,0 +1,314 @@
+/* Landing Page Styles */
+
+.page-landing {
+  background: var(--bg, #f5f5f5);
+}
+
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Hero Section */
+.landing-hero {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  margin-bottom: 4rem;
+}
+
+.landing-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.landing-hero-title {
+  font-size: 2.5rem;
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+}
+
+.landing-hero-subtitle {
+  font-size: 1.25rem;
+  margin: 0 0 2rem 0;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+.landing-hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.btn-outline:hover {
+  background: white;
+  color: #667eea;
+}
+
+/* Features Section */
+.landing-features {
+  margin-bottom: 4rem;
+}
+
+.landing-section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--text, #333);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.feature-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: var(--text, #333);
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--muted, #666);
+  line-height: 1.6;
+}
+
+/* Competiciones Preview */
+.landing-competitions {
+  margin-bottom: 4rem;
+}
+
+.competitions-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.competition-preview-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.competition-preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.competition-preview-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border, #e0e0e0);
+}
+
+.competition-preview-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.competition-preview-body {
+  padding: 1rem 1.5rem;
+}
+
+.competition-preview-description {
+  margin: 0 0 1rem 0;
+  color: var(--muted, #666);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.competition-preview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--muted, #666);
+}
+
+.competition-preview-meta strong {
+  color: var(--text, #333);
+}
+
+.competition-preview-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border, #e0e0e0);
+  background: var(--bg, #f9f9f9);
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.landing-section-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Noticias Section */
+.landing-news {
+  margin-bottom: 4rem;
+}
+
+/* CTA Section */
+.landing-cta {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.cta-content h2 {
+  font-size: 2rem;
+  margin: 0 0 1rem 0;
+  color: var(--text, #333);
+}
+
+.cta-content p {
+  font-size: 1.1rem;
+  color: var(--muted, #666);
+  margin: 0 0 2rem 0;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state p {
+  margin-bottom: 1rem;
+}
+
+/* Badges (reutilizados de dashboard.css) */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-official {
+  background: #007bff;
+  color: white;
+}
+
+.badge-unofficial {
+  background: #6c757d;
+  color: white;
+}
+
+.badge-active {
+  background: #28a745;
+  color: white;
+}
+
+.badge-finished {
+  background: #6c757d;
+  color: white;
+}
+
+.badge-open {
+  background: #ffc107;
+  color: #333;
+}
+
+.badge-draft {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.competition-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .landing-hero {
+    padding: 2rem 1rem;
+  }
+
+  .landing-hero-title {
+    font-size: 2rem;
+  }
+
+  .landing-hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .competitions-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero-actions,
+  .cta-actions {
+    flex-direction: column;
+  }
+
+  .landing-hero-actions .btn,
+  .cta-actions .btn {
+    width: 100%;
+  }
+}
+

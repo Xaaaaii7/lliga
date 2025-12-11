@@ -1,26 +1,78 @@
-<!-- index.html --->
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Voll Damm Returns — Inicio</title>
+  <title>Voll Damm Returns — Plataforma de Competiciones</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/landing.css" />
 </head>
 
-<body class="page-home">
-
+<body class="page-landing">
   <header class="site-header">
     <img src="img/logo.png" alt="Logo Torneo" class="logo" />
-    <h1>Voll Damm</h1>
+    <h1>Voll Damm Returns</h1>
     <nav id="main-nav"></nav>
   </header>
 
-  <main id="home-root" class="container home-layout">
-    <!-- HERO NOTICIAS DESTACADAS (mismo carrusel que en noticias.html) -->
-    <section class="home-hero">
-      <h2>Destacadas</h2>
+  <main class="container landing-container">
+    <!-- Hero Section -->
+    <section class="landing-hero">
+      <div class="landing-hero-content">
+        <h2 class="landing-hero-title">Gestiona tus competiciones de fútbol</h2>
+        <p class="landing-hero-subtitle">
+          Crea y gestiona torneos, ligas y competiciones. Sigue estadísticas en tiempo real,
+          gestiona equipos y disfruta del fútbol como nunca antes.
+        </p>
+        <div class="landing-hero-actions">
+          <a href="competitions.html" class="btn btn-primary btn-large">Explorar competiciones</a>
+          <a href="liga.html" class="btn btn-outline btn-large">Ver liga principal</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="landing-features">
+      <h2 class="landing-section-title">¿Qué puedes hacer?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🏆</div>
+          <h3>Crear competiciones</h3>
+          <p>Crea tus propias ligas y torneos. Configura reglas, equipos y calendarios.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Estadísticas en tiempo real</h3>
+          <p>Sigue clasificaciones, goleadores, MVP y estadísticas detalladas de cada partido.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Gestiona equipos</h3>
+          <p>Administra plantillas, formaciones y toda la información de tus equipos.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Únete a competiciones</h3>
+          <p>Descubre competiciones públicas y únete a las que más te interesen.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Competiciones Destacadas -->
+    <section class="landing-competitions" id="landing-competitions">
+      <h2 class="landing-section-title">Competiciones destacadas</h2>
+      <div id="featured-competitions" class="competitions-preview">
+        <p class="muted">Cargando competiciones...</p>
+      </div>
+      <div class="landing-section-footer">
+        <a href="competitions.html" class="btn btn-primary">Ver todas las competiciones</a>
+      </div>
+    </section>
+
+    <!-- Noticias Destacadas -->
+    <section class="landing-news">
+      <h2 class="landing-section-title">Últimas noticias</h2>
       <div class="hero-carousel" id="hero-carousel">
         <div class="hero-track" id="hero-track"></div>
         <button class="hero-nav prev" id="hero-prev" aria-label="Anterior">‹</button>
@@ -29,93 +81,20 @@
       </div>
     </section>
 
-    <div class="home-grid">
-      <!-- COLUMNA PRINCIPAL -->
-      <div class="home-main">
-        <!-- CLASIFICACIÓN TOP 10 -->
-        <section class="home-box" id="home-table-top10">
-          <h2>Clasificación (Top 10)</h2>
-          <div class="box-body">
-            <p class="muted">Cargando clasificación…</p>
-          </div>
-        </section>
-
-        <!-- TEAM OF THE MOMENT (3 EQUIPOS) -->
-        <section class="home-box" id="home-team-form">
-          <h2>Teams of the moment</h2>
-          <div class="box-body">
-            <p class="muted">Calculando forma de los equipos…</p>
-          </div>
-        </section>
-
-        <!-- GOLEADOR DEL MOMENTO -->
-        <section class="home-box" id="home-goleador-momento">
-          <h2>Goleador del momento</h2>
-          <div class="box-body">
-            <!-- Se rellenará desde js/index.js usando goal_events -->
-            <p class="muted">
-              Pendiente de conectar con la tabla de eventos de gol (goal_events)
-              para poder calcular los goles de los últimos 3 partidos.
-            </p>
-          </div>
-        </section>
-
-        <!-- MINI TABLA PICHICHI (TOP 6) -->
-        <section class="home-box" id="home-pichichi-mini">
-          <h2>Pichichi (Top 6)</h2>
-          <div class="box-body">
-            <p class="muted">Cargando pichichi…</p>
-          </div>
-        </section>
+    <!-- CTA Section -->
+    <section class="landing-cta">
+      <div class="cta-content">
+        <h2>¿Listo para empezar?</h2>
+        <p>Únete a una competición existente o crea la tuya propia</p>
+        <div class="cta-actions">
+          <a href="register.html" class="btn btn-primary btn-large">Crear cuenta</a>
+          <a href="login.html" class="btn btn-outline btn-large">Iniciar sesión</a>
+        </div>
       </div>
-
-      <!-- COLUMNA LATERAL -->
-      <aside class="home-aside">
-        <!-- MVP DE LA JORNADA ACTUAL -->
-        <section class="home-box" id="home-mvp-jornada">
-          <h2>MVP de la jornada</h2>
-          <div class="box-body">
-            <p class="muted">Buscando última jornada disputada…</p>
-          </div>
-        </section>
-
-        <!-- MVPs DE LA TEMPORADA (TOP 3) -->
-        <section class="home-box" id="home-mvp-temporada">
-          <h2>MVPs de la temporada</h2>
-          <div class="box-body">
-            <p class="muted">Calculando ranking MVP temporada…</p>
-          </div>
-        </section>
-
-        <!-- CURIOSIDAD DEL DÍA -->
-        <section class="home-box" id="home-curiosidad">
-          <h2>Curiosidad del día</h2>
-          <div class="box-body">
-            <p class="muted">Cargando curiosidad…</p>
-          </div>
-        </section>
-
-        <!-- DIRECTOS -->
-        <section class="home-box" id="home-directos">
-          <h2>Directos</h2>
-          <div class="box-body">
-            <p>Consulta los partidos en directo y próximos streams.</p>
-            <a href="directos.html" class="btn btn-primary">Ir a Directos</a>
-          </div>
-        </section>
-
-        <!-- FORMACIÓN DEL DÍA -->
-        <section class="home-box" id="home-formacion-dia">
-          <h2>Formación del día</h2>
-          <div class="box-body">
-            <p class="muted">Cargando formación aleatoria…</p>
-          </div>
-        </section>
-      </aside>
-    </div>
+    </section>
   </main>
 
-  <!-- Modal noticia (reutilizado de noticias.html) -->
+  <!-- Modal noticia -->
   <div id="news-backdrop" class="modal-backdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="news-title">
       <button class="modal-close" id="news-close" aria-label="Cerrar">✕</button>
@@ -130,9 +109,8 @@
   </footer>
 
   <script type="module" src="js/loader.js"></script>
-  <script type="module" src="js/core-loader.js"></script>
-  <script type="module" src="js/noticias.js"></script> <!-- rellena carrusel + modal -->
-  <script type="module" src="js/index.js"></script> <!-- widgets de la home -->
+  <script type="module" src="js/noticias.js"></script>
+  <script type="module" src="js/index.js"></script>
 </body>
 
 </html>

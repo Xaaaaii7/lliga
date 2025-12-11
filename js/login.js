@@ -56,15 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Si tiene team_nickname => redirigir a su club
-      if (profile.team_nickname) {
-        const team = encodeURIComponent(profile.team_nickname);
-        window.location.href = `club.html?team=${team}`;
-        return;
-      }
-
-      // Fallback: inicio
-      window.location.href = 'index.html';
+      // NUEVO: Redirigir a dashboard en lugar de club directamente
+      // El dashboard mostrará las competiciones del usuario y desde ahí podrá navegar
+      window.location.href = 'dashboard.html';
+      return;
     } catch (err) {
       console.error(err);
       errorEl.textContent = err?.message || 'Error de login. Revisa email y contraseña.';
