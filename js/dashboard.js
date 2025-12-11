@@ -2,6 +2,7 @@ import { getCurrentUser, getCurrentProfile, logout } from './modules/auth.js';
 import { getUserCompetitions, getPublicCompetitions } from './modules/competition-data.js';
 import { buildURLWithCompetition } from './modules/competition-context.js';
 import { getCompetitionStats } from './modules/competitions.js';
+import { getOfficialStatsCurrentSeason, getAllCompetitionsStats } from './modules/user-stats.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Verificar autenticación
@@ -65,6 +66,9 @@ async function loadDashboardData() {
 
     // Calcular y mostrar resumen global
     await renderSummary(userCompetitions);
+
+    // Cargar y mostrar estadísticas detalladas
+    await renderDetailedStats();
 
   } catch (error) {
     console.error('Error cargando datos del dashboard:', error);
@@ -182,12 +186,18 @@ async function renderSummary(competitions) {
   const activeCount = competitions.filter(c => c.status === 'active').length;
   updateSummaryValue('summary-active-competitions', activeCount);
 
-  // TODO: Calcular estadísticas globales
-  // Por ahora mostramos valores básicos
-  // En la Fase 3 implementaremos el cálculo completo
-  updateSummaryValue('summary-matches-played', '—');
-  updateSummaryValue('summary-goals-scored', '—');
-  updateSummaryValue('summary-wins', '—');
+  // Calcular estadísticas globales (todas las competiciones)
+  try {
+    const allStats = await getAllCompetitionsStats();
+    updateSummaryValue('summary-matches-played', allStats.matches_played);
+    updateSummaryValue('summary-goals-scored', allStats.goals_for);
+    updateSummaryValue('summary-wins', allStats.wins);
+  } catch (error) {
+    console.error('Error calculando estadísticas globales:', error);
+    updateSummaryValue('summary-matches-played', '—');
+    updateSummaryValue('summary-goals-scored', '—');
+    updateSummaryValue('summary-wins', '—');
+  }
 }
 
 function updateSummaryValue(id, value) {
@@ -226,6 +236,100 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+async function renderDetailedStats() {
+  try {
+    // Mostrar temporada actual
+    const { getActiveSeason } = await import('./modules/supabase-client.js');
+    const currentSeason = getActiveSeason();
+    const seasonLabel = document.getElementById('current-season-label');
+    if (seasonLabel) {
+      seasonLabel.textContent = currentSeason || 'N/A';
+    }
+
+    // Cargar estadísticas oficiales (temporada actual)
+    const officialStats = await getOfficialStatsCurrentSeason();
+    renderStatsTable('official-stats-container', officialStats, 'Competiciones Oficiales');
+
+    // Cargar estadísticas todas las competiciones
+    const allStats = await getAllCompetitionsStats();
+    renderStatsTable('all-stats-container', allStats, 'Todas las Competiciones');
+
+  } catch (error) {
+    console.error('Error cargando estadísticas detalladas:', error);
+    const officialContainer = document.getElementById('official-stats-container');
+    const allContainer = document.getElementById('all-stats-container');
+    if (officialContainer) {
+      officialContainer.innerHTML = '<p class="error-message">Error cargando estadísticas oficiales.</p>';
+    }
+    if (allContainer) {
+      allContainer.innerHTML = '<p class="error-message">Error cargando estadísticas globales.</p>';
+    }
+  }
+}
+
+function renderStatsTable(containerId, stats, title) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!stats || stats.matches_played === 0) {
+    container.innerHTML = '<p class="muted">No hay estadísticas disponibles.</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Métrica</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Partidos jugados</td>
+          <td><strong>${stats.matches_played}</strong></td>
+        </tr>
+        <tr>
+          <td>Victorias</td>
+          <td><strong>${stats.wins}</strong></td>
+        </tr>
+        <tr>
+          <td>Empates</td>
+          <td><strong>${stats.draws}</strong></td>
+        </tr>
+        <tr>
+          <td>Derrotas</td>
+          <td><strong>${stats.losses}</strong></td>
+        </tr>
+        <tr>
+          <td>Goles a favor</td>
+          <td><strong>${stats.goals_for}</strong></td>
+        </tr>
+        <tr>
+          <td>Goles en contra</td>
+          <td><strong>${stats.goals_against}</strong></td>
+        </tr>
+        <tr>
+          <td>Diferencia de goles</td>
+          <td><strong>${stats.goal_difference >= 0 ? '+' : ''}${stats.goal_difference}</strong></td>
+        </tr>
+        <tr>
+          <td>Puntos totales</td>
+          <td><strong>${stats.points}</strong></td>
+        </tr>
+        <tr>
+          <td>Promedio goles a favor</td>
+          <td><strong>${stats.avg_goals_for}</strong></td>
+        </tr>
+        <tr>
+          <td>Promedio goles en contra</td>
+          <td><strong>${stats.avg_goals_against}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  `;
 }
 
 function showError(message) {
