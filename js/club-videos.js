@@ -1,6 +1,8 @@
 // js/club-videos.js
+import { getSupabaseClient } from './modules/supabase-client.js';
+
 (async () => {
-  const msgEl   = document.getElementById("videos-msg");
+  const msgEl = document.getElementById("videos-msg");
   const embedEl = document.getElementById("playlist-embed");
 
   if (!msgEl || !embedEl) {
@@ -9,8 +11,8 @@
   }
 
   // 1) Leemos el equipo: preferimos el global CLUB_NAME y si no, querystring
-  const params   = new URLSearchParams(location.search);
-  const qsTeam   = params.get("team");
+  const params = new URLSearchParams(location.search);
+  const qsTeam = params.get("team");
   const globalTeam = window.CLUB_NAME || null;
   const team = globalTeam || qsTeam;
 
@@ -23,20 +25,7 @@
 
   const playlistName = `Liga Voll Damm - ${team}`;
 
-  // 2) Preparamos acceso a Supabase
-  const AppUtils = window.AppUtils || {};
-  const getSupabaseClient = AppUtils.getSupabaseClient;
-
-  if (typeof getSupabaseClient !== "function") {
-    console.warn("[club-videos] No hay AppUtils.getSupabaseClient disponible");
-    msgEl.innerHTML = `
-      <p style="color:var(--muted)">
-        No se ha podido cargar la playlist de <b>${team}</b> (Supabase no está disponible).
-      </p>
-    `;
-    return;
-  }
-
+  // 2) Buscar playlist en Supabase
   let playlistId = null;
 
   try {

@@ -1,32 +1,18 @@
+import { createNavigationControls } from './modules/navigation.js';
+import { queryTable } from './modules/db-helpers.js';
+import { slugify } from './modules/utils.js';
+
 (async () => {
   const root = document.getElementById('jornada');
   if (!root) return;
 
-  // Import navigation helper
-  const { createNavigationControls } = await import('./modules/navigation.js');
-
-  // Helpers utilidades (loadJSON ya no es principal, usamos getSupabaseClient)
-  const AppUtils = window.AppUtils || {};
-  const { getSupabaseClient } = AppUtils;
-
-  if (typeof getSupabaseClient !== 'function') {
-    root.innerHTML = `
-      <p style="text-align:center;color:#9fb3c8">
-        Error de configuración: falta AppUtils.getSupabaseClient para cargar jornadas.
-      </p>`;
-    return;
-  }
-
   // Carga de jornadas desde Supabase
   let jornadasCfg = [];
   try {
-    const supabase = await getSupabaseClient();
-    const { data, error } = await supabase
-      .from('jornadas_config')
-      .select('*')
-      .order('jornada', { ascending: true });
-
-    if (error) throw error;
+    const data = await queryTable('jornadas_config', '*', {
+      useSeason: false,
+      order: { column: 'jornada', ascending: true }
+    });
 
     // Mapear de estructura plana (DB) a estructura anidada (antiguo JSON)
     // para no romper la lógica de render existente
@@ -52,10 +38,10 @@
     return;
   }
 
-  // Helpers de rutas (desde Core)
-  const slug = CoreStats.slug;
-  const logoPath = eq => `img/${slug(eq)}.png`;
-  const playerPhotoPath = nombre => `img/jugadores/${slug(nombre)}.jpg`;
+
+  // Helpers de rutas
+  const logoPath = eq => `img/${slugify(eq)}.png`;
+  const playerPhotoPath = nombre => `img/jugadores/${slugify(nombre)}.jpg`;
 
   // ==========================
   //   PRECALCULAR MVP JORNADA
