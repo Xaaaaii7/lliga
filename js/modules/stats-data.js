@@ -32,7 +32,7 @@ const mapStatsRowFromDb = (row) => ({
 });
 
 // Carga jornadas desde Supabase.matches + league_teams
-const loadResultadosFromSupabase = async () => {
+const loadResultadosFromSupabase = async (competitionId = null) => {
     const supaCfg = getSupabaseConfig() || { season: '' };
     const seasonFromCfg = supaCfg.season || '';
     const activeSeason = getActiveSeason() || seasonFromCfg || '';
@@ -43,6 +43,7 @@ const loadResultadosFromSupabase = async () => {
         .from('matches')
         .select(`
         id,season,round_id,match_date,match_time,home_goals,away_goals,stream_url,
+        competition_id,
         home_league_team_id,away_league_team_id,
         home:league_teams!matches_home_league_team_id_fkey(
           id,nickname,display_name,penalty_points,penalty_reason,club:clubs(id,name)
@@ -54,7 +55,11 @@ const loadResultadosFromSupabase = async () => {
         .order('round_id', { ascending: true })
         .order('match_date', { ascending: true });
 
-    if (activeSeason) {
+    // Filtrar por competición si se proporciona
+    if (competitionId) {
+        query = query.eq('competition_id', competitionId);
+    } else if (activeSeason) {
+        // Si no hay competitionId, usar el filtro de temporada (compatibilidad hacia atrás)
         query = query.eq('season', activeSeason);
     }
 
@@ -138,12 +143,12 @@ const loadResultadosFromSupabase = async () => {
 };
 
 // Carga índice de stats desde match_team_stats
-const loadStatsIndexFromSupabase = async () => {
+const loadStatsIndexFromSupabase = async (competitionId = null) => {
     const supabase = await getSupabaseClient();
 
     // Nos aseguramos de tener teamMap cargado
     if (!_teamMapCache) {
-        await getResultados();
+        await getResultados(competitionId);
     }
     const teamMap = _teamMapCache || new Map();
 
@@ -151,17 +156,21 @@ const loadStatsIndexFromSupabase = async () => {
     const seasonFromCfg = supaCfg.season || '';
     const activeSeason = getActiveSeason() || seasonFromCfg || '';
 
-    // Si quieres filtrar por temporada, unimos con matches
+    // Si quieres filtrar por temporada o competición, unimos con matches
     let query = supabase
         .from('match_team_stats')
         .select(`
         match_id,league_team_id,
         possession,shots,shots_on_target,goals,fouls,offsides,corners,free_kicks,
         passes,passes_completed,crosses,interceptions,tackles,saves,red_cards,
-        match:matches(season)
+        match:matches(season,competition_id)
       `);
 
-    if (activeSeason) {
+    // Filtrar por competición si se proporciona
+    if (competitionId) {
+        query = query.eq('match.competition_id', competitionId);
+    } else if (activeSeason) {
+        // Si no hay competitionId, usar el filtro de temporada (compatibilidad hacia atrás)
         query = query.eq('match.season', activeSeason);
     }
 
@@ -191,36 +200,50 @@ const loadStatsIndexFromSupabase = async () => {
 // --------------------------
 // APIs públicas de carga
 // --------------------------
-export const getResultados = async () => {
-    if (_resultadosCache) return _resultadosCache;
+export const getResultados = async (competitionId = null) => {
+    // Si cambia el competitionId, invalidar caché
+    const cacheKey = competitionId || 'all';
+    if (_resultadosCache && cacheKey === 'all') {
+        // Solo usar caché si no hay filtro de competición
+        return _resultadosCache;
+    }
 
     try {
-        const jornadas = await loadResultadosFromSupabase();
-        _resultadosCache = Array.isArray(jornadas) ? jornadas : [];
-        if (_resultadosCache.length) return _resultadosCache;
+        const jornadas = await loadResultadosFromSupabase(competitionId);
+        const result = Array.isArray(jornadas) ? jornadas : [];
+        // Solo cachear si no hay filtro de competición (compatibilidad)
+        if (!competitionId) {
+            _resultadosCache = result;
+        }
+        return result;
     } catch (e) {
         console.warn('Fallo cargando resultados desde Supabase:', e);
     }
 
-    // Sin fallback a JSON local
-    _resultadosCache = [];
-    return _resultadosCache;
+    return [];
 };
 
-export const getStatsIndex = async () => {
-    if (_statsIndexCache) return _statsIndexCache;
+export const getStatsIndex = async (competitionId = null) => {
+    // Si cambia el competitionId, invalidar caché
+    const cacheKey = competitionId || 'all';
+    if (_statsIndexCache && cacheKey === 'all') {
+        // Solo usar caché si no hay filtro de competición
+        return _statsIndexCache;
+    }
 
     try {
-        const idx = await loadStatsIndexFromSupabase();
-        _statsIndexCache = idx && typeof idx === "object" ? idx : {};
-        if (Object.keys(_statsIndexCache).length) return _statsIndexCache;
+        const idx = await loadStatsIndexFromSupabase(competitionId);
+        const result = idx && typeof idx === "object" ? idx : {};
+        // Solo cachear si no hay filtro de competición (compatibilidad)
+        if (!competitionId) {
+            _statsIndexCache = result;
+        }
+        return result;
     } catch (e) {
         console.warn('Fallo cargando stats desde Supabase:', e);
     }
 
-    // Sin fallback a JSON local
-    _statsIndexCache = {};
-    return _statsIndexCache;
+    return {};
 };
 
 // --------------------------
@@ -279,15 +302,24 @@ const loadPichichiFromSupabase = async () => {
 };
 
 
-export const getPichichiRows = async () => {
-    if (_pichichiRowsCache) return _pichichiRowsCache;
+export const getPichichiRows = async (competitionId = null) => {
+    // Si cambia el competitionId, invalidar caché
+    const cacheKey = competitionId || 'all';
+    if (_pichichiRowsCache && cacheKey === 'all') {
+        // Solo usar caché si no hay filtro de competición
+        return _pichichiRowsCache;
+    }
 
     // 1) Intentamos Supabase
     try {
-        const rowsDb = await loadPichichiFromSupabase();
+        const rowsDb = await loadPichichiFromSupabase(competitionId);
         if (Array.isArray(rowsDb) && rowsDb.length) {
-            _pichichiRowsCache = rowsDb;
-            return _pichichiRowsCache;
+            const result = rowsDb;
+            // Solo cachear si no hay filtro de competición (compatibilidad)
+            if (!competitionId) {
+                _pichichiRowsCache = result;
+            }
+            return result;
         }
     } catch (e) {
         console.warn('Fallo cargando pichichi desde Supabase, intentaré TSV:', e);

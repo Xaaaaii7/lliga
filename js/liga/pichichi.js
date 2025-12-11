@@ -1,9 +1,41 @@
+import { getCompetitionFromURL, getCurrentCompetitionSlug, buildBreadcrumb, renderBreadcrumb } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
+
 (async () => {
   const msgEl  = document.getElementById('pichichi-msg');
   const tbody  = document.getElementById('tabla-pichichi-jug');
   const heroEl = document.getElementById('pichichi-hero');
 
   if (!tbody) return;
+
+  // --- Obtener contexto de competición ---
+  let competitionId = null;
+  let competitionSlug = null;
+  let competitionName = null;
+
+  try {
+    competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionId = competition.id;
+        competitionName = competition.name;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+  }
+
+  // --- Renderizar breadcrumb ---
+  if (competitionName && tbody) {
+    const breadcrumbContainer = document.createElement('div');
+    breadcrumbContainer.className = 'breadcrumb-container';
+    breadcrumbContainer.style.marginBottom = '1rem';
+    tbody.parentElement.insertAdjacentElement('beforebegin', breadcrumbContainer);
+    
+    const breadcrumbItems = buildBreadcrumb(competitionSlug, competitionName, 'Pichichi');
+    renderBreadcrumb(breadcrumbContainer, breadcrumbItems);
+  }
 
   const setMsg = (t) => { if (msgEl) msgEl.textContent = t || ''; };
 
@@ -104,7 +136,10 @@
   // Carga desde Core + render
   // -----------------------------
   try {
-    const rows = await CoreStats.getPichichiRows();
+    // Nota: getPichichiRows aún no acepta competitionId
+    // Por ahora se filtra por temporada (compatibilidad hacia atrás)
+    // TODO: Modificar getPichichiRows para filtrar por competición
+    const rows = await CoreStats.getPichichiRows(competitionId);
     const fullData = CoreStats.computePichichiPlayers(rows);
     render(fullData);
   } catch (e) {

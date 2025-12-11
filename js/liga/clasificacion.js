@@ -7,15 +7,47 @@ import { computePartidosEquipo, computePosicionesEquipo } from '../modules/stats
 import * as Render from '../modules/render.js';
 import { Modal } from '../modules/modal.js';
 import { createNavigationControls } from '../modules/navigation.js';
+import { getCompetitionFromURL, getCurrentCompetitionSlug, buildBreadcrumb, renderBreadcrumb } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
 
 (async () => {
   const tbody = document.getElementById('tabla-clasificacion');
   if (!tbody) return;
 
+  // --- Obtener contexto de competición ---
+  let competitionId = null;
+  let competitionSlug = null;
+  let competitionName = null;
+
+  try {
+    competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionId = competition.id;
+        competitionName = competition.name;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+    // Continuar sin filtro de competición (compatibilidad hacia atrás)
+  }
+
+  // --- Renderizar breadcrumb ---
+  const breadcrumbContainer = document.createElement('div');
+  breadcrumbContainer.className = 'breadcrumb-container';
+  breadcrumbContainer.style.marginBottom = '1rem';
+  tbody.parentElement.insertAdjacentElement('beforebegin', breadcrumbContainer);
+  
+  if (competitionName) {
+    const breadcrumbItems = buildBreadcrumb(competitionSlug, competitionName, 'Clasificación');
+    renderBreadcrumb(breadcrumbContainer, breadcrumbItems);
+  }
+
   // --- Data Loading ---
   let jornadas = [];
   try {
-    jornadas = await getResultados();
+    jornadas = await getResultados(competitionId);
   } catch (e) {
     console.error("Error loading matches:", e);
     Render.renderError(tbody.parentElement, 'No se pudieron cargar los resultados.');
@@ -83,7 +115,7 @@ import { createNavigationControls } from '../modules/navigation.js';
   const abrirHistorialEquipo = async (equipos, hasta, teamName) => {
     const eq = equipos.find(e => e.nombre === teamName);
     const partidos = computePartidosEquipo(jornadas, hasta, teamName);
-    const posHistory = await computePosicionesEquipo(hasta, teamName);
+    const posHistory = await computePosicionesEquipo(hasta, teamName, competitionId);
 
     if (!eq && partidos.length === 0 && posHistory.length === 0) return;
 
@@ -232,14 +264,14 @@ import { createNavigationControls } from '../modules/navigation.js';
     initialValue: lastPlayed,
     onUpdate: async (newValue) => {
       current = newValue;
-      const equipos = await computeClasificacion(current);
+      const equipos = await computeClasificacion(current, { competitionId });
       render(equipos, current);
     },
     formatLabel: (val) => `Jornada ${val}`
   });
 
   // Initial Render
-  const equiposInicial = await computeClasificacion(current);
+  const equiposInicial = await computeClasificacion(current, { competitionId });
   render(equiposInicial, current);
 
 })();

@@ -39,8 +39,8 @@ export const combinedShot = (t) => {
 
 export const efectRival = (t) => t.tirosRival > 0 ? t.golesEncajados / t.tirosRival : NaN;
 
-export const computeRankingsPorEquipo = async () => {
-    const statsIndex = await getStatsIndex();
+export const computeRankingsPorEquipo = async (competitionId = null) => {
+    const statsIndex = await getStatsIndex(competitionId);
 
     const agg = new Map();
     const teamAgg = (name) => {
@@ -604,12 +604,13 @@ export function computePartidosEquipo(jornadas, hasta, teamName) {
  * Compute position history for a team
  * @param {number} hasta - limit jornada
  * @param {string} teamName 
+ * @param {number|null} competitionId - ID de competición (opcional)
  * @returns {Promise<Array>} List of {jornada, pos, pts}
  */
-export async function computePosicionesEquipo(hasta, teamName) {
+export async function computePosicionesEquipo(hasta, teamName, competitionId = null) {
     const history = [];
     for (let jNum = 1; jNum <= hasta; jNum++) {
-        const tabla = await computeClasificacion(jNum);
+        const tabla = await computeClasificacion(jNum, { competitionId });
         const idx = tabla.findIndex(e => e.nombre === teamName);
         if (idx === -1) continue;
         history.push({

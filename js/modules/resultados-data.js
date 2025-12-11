@@ -93,12 +93,17 @@ export const getResultados = async () => {
 // Match Data Loading
 // -----------------------------
 
-export const loadAllMatches = async () => {
-    if (jornadasLoaded) return { jornadas, partidoMeta };
+let lastCompetitionId = null;
+
+export const loadAllMatches = async (competitionId = null) => {
+    // Invalidar caché si cambia el competitionId
+    if (jornadasLoaded && lastCompetitionId === competitionId) {
+        return { jornadas, partidoMeta };
+    }
 
     let rawJornadas = [];
     try {
-        rawJornadas = await CoreStats.getResultados();
+        rawJornadas = await CoreStats.getResultados(competitionId);
     } catch (e) {
         console.error('Error getResultados:', e);
         rawJornadas = [];
@@ -160,6 +165,7 @@ export const loadAllMatches = async () => {
 
     jornadas = Array.from(jornadasMap.values()).sort((a, b) => (a.numero || 0) - (b.numero || 0));
     jornadasLoaded = true;
+    lastCompetitionId = competitionId;
 
     return { jornadas, partidoMeta };
 };

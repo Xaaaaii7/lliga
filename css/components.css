@@ -431,3 +431,46 @@ ul.kv li{
 @media (max-width:700px){
   .cards-2col{grid-template-columns:1fr;}
 }
+
+/* ==================
+   BREADCRUMBS
+   ================== */
+.breadcrumb-container {
+  margin-bottom: 1rem;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--muted, #9fb3c8);
+}
+
+.breadcrumb-link {
+  color: var(--accent, #007bff);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: var(--text, #e6edf3);
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: var(--muted, #9fb3c8);
+  margin: 0 0.25rem;
+}
+
+.breadcrumb-current {
+  color: var(--text, #e6edf3);
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .breadcrumb {
+    font-size: 0.85rem;
+  }
+}

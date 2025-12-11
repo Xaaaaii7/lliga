@@ -16,10 +16,42 @@ import {
 } from '../modules/resultados-modal.js';
 
 import { createNavigationControls } from '../modules/navigation.js';
+import { getCompetitionFromURL, getCurrentCompetitionSlug, buildBreadcrumb, renderBreadcrumb } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
 
 (async () => {
   const root = document.getElementById('resultados');
   if (!root) return;
+
+  // --- Obtener contexto de competición ---
+  let competitionId = null;
+  let competitionSlug = null;
+  let competitionName = null;
+
+  try {
+    competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionId = competition.id;
+        competitionName = competition.name;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+    // Continuar sin filtro de competición (compatibilidad hacia atrás)
+  }
+
+  // --- Renderizar breadcrumb ---
+  const breadcrumbContainer = document.createElement('div');
+  breadcrumbContainer.className = 'breadcrumb-container';
+  breadcrumbContainer.style.marginBottom = '1rem';
+  root.insertAdjacentElement('beforebegin', breadcrumbContainer);
+  
+  if (competitionName) {
+    const breadcrumbItems = buildBreadcrumb(competitionSlug, competitionName, 'Resultados');
+    renderBreadcrumb(breadcrumbContainer, breadcrumbItems);
+  }
 
   // Modal refs
   const bodyEl = document.getElementById('stats-body');
@@ -34,7 +66,7 @@ import { createNavigationControls } from '../modules/navigation.js';
   // Start background loads
   loadCitiesMap();
 
-  const { jornadas, partidoMeta } = await loadAllMatches();
+  const { jornadas, partidoMeta } = await loadAllMatches(competitionId);
 
   if (!Array.isArray(jornadas) || !jornadas.length) {
     root.innerHTML = `<p class="hint">No se pudieron cargar los partidos.</p>`;

@@ -11,8 +11,28 @@ import {
   resolvePlaylistIdForClub,
   fetchPlaylistItemsRSS
 } from '../modules/club-data.js';
+import { getCompetitionFromURL, getCurrentCompetitionSlug, buildBreadcrumb, renderBreadcrumb, buildURLWithCompetition } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
 
 (async () => {
+  // --- Obtener contexto de competición ---
+  let competitionId = null;
+  let competitionSlug = null;
+  let competitionName = null;
+
+  try {
+    competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionId = competition.id;
+        competitionName = competition.name;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+  }
+
   // --------------------------
   // CLUB target
   // --------------------------
@@ -21,6 +41,20 @@ import {
     document.getElementById("club-root").innerHTML =
       "<p style='color:var(--muted)'>Equipo no especificado.</p>";
     return;
+  }
+
+  // --- Renderizar breadcrumb ---
+  if (competitionName) {
+    const root = document.getElementById("club-root");
+    if (root) {
+      const breadcrumbContainer = document.createElement('div');
+      breadcrumbContainer.className = 'breadcrumb-container';
+      breadcrumbContainer.style.marginBottom = '1rem';
+      root.insertAdjacentElement('beforebegin', breadcrumbContainer);
+      
+      const breadcrumbItems = buildBreadcrumb(competitionSlug, competitionName, CLUB);
+      renderBreadcrumb(breadcrumbContainer, breadcrumbItems);
+    }
   }
 
   // Helpers locales derivados de módulos (para compatibilidad de uso en el código)
@@ -51,8 +85,8 @@ import {
     computeTeamTotals: async () => []
   };
 
-  const resultados = await CoreStats.getResultados();
-  await CoreStats.getStatsIndex(); // Ensure index is loaded if needed internally
+  const resultados = await CoreStats.getResultados(competitionId);
+  await CoreStats.getStatsIndex(competitionId); // Ensure index is loaded if needed internally
 
   resultados.sort((a, b) => (a.numero || 0) - (b.numero || 0));
 
@@ -138,7 +172,7 @@ import {
   // --------------------------
   // Clasificación desde CoreStats (con H2H)
   // --------------------------
-  const fullClasif = await CoreStats.computeClasificacion(null, { useH2H: true });
+  const fullClasif = await CoreStats.computeClasificacion(null, { useH2H: true, competitionId });
   const idxClub = fullClasif.findIndex(t => norm(t.nombre) === norm(CLUB));
 
   const clubRow = fullClasif.find(t => norm(t.nombre) === norm(CLUB));
@@ -412,7 +446,7 @@ import {
   const tabStats = document.getElementById("tab-stats");
 
   try {
-    const adv = await CoreStats.computeRankingsPorEquipo();
+    const adv = await CoreStats.computeRankingsPorEquipo(competitionId);
     const totals = await CoreStats.computeTeamTotals();
 
     const {

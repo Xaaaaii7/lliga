@@ -79,7 +79,7 @@ export async function getCurrentCompetitionSlug() {
  */
 export function buildBreadcrumb(competitionSlug, competitionName, currentPage) {
   const items = [
-    { label: 'Dashboard', url: 'dashboard.html' },
+    { label: 'Dashboard', url: '../dashboard.html' },
   ];
 
   if (competitionSlug && competitionName) {

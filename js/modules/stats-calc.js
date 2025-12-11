@@ -12,8 +12,8 @@ export const dg = e => e.gf - e.gc;
 // Clasificación con H2H
 // --------------------------
 export const computeClasificacion = async (hasta = null, opts = {}) => {
-    const { useH2H = true } = opts;
-    const jornadas = await getResultados();
+    const { useH2H = true, competitionId = null } = opts;
+    const jornadas = await getResultados(competitionId);
 
     const limit = (hasta == null)
         ? jornadas.length

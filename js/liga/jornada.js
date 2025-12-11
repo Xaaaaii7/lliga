@@ -1,10 +1,39 @@
 import { createNavigationControls } from '../modules/navigation.js';
 import { queryTable } from '../modules/db-helpers.js';
 import { slugify } from '../modules/utils.js';
+import { getCompetitionFromURL, getCurrentCompetitionSlug, buildBreadcrumb, renderBreadcrumb } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
 
 (async () => {
   const root = document.getElementById('jornada');
   if (!root) return;
+
+  // --- Obtener contexto de competición ---
+  let competitionSlug = null;
+  let competitionName = null;
+
+  try {
+    competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionName = competition.name;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+  }
+
+  // --- Renderizar breadcrumb ---
+  if (competitionName) {
+    const breadcrumbContainer = document.createElement('div');
+    breadcrumbContainer.className = 'breadcrumb-container';
+    breadcrumbContainer.style.marginBottom = '1rem';
+    root.insertAdjacentElement('beforebegin', breadcrumbContainer);
+    
+    const breadcrumbItems = buildBreadcrumb(competitionSlug, competitionName, 'Jornada');
+    renderBreadcrumb(breadcrumbContainer, breadcrumbItems);
+  }
 
   // Carga de jornadas desde Supabase
   let jornadasCfg = [];
