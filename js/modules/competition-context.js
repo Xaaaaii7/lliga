@@ -15,6 +15,26 @@ export function getCompetitionFromURL() {
 }
 
 /**
+ * Obtiene el path base de la aplicación (útil para GitHub Pages)
+ * @returns {string} Path base (ej: '/lliga/' o '/')
+ */
+function getBasePath() {
+  const pathname = window.location.pathname;
+  // Si estamos en la raíz, retornar '/'
+  if (pathname === '/' || pathname === '/index.html') {
+    return '/';
+  }
+  // Extraer el path base (todo hasta el último '/')
+  // Ejemplo: '/lliga/clasificacion.html' -> '/lliga/'
+  const parts = pathname.split('/').filter(p => p);
+  if (parts.length > 1) {
+    // Hay un subdirectorio (ej: 'lliga')
+    return '/' + parts[0] + '/';
+  }
+  return '/';
+}
+
+/**
  * Construye una URL con el contexto de competición
  * @param {string} path - Ruta relativa (ej: 'clasificacion.html')
  * @param {string|null} competitionSlug - Slug de la competición
@@ -22,7 +42,10 @@ export function getCompetitionFromURL() {
  * @returns {string} URL completa con parámetros
  */
 export function buildURLWithCompetition(path, competitionSlug, additionalParams = {}) {
-  const url = new URL(path, window.location.origin);
+  const basePath = getBasePath();
+  // Construir la ruta completa con el path base
+  const fullPath = basePath === '/' ? path : basePath + path;
+  const url = new URL(fullPath, window.location.origin);
   
   if (competitionSlug) {
     url.searchParams.set('comp', competitionSlug);
@@ -80,8 +103,11 @@ export async function getCurrentCompetitionSlug() {
  * @returns {Array<{label: string, url: string|null}>} Array de items del breadcrumb
  */
 export function buildBreadcrumb(competitionSlug, competitionName, currentPage) {
+  const basePath = getBasePath();
+  const dashboardPath = basePath === '/' ? 'dashboard.html' : basePath + 'dashboard.html';
+  
   const items = [
-    { label: 'Dashboard', url: '../dashboard.html' },
+    { label: 'Dashboard', url: dashboardPath },
   ];
 
   if (competitionSlug && competitionName) {
