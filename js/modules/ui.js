@@ -22,7 +22,9 @@ export async function renderUserSection() {
     const profile = await getCurrentProfile();
     const safeName = escapeHtml(profile?.nickname || user.email);
 
+    // Dashboard solo aparece si está logueado, al lado del nombre
     let html = `<span class="user-name">${safeName}</span>`;
+    html += ` | <a href="dashboard.html">Dashboard</a>`;
     if (profile?.is_admin) {
         html += ` | <a href="admin.html">Admin</a>`;
     }
@@ -53,18 +55,30 @@ export function initNavigation() {
     const header = document.querySelector('.site-header');
     const nav = document.getElementById('main-nav');
     if (nav && header) {
-        // Detectar si estamos en la landing page (index.html con clase page-landing)
+        // Detectar si estamos en una página de landing (index.html, competitions.html, dashboard.html)
         const currentPage = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing');
+        const isLandingPage = (currentPage === 'index.html' && document.body.classList.contains('page-landing')) ||
+                             currentPage === 'competitions.html' ||
+                             currentPage === 'dashboard.html';
 
         let links;
 
         if (isLandingPage) {
-            // Menú para landing page (público, neutral)
-            links = [
-                ['index.html', 'Inicio'],
-                ['competitions.html', 'Competiciones']
-            ];
+            // Menú para landing pages (index.html y competitions.html tienen el mismo menú)
+            // Dashboard también usa este menú pero solo se muestra si está logueado
+            if (currentPage === 'dashboard.html') {
+                // Dashboard tiene un menú especial
+                links = [
+                    ['index.html', 'Inicio'],
+                    ['competitions.html', 'Competiciones']
+                ];
+            } else {
+                // index.html y competitions.html tienen el mismo menú
+                links = [
+                    ['index.html', 'Inicio'],
+                    ['competitions.html', 'Competiciones']
+                ];
+            }
         } else {
             // Menú para páginas de liga (clasificacion, resultados, etc.)
             // Verificar si es una página de liga por el nombre del archivo
@@ -88,11 +102,9 @@ export function initNavigation() {
                     ['directos.html', 'Directos']
                 ];
             } else {
-                // Menú para otras páginas (dashboard, admin, competitions, etc.)
+                // Menú para otras páginas (admin, login, register, etc.)
                 links = [
                     ['index.html', 'Inicio'],
-                    ['liga.html', 'Liga'],
-                    ['dashboard.html', 'Dashboard'],
                     ['competitions.html', 'Competiciones']
                 ];
             }
