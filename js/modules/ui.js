@@ -53,29 +53,44 @@ export function initNavigation() {
     const header = document.querySelector('.site-header');
     const nav = document.getElementById('main-nav');
     if (nav && header) {
+        // Detectar si estamos en la landing page (index.html)
+        const currentPage = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing');
 
-        // Menú principal
-        const links = [
-            ['index.html', 'Inicio'],
-            ['noticias.html', 'Noticias'],
-            ['clasificacion.html', 'Clasificación'],
-            ['resultados.html', 'Resultados'],
-            ['jugadores.html', 'Jugadores'],
-            ['pichichi.html', 'Pichichi'],
-            ['clubs.html', 'Clubs'],
-            ['jornada.html', 'Jornada'],
-            ['reglas.html', 'Reglas'],
-            ['directos.html', 'Directos']
-        ];
+        let links;
+
+        if (isLandingPage) {
+            // Menú para landing page (público, neutral - sin acceso directo a liga)
+            links = [
+                ['index.html', 'Inicio'],
+                ['competitions.html', 'Competiciones'],
+                ['noticias.html', 'Noticias'],
+                ['reglas.html', 'Reglas']
+            ];
+        } else {
+            // Menú completo para páginas internas
+            links = [
+                ['index.html', 'Inicio'],
+                ['liga.html', 'Liga'],
+                ['noticias.html', 'Noticias'],
+                ['clasificacion.html', 'Clasificación'],
+                ['resultados.html', 'Resultados'],
+                ['jugadores.html', 'Jugadores'],
+                ['pichichi.html', 'Pichichi'],
+                ['clubs.html', 'Clubs'],
+                ['jornada.html', 'Jornada'],
+                ['reglas.html', 'Reglas'],
+                ['directos.html', 'Directos']
+            ];
+        }
 
         nav.innerHTML = links
             .map(([href, label]) => `<a href="${href}" data-href="${href}">${label}</a>`)
             .join('');
 
         // Activar link
-        const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
         nav.querySelectorAll('a').forEach(a => {
-            if ((a.getAttribute('data-href') || '').toLowerCase() === here) {
+            if ((a.getAttribute('data-href') || '').toLowerCase() === currentPage) {
                 a.classList.add('active');
             }
         });
@@ -98,5 +113,6 @@ export function initNavigation() {
     }
 
     // Renderizar info de usuario (login/admin/logout)
+    // En la landing page, solo mostrar si está logueado
     renderUserSection().catch(console.error);
 }
