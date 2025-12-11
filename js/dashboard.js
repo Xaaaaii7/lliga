@@ -1,7 +1,7 @@
 import { getCurrentUser, getCurrentProfile, logout } from './modules/auth.js';
-import { getUserCompetitions, getPublicCompetitions } from './modules/competition-data.js';
+import { getUserCompetitions } from './modules/competition-data.js';
+import { getPublicCompetitions, getCompetitionStats } from './modules/competitions.js';
 import { buildURLWithCompetition } from './modules/competition-context.js';
-import { getCompetitionStats } from './modules/competitions.js';
 import { getOfficialStatsCurrentSeason, getAllCompetitionsStats } from './modules/user-stats.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
