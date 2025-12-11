@@ -40,11 +40,16 @@ export async function renderUserSection() {
 }
 
 export function initNavigation() {
-    // ✔ Convertir automáticamente el LOGO del header en enlace a index.html
+    // Detectar si estamos en una página dentro de liga/
+    const isInLigaFolder = window.location.pathname.includes('/liga/');
+    
+    // ✔ Convertir automáticamente el LOGO del header en enlace
     const headerLogo = document.querySelector('.site-header .logo');
     if (headerLogo && !headerLogo.closest('a')) {
         const wrapper = document.createElement('a');
-        wrapper.href = 'index.html';
+        // Si estamos en liga/, el logo apunta a liga/index.html (relativo)
+        // Si estamos en raíz, apunta a index.html
+        wrapper.href = isInLigaFolder ? 'index.html' : 'index.html';
         wrapper.style.display = 'inline-block';
         headerLogo.parentNode.insertBefore(wrapper, headerLogo);
         wrapper.appendChild(headerLogo);
@@ -55,7 +60,7 @@ export function initNavigation() {
     if (nav && header) {
         // Detectar si estamos en la landing page (index.html)
         const currentPage = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing');
+        const isLandingPage = currentPage === 'index.html' && document.body.classList.contains('page-landing') && !isInLigaFolder;
 
         let links;
 
@@ -66,14 +71,11 @@ export function initNavigation() {
                 ['competitions.html', 'Competiciones']
             ];
         } else {
-            // Detectar si estamos en una página dentro de liga/
-            const isInLigaFolder = window.location.pathname.includes('/liga/');
             
             if (isInLigaFolder) {
                 // Menú para páginas dentro de liga/
                 links = [
-                    ['../index.html', 'Inicio'],
-                    ['index.html', 'Liga'],
+                    ['index.html', 'Inicio'],
                     ['noticias.html', 'Noticias'],
                     ['clasificacion.html', 'Clasificación'],
                     ['resultados.html', 'Resultados'],
@@ -100,8 +102,15 @@ export function initNavigation() {
             .join('');
 
         // Activar link
+        // Para páginas en liga/, comparar solo el nombre del archivo
+        const pageToCompare = isInLigaFolder 
+            ? currentPage 
+            : (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        
         nav.querySelectorAll('a').forEach(a => {
-            if ((a.getAttribute('data-href') || '').toLowerCase() === currentPage) {
+            const href = a.getAttribute('data-href') || '';
+            const hrefFile = href.split('/').pop().toLowerCase();
+            if (hrefFile === pageToCompare || href.toLowerCase() === currentPage) {
                 a.classList.add('active');
             }
         });

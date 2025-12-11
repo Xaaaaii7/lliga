@@ -1,8 +1,20 @@
 import { loadLeagueTeams } from './modules/db-helpers.js';
 import { getSupabaseClient, getActiveSeason } from './modules/supabase-client.js';
-import { getCurrentUser } from './modules/auth.js';
+import { getCurrentUser, getCurrentProfile } from './modules/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Si ya está logueado, redirigir al dashboard
+  const currentUser = await getCurrentUser();
+  if (currentUser) {
+    const profile = await getCurrentProfile();
+    if (profile?.is_admin) {
+      window.location.href = 'admin.html';
+      return;
+    }
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   const supabase = await getSupabaseClient();
   const season = getActiveSeason();
 
@@ -13,13 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const teamSelect = document.getElementById('reg-team');
   const errorEl = document.getElementById('register-error');
   const successEl = document.getElementById('register-success');
-
-  // Si ya está logueado, redirigir
-  const currentUser = await getCurrentUser();
-  if (currentUser) {
-    window.location.href = 'index.html';
-    return;
-  }
 
   // 1) Cargar equipos usando helper
   async function loadTeams() {

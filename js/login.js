@@ -1,7 +1,19 @@
 import { login, getCurrentUser, getCurrentProfile } from './modules/auth.js';
 import { getSupabaseClient } from './modules/supabase-client.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Si ya está logueado, redirigir al dashboard
+  const user = await getCurrentUser();
+  if (user) {
+    const profile = await getCurrentProfile();
+    if (profile?.is_admin) {
+      window.location.href = 'admin.html';
+      return;
+    }
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   const form = document.getElementById('login-form');
   const emailInput = document.getElementById('login-email');
   const passInput = document.getElementById('login-password');
