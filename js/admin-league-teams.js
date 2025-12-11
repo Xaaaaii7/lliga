@@ -1,6 +1,6 @@
 import { Modal } from './modules/modal.js';
-import { queryTable, getSupabaseClient } from './modules/db-helpers.js';
-import { getActiveSeason } from './modules/supabase-client.js';
+import { queryTable } from './modules/db-helpers.js';
+import { getSupabaseClient, getActiveSeason } from './modules/supabase-client.js';
 import { ensureAdmin } from './modules/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
