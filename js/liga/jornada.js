@@ -11,6 +11,7 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
   // --- Obtener contexto de competición ---
   let competitionSlug = null;
   let competitionName = null;
+  let competitionId = null;
 
   try {
     competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
@@ -18,6 +19,7 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
       const competition = await getCompetitionBySlug(competitionSlug);
       if (competition) {
         competitionName = competition.name;
+        competitionId = competition.id;
       }
     }
   } catch (e) {
@@ -40,6 +42,8 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
   try {
     const data = await queryTable('jornadas_config', '*', {
       useSeason: false,
+      competitionId: competitionId,
+      autoCompetitionId: true, // Intentar obtener automáticamente si no se proporciona
       order: { column: 'jornada', ascending: true }
     });
 

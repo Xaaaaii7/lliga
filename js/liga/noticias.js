@@ -1,10 +1,30 @@
 import { Modal } from '../modules/modal.js';
 import { queryTable, withErrorHandling } from '../modules/db-helpers.js';
+import { getCompetitionFromURL, getCurrentCompetitionSlug } from '../modules/competition-context.js';
+import { getCompetitionBySlug } from '../modules/competition-data.js';
 
 (async () => {
+  // --- Obtener contexto de competición ---
+  let competitionId = null;
+  try {
+    const competitionSlug = getCompetitionFromURL() || await getCurrentCompetitionSlug();
+    if (competitionSlug) {
+      const competition = await getCompetitionBySlug(competitionSlug);
+      if (competition) {
+        competitionId = competition.id;
+      }
+    }
+  } catch (e) {
+    console.warn('Error obteniendo contexto de competición:', e);
+  }
+
   // Carga segura desde Supabase usando el nuevo helper
   const data = await withErrorHandling(
-    () => queryTable('noticias', '*', { useSeason: false }),
+    () => queryTable('noticias', '*', { 
+      useSeason: false,
+      competitionId: competitionId,
+      autoCompetitionId: true // Intentar obtener automáticamente si no se proporciona
+    }),
     {
       errorMessage: 'No se pudo cargar noticias desde Supabase',
       fallback: []

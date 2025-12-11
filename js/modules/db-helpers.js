@@ -2,17 +2,37 @@
  * Database Query Helpers
  * 
  * Módulo para centralizar queries comunes a Supabase y reducir código duplicado.
- * Incluye manejo automático de temporada (season) y errores consistente.
+ * Incluye manejo automático de temporada (season) y competition_id.
  */
 
 import { getSupabaseClient, getActiveSeason } from './supabase-client.js';
+import { getCurrentCompetitionId } from './competitions.js';
 
 /**
- * Query simple con filtro de temporada automático
+ * Lista de tablas que tienen la columna competition_id
+ * Se usa para aplicar el filtro automáticamente cuando sea apropiado
+ */
+const TABLES_WITH_COMPETITION_ID = new Set([
+    'matches',
+    'rounds',
+    'goal_events',
+    'match_injuries',
+    'match_red_cards',
+    'match_team_stats',
+    'noticias',
+    'player_suspensions',
+    'jornadas_config',
+    'league_teams' // Puede tener competition_id (puede ser NULL)
+]);
+
+/**
+ * Query simple con filtro de temporada y competition_id automático
  * @param {string} table - Nombre de la tabla
  * @param {string} select - Columnas a seleccionar (formato Supabase)
  * @param {Object} options - Opciones adicionales
  * @param {boolean} options.useSeason - Si debe filtrar por temporada (default: true)
+ * @param {number|null} options.competitionId - ID de competición (si null, intenta obtenerlo del contexto)
+ * @param {boolean} options.autoCompetitionId - Si debe obtener competition_id automáticamente (default: true)
  * @param {Object} options.filters - Filtros adicionales { column: value }
  * @param {Object} options.order - Ordenamiento { column: string, ascending: boolean }
  * @param {number} options.limit - Límite de resultados
@@ -22,6 +42,8 @@ import { getSupabaseClient, getActiveSeason } from './supabase-client.js';
 export async function queryTable(table, select = '*', options = {}) {
     const {
         useSeason = true,
+        competitionId = null,
+        autoCompetitionId = true,
         filters = {},
         order = null,
         limit = null
@@ -30,8 +52,23 @@ export async function queryTable(table, select = '*', options = {}) {
     const supabase = await getSupabaseClient();
     let query = supabase.from(table).select(select);
 
-    // Filtro de temporada automático
-    if (useSeason) {
+    // Obtener competition_id automáticamente si no se proporciona y la tabla lo soporta
+    let finalCompetitionId = competitionId;
+    if (finalCompetitionId === null && autoCompetitionId && TABLES_WITH_COMPETITION_ID.has(table)) {
+        try {
+            finalCompetitionId = await getCurrentCompetitionId();
+        } catch (e) {
+            // Si falla obtener competition_id, continuar sin él (compatibilidad hacia atrás)
+            console.debug(`No se pudo obtener competition_id automáticamente para ${table}:`, e);
+        }
+    }
+
+    // PRIORIDAD: competition_id sobre season
+    // Si tenemos competition_id y la tabla lo soporta, usarlo
+    if (finalCompetitionId !== null && TABLES_WITH_COMPETITION_ID.has(table)) {
+        query = query.eq('competition_id', finalCompetitionId);
+    } else if (useSeason) {
+        // Fallback a season si no hay competition_id
         const season = getActiveSeason();
         if (season) {
             query = query.eq('season', season);
@@ -76,12 +113,27 @@ export async function queryTable(table, select = '*', options = {}) {
  */
 export async function queryTableNotNull(table, select, notNullColumns = [], options = {}) {
     const supabase = await getSupabaseClient();
-    const season = options.useSeason !== false ? getActiveSeason() : null;
+    
+    // Obtener competition_id automáticamente si no se proporciona
+    let finalCompetitionId = options.competitionId;
+    if (finalCompetitionId === null && options.autoCompetitionId !== false && TABLES_WITH_COMPETITION_ID.has(table)) {
+        try {
+            finalCompetitionId = await getCurrentCompetitionId();
+        } catch (e) {
+            console.debug(`No se pudo obtener competition_id automáticamente para ${table}:`, e);
+        }
+    }
 
     let query = supabase.from(table).select(select);
 
-    if (season && options.useSeason !== false) {
-        query = query.eq('season', season);
+    // PRIORIDAD: competition_id sobre season
+    if (finalCompetitionId !== null && TABLES_WITH_COMPETITION_ID.has(table)) {
+        query = query.eq('competition_id', finalCompetitionId);
+    } else if (options.useSeason !== false) {
+        const season = getActiveSeason();
+        if (season) {
+            query = query.eq('season', season);
+        }
     }
 
     // Aplicar filtros NOT NULL
@@ -144,21 +196,27 @@ export async function queryById(table, id, select = '*', idColumn = 'id') {
 }
 
 /**
- * Carga equipos de la liga para la temporada actual
+ * Carga equipos de la liga para la competición/temporada actual
  * (Wrapper específico, muy usado)
  * @param {Object} options - Opciones
  * @param {string} options.select - Columnas a seleccionar
  * @param {boolean} options.orderByNickname - Ordenar por nickname (default: true)
+ * @param {number|null} options.competitionId - ID de competición (opcional)
+ * @param {boolean} options.autoCompetitionId - Si debe obtener competition_id automáticamente (default: true)
  * @returns {Promise<Array>}
  */
 export async function loadLeagueTeams(options = {}) {
     const {
         select = 'id, nickname, display_name',
-        orderByNickname = true
+        orderByNickname = true,
+        competitionId = null,
+        autoCompetitionId = true
     } = options;
 
     return queryTable('league_teams', select, {
         useSeason: true,
+        competitionId,
+        autoCompetitionId,
         order: orderByNickname ? { column: 'nickname', ascending: true } : null
     });
 }
@@ -167,12 +225,16 @@ export async function loadLeagueTeams(options = {}) {
  * Carga partidos con relaciones a equipos
  * (Wrapper específico, muy usado)
  * @param {Object} options - Opciones adicionales
+ * @param {string} options.select - Columnas a seleccionar
+ * @param {number|null} options.competitionId - ID de competición (opcional)
+ * @param {boolean} options.autoCompetitionId - Si debe obtener competition_id automáticamente (default: true)
  * @returns {Promise<Array>}
  */
 export async function loadMatches(options = {}) {
     const defaultSelect = `
     id,
     season,
+    competition_id,
     round_id,
     match_date,
     match_time,
@@ -185,10 +247,17 @@ export async function loadMatches(options = {}) {
     away:league_teams!matches_away_league_team_id_fkey ( id, nickname, display_name )
   `;
 
-    const { select = defaultSelect, ...restOptions } = options;
+    const { 
+        select = defaultSelect, 
+        competitionId = null,
+        autoCompetitionId = true,
+        ...restOptions 
+    } = options;
 
     return queryTable('matches', select, {
         useSeason: true,
+        competitionId,
+        autoCompetitionId,
         order: { column: 'round_id', ascending: true },
         ...restOptions
     });

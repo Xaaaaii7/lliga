@@ -12,7 +12,10 @@ async function loadChannelTeamMap() {
       display_name,
       nickname,
       user:users!user_id(twitch_channel)
-    `, { useSeason: false }),
+    `, { 
+      useSeason: false,
+      autoCompetitionId: false // Los directos pueden ser de cualquier competición
+    }),
     {
       errorMessage: "Error cargando mapa de canales desde DB",
       fallback: null
