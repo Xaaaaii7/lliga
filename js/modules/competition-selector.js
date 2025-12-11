@@ -5,9 +5,9 @@
  */
 
 import { getCurrentUser } from './auth.js';
-import { getUserCompetitions, getPublicCompetitions } from './competition-data.js';
+import { getUserCompetitions } from './competition-data.js';
 import { getCompetitionFromURL, buildURLWithCompetition, navigateWithCompetition } from './competition-context.js';
-import { getCurrentCompetition } from './competitions.js';
+import { getCurrentCompetition, getPublicCompetitions } from './competitions.js';
 import { escapeHtml } from './utils.js';
 
 /**
