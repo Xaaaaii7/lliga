@@ -44,9 +44,25 @@ export async function renderUserSection() {
     }
 }
 
-export function initNavigation() {
+export async function initNavigation() {
     // Obtener el parámetro comp de la URL si existe (lo necesitamos para el logo también)
-    const competitionSlug = getCompetitionFromURL();
+    let competitionSlug = getCompetitionFromURL();
+    
+    // Si no hay parámetro en la URL pero estamos en una página de liga, intentar obtenerlo del contexto
+    if (!competitionSlug) {
+        const currentPage = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const ligaPages = ['liga.html', 'clasificacion.html', 'resultados.html', 'jornada.html', 'club.html', 
+                          'pichichi.html', 'clubs.html', 'jugadores.html', 'noticias.html', 
+                          'reglas.html', 'directos.html'];
+        if (ligaPages.includes(currentPage)) {
+            try {
+                const { getCurrentCompetitionSlug } = await import('./competition-context.js');
+                competitionSlug = await getCurrentCompetitionSlug();
+            } catch (e) {
+                console.debug('No se pudo obtener competitionSlug del contexto:', e);
+            }
+        }
+    }
     
     // ✔ Convertir automáticamente el LOGO del header en enlace
     const headerLogo = document.querySelector('.site-header .logo');

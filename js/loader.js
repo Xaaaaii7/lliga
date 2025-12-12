@@ -31,10 +31,17 @@ Object.keys(AppUtils).forEach(key => {
 });
 
 // Initialize UI (Nav, Header) when DOM is ready
+// initNavigation es ahora async, así que necesitamos manejarlo correctamente
+const initNav = () => {
+    UI.initNavigation().catch(err => {
+        console.error('Error inicializando navegación:', err);
+    });
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', UI.initNavigation);
+    document.addEventListener('DOMContentLoaded', initNav);
 } else {
-    UI.initNavigation();
+    initNav();
 }
 
 console.log('AppUtils loaded via ES Modules wrapper.');
