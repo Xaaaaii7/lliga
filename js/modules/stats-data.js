@@ -265,7 +265,7 @@ function parseTSV(text) {
 }
 
 // Carga pichichi desde Supabase:
-const loadPichichiFromSupabase = async () => {
+const loadPichichiFromSupabase = async (competitionId = null) => {
     const supaCfg = getSupabaseConfig() || { season: '' };
     const seasonFromCfg = supaCfg.season || '';
     const activeSeason = getActiveSeason() || seasonFromCfg || '';
@@ -274,9 +274,12 @@ const loadPichichiFromSupabase = async () => {
 
     let query = supabase
         .from('goleadores') // la VIEW
-        .select('season, player_id, jugador, manager, partidos, goles');
+        .select('season, player_id, jugador, manager, partidos, goles, competition_id');
 
-    if (activeSeason) {
+    // Prioridad: competition_id sobre season
+    if (competitionId !== null) {
+        query = query.eq('competition_id', competitionId);
+    } else if (activeSeason) {
         query = query.eq('season', activeSeason);
     }
 
@@ -293,7 +296,7 @@ const loadPichichiFromSupabase = async () => {
     const rows = data.map(r => ({
         "Jugador": r.jugador || '',
         "Equipo": r.manager || '',           // aquí usamos el nickname del manager
-        "Partidos": String(r.partidos ?? 0),   // partidos jugados por el manager
+        "Partidos": String(r.partidos ?? 0),   // partidos jugados por el EQUIPO (corregido)
         "Goles": String(r.goles ?? 0)
     }));
 

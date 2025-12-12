@@ -608,22 +608,50 @@ export const removeInjuryFromState = (matchId, side, playerId) => {
 // Suspension Logic
 // -----------------------------
 
-const getNextMatchForTeam = async (season, teamId, currentRoundId) => {
+// Helper: obtener competition_id de un match
+const getMatchCompetitionId = async (matchId) => {
+    const supa = await getSupa();
+    if (!supa || !matchId) return null;
+
+    try {
+        const { data, error } = await supa
+            .from('matches')
+            .select('competition_id')
+            .eq('id', matchId)
+            .limit(1)
+            .single();
+
+        if (error || !data) return null;
+        return data.competition_id || null;
+    } catch (e) {
+        console.warn(`Error obteniendo competition_id para match ${matchId}:`, e);
+        return null;
+    }
+};
+
+const getNextMatchForTeam = async (season, teamId, currentRoundId, competitionId = null) => {
     const supa = await getSupa();
     if (!supa) return null;
 
     const currentRoundNum = Number(currentRoundId);
     if (!isNum(currentRoundNum)) return null;
 
-    const { data, error } = await supa
+    let query = supa
         .from('matches')
         .select('id, round_id')
-        .eq('season', season)
         .or(`home_league_team_id.eq.${teamId},away_league_team_id.eq.${teamId}`)
         .gt('round_id', currentRoundNum)
         .order('round_id', { ascending: true })
-        .limit(1)
-        .single();
+        .limit(1);
+
+    // Prioridad: competition_id sobre season
+    if (competitionId !== null) {
+        query = query.eq('competition_id', competitionId);
+    } else {
+        query = query.eq('season', season);
+    }
+
+    const { data, error } = await query.single();
 
     if (error || !data) return null;
     return data.id;
@@ -632,6 +660,9 @@ const getNextMatchForTeam = async (season, teamId, currentRoundId) => {
 const saveSuspensionForMatch = async (triggerMatchId, leagueTeamId, playerIds, reasonMatchId, type = 'red_card') => {
     const supa = await getSupa();
     if (!supa) return;
+
+    // Obtener competition_id del match que causa la sanción
+    const competitionId = await getMatchCompetitionId(reasonMatchId);
 
     const { data: currentSus, error: errGet } = await supa
         .from('player_suspensions')
@@ -648,12 +679,19 @@ const saveSuspensionForMatch = async (triggerMatchId, leagueTeamId, playerIds, r
     const toDelete = currentPids.filter(pid => !newPidsSet.has(pid));
 
     if (toDelete.length > 0) {
-        await supa
+        let deleteQuery = supa
             .from('player_suspensions')
             .delete()
             .eq('origin_match_id', reasonMatchId)
             .eq('league_team_id', leagueTeamId)
             .in('player_id', toDelete);
+
+        // Filtrar por competition_id si está disponible
+        if (competitionId !== null) {
+            deleteQuery = deleteQuery.eq('competition_id', competitionId);
+        }
+
+        await deleteQuery;
     }
 
     const toInsert = playerIds.filter(pid => !currentPids.includes(pid));
@@ -665,19 +703,26 @@ const saveSuspensionForMatch = async (triggerMatchId, leagueTeamId, playerIds, r
         const season = getActiveSeasonSafe();
         const currentRound = meta.round_id || meta.jornada;
 
-        const nextMatchId = await getNextMatchForTeam(season, leagueTeamId, currentRound);
+        const nextMatchId = await getNextMatchForTeam(season, leagueTeamId, currentRound, competitionId);
         if (!nextMatchId) {
             console.log('No next match found for suspension/injury for team', leagueTeamId);
             return;
         }
 
-        const rows = toInsert.map(pid => ({
-            player_id: pid,
-            league_team_id: leagueTeamId,
-            match_id: nextMatchId,
-            origin_match_id: reasonMatchId,
-            reason: type
-        }));
+        const rows = toInsert.map(pid => {
+            const row = {
+                player_id: pid,
+                league_team_id: leagueTeamId,
+                match_id: nextMatchId,
+                origin_match_id: reasonMatchId,
+                reason: type
+            };
+            // Añadir competition_id si está disponible
+            if (competitionId !== null) {
+                row.competition_id = competitionId;
+            }
+            return row;
+        });
 
         const { error: errIns } = await supa
             .from('player_suspensions')
@@ -700,6 +745,9 @@ export const saveScorersToSupabase = async (matchId) => {
 
     const season = getActiveSeasonSafe();
     if (!season) return { ok: false, msg: 'Temporada activa no definida' };
+
+    // Obtener competition_id del match
+    const competitionId = await getMatchCompetitionId(matchId);
 
     const meta = state.meta;
     const localTeamId = meta.local_team_id;
@@ -724,13 +772,18 @@ export const saveScorersToSupabase = async (matchId) => {
     const pushSide = (sideName, leagueTeamId) => {
         (state[sideName] || []).forEach(p => {
             for (let i = 0; i < p.goals; i++) {
-                rows.push({
+                const row = {
                     match_id: matchId,
                     league_team_id: leagueTeamId,
                     player_id: (p.player_id === -1) ? null : p.player_id,
                     minute: null,
                     event_type: (p.player_id === -1) ? 'own_goal' : 'goal'
-                });
+                };
+                // Añadir competition_id si está disponible
+                if (competitionId !== null) {
+                    row.competition_id = competitionId;
+                }
+                rows.push(row);
             }
         });
     };
@@ -759,6 +812,9 @@ export const saveRedCardsFull = async (matchId) => {
     const supa = await getSupa();
     if (!supa) return { ok: false, msg: 'Supabase no configurado' };
 
+    // Obtener competition_id del match
+    const competitionId = await getMatchCompetitionId(matchId);
+
     const meta = state.meta;
     const localTeamId = meta.local_team_id;
     const visitTeamId = meta.visitante_team_id;
@@ -777,18 +833,28 @@ export const saveRedCardsFull = async (matchId) => {
 
     const rows = [];
     (state.redLocal || []).forEach(p => {
-        rows.push({
+        const row = {
             match_id: matchId,
             league_team_id: localTeamId,
             player_id: p.player_id
-        });
+        };
+        // Añadir competition_id si está disponible
+        if (competitionId !== null) {
+            row.competition_id = competitionId;
+        }
+        rows.push(row);
     });
     (state.redVisitante || []).forEach(p => {
-        rows.push({
+        const row = {
             match_id: matchId,
             league_team_id: visitTeamId,
             player_id: p.player_id
-        });
+        };
+        // Añadir competition_id si está disponible
+        if (competitionId !== null) {
+            row.competition_id = competitionId;
+        }
+        rows.push(row);
     });
 
     if (rows.length) {
@@ -832,6 +898,9 @@ export const saveInjuriesFull = async (matchId) => {
     const supa = await getSupa();
     if (!supa) return { ok: false, msg: 'Supabase no configurado' };
 
+    // Obtener competition_id del match
+    const competitionId = await getMatchCompetitionId(matchId);
+
     const meta = state.meta;
     const localTeamId = meta.local_team_id;
     const visitTeamId = meta.visitante_team_id;
@@ -850,18 +919,28 @@ export const saveInjuriesFull = async (matchId) => {
 
     const rows = [];
     (state.injuriesLocal || []).forEach(p => {
-        rows.push({
+        const row = {
             match_id: matchId,
             league_team_id: localTeamId,
             player_id: p.player_id
-        });
+        };
+        // Añadir competition_id si está disponible
+        if (competitionId !== null) {
+            row.competition_id = competitionId;
+        }
+        rows.push(row);
     });
     (state.injuriesVisitante || []).forEach(p => {
-        rows.push({
+        const row = {
             match_id: matchId,
             league_team_id: visitTeamId,
             player_id: p.player_id
-        });
+        };
+        // Añadir competition_id si está disponible
+        if (competitionId !== null) {
+            row.competition_id = competitionId;
+        }
+        rows.push(row);
     });
 
     if (rows.length) {

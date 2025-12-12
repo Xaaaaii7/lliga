@@ -2,18 +2,18 @@ export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
     console.log(`Starting Daily Curiosity: Pitchichi Efficiency (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    // Note: goleadores is a view, may not have competition_id directly
-    // For now, filter by season only (legacy behavior)
+    // La vista goleadores ahora incluye competition_id
     let rowsQuery = supabase
         .from('goleadores')
-        .select('season, jugador, partidos, goles, manager')
-        .eq('season', SEASON)
+        .select('season, jugador, partidos, goles, manager, competition_id')
         .gte('partidos', 5); // Filter min 5 matches for relevance
 
-    // TODO: If goleadores view is updated to include competition_id, add filter here
-    // if (competitionId !== null) {
-    //     rowsQuery = rowsQuery.eq('competition_id', competitionId);
-    // }
+    // Prioridad: competition_id sobre season
+    if (competitionId !== null) {
+        rowsQuery = rowsQuery.eq('competition_id', competitionId);
+    } else {
+        rowsQuery = rowsQuery.eq('season', SEASON);
+    }
 
     const { data: rows, error } = await rowsQuery;
 

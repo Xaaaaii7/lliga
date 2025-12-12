@@ -13,3 +13,4 @@ js/modules/config.js
 Thumbs.db
 *.md
 *.sql
+/lambdas
