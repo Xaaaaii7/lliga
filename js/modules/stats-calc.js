@@ -124,8 +124,8 @@ export const computeClasificacionPorJornada = async (opts = {}) => {
 };
 
 // Totales GF/GC/PJ simples (por si lo quieres directo)
-export const computeTeamTotals = async () => {
-    const tabla = await computeClasificacion(null, { useH2H: false });
+export const computeTeamTotals = async (competitionId = null) => {
+    const tabla = await computeClasificacion(null, { useH2H: false, competitionId });
     return tabla.map(t => ({
         nombre: t.nombre, pj: t.pj, gf: t.gf, gc: t.gc
     }));

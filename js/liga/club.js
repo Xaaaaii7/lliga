@@ -203,7 +203,7 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
   // --------------------------
   let goleador = null;
   try {
-    const rows = await CoreStats.getPichichiRows();
+    const rows = await CoreStats.getPichichiRows(competitionId);
     const data = CoreStats.computePichichiPlayers(rows);
     const jugadoresClub = data.filter(x => norm(x.equipo) === norm(CLUB));
     goleador = jugadoresClub[0] || null;
@@ -403,7 +403,7 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
       let teamData = null;
 
       try {
-        const plantillaDb = await loadPlantillaFromDb(CLUB);
+        const plantillaDb = await loadPlantillaFromDb(CLUB, competitionId);
         if (plantillaDb && Array.isArray(plantillaDb.squad) && plantillaDb.squad.length) {
           teamData = {
             coach: null,              // ahora mismo no lo tenemos en BD
@@ -447,7 +447,7 @@ import { getCompetitionBySlug } from '../modules/competition-data.js';
 
   try {
     const adv = await CoreStats.computeRankingsPorEquipo(competitionId);
-    const totals = await CoreStats.computeTeamTotals();
+    const totals = await CoreStats.computeTeamTotals(competitionId);
 
     const {
       raw = [],

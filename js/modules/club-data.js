@@ -26,22 +26,29 @@ async function getUserRowByNickname(nickname) {
 
 /**
  * Carga la plantilla de un club desde Supabase
+ * @param {string} clubNickname - Nickname del club
+ * @param {number|null} competitionId - ID de la competición (opcional, para filtrar por competición)
  */
-export async function loadPlantillaFromDb(clubNickname) {
+export async function loadPlantillaFromDb(clubNickname, competitionId = null) {
     if (!clubNickname) return null;
 
     const supabase = await getSupabaseClient();
     const cfg = getSupabaseConfig();
     const season = cfg?.season || null;
 
-    // 1) Resolver club_id a partir de league_teams.nickname (y season)
+    // 1) Resolver club_id a partir de league_teams.nickname (y season/competition)
     let ltQuery = supabase
         .from("league_teams")
-        .select("club_id, season, nickname")
+        .select("club_id, season, nickname, competition_id")
         .ilike("nickname", clubNickname)      // case-insensitive
         .limit(1);
 
-    if (season) ltQuery = ltQuery.eq("season", season);
+    // Prioridad: competition_id sobre season
+    if (competitionId !== null) {
+        ltQuery = ltQuery.eq("competition_id", competitionId);
+    } else if (season) {
+        ltQuery = ltQuery.eq("season", season);
+    }
 
     const { data: ltRows, error: ltError } = await ltQuery;
     if (ltError) {
