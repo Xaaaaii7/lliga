@@ -1,14 +1,21 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Player Bad Boy (Season: ${SEASON})`);
+    console.log(`Starting: Player Bad Boy (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // Using match_red_cards table is best if available, or if stats only gives team aggregate we can't find player.
     // We confirmed match_red_cards exists earlier.
 
-    const { data: cards } = await supabase
+    let cardsQuery = supabase
         .from('match_red_cards') // Assuming this table links red cards to players
-        .select('player_id, player:players(name), match:matches!inner(season)')
-        .eq('match.season', SEASON);
+        .select('player_id, player:players(name), match:matches!inner(season, competition_id)');
+
+    if (competitionId !== null) {
+        cardsQuery = cardsQuery.eq('match.competition_id', competitionId);
+    } else {
+        cardsQuery = cardsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: cards } = await cardsQuery;
 
     if (!cards?.length) {
         // try aggregating if match_red_cards is empty? 
@@ -29,12 +36,18 @@ export async function run(supabase) {
 
     if (!leader) return;
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'player_bad_boy',
         titulo: 'El chico malo',
         descripcion: `${leader} ha sido expulsado ${max} veces esta temporada.`,
         payload: { category: 'jugadores', playerName: leader, value: max, badge: `img/jugadores/${leader.toLowerCase().replace(/\s+/g, '-')}.jpg` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

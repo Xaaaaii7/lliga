@@ -1,13 +1,20 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Top Half Killers (Season: ${SEASON})`);
+    console.log(`Starting: Top Half Killers (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // 1. Calculate Standings
-    const { data: matches } = await supabase
+    let matchesQuery = supabase
         .from('matches')
         .select('home_league_team_id, away_league_team_id, home_goals, away_goals')
-        .eq('season', SEASON)
         .not('home_goals', 'is', null);
+
+    if (competitionId !== null) {
+        matchesQuery = matchesQuery.eq('competition_id', competitionId);
+    } else {
+        matchesQuery = matchesQuery.eq('season', SEASON);
+    }
+
+    const { data: matches } = await matchesQuery;
 
     if (!matches?.length) return;
 
@@ -53,12 +60,18 @@ export async function run(supabase) {
     const { data: t } = await supabase.from('league_teams').select('nickname').eq('id', leaderId).single();
     const name = t?.nickname || 'Unknown';
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_top_half_killer',
         titulo: 'Cazador de élite',
         descripcion: `El ${name} se crece ante los mejores: ha sumado ${maxPts} puntos contra rivales de la mitad superior de la tabla.`,
         payload: { category: 'equipos', nickname: name, value: maxPts, badge: `img/${name.toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

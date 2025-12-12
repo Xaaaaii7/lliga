@@ -1,11 +1,11 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Player Dependency (Season: ${SEASON})`);
+    console.log(`Starting: Player Dependency (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // 1. Fetch all goals (excluding OGs usually, as they aren't "scored by the team" in the same way, but debatable. 
     // Dependency usually means: Player Goals / Team Goals.
     // We'll count ALL goals for team total, and Player goals (non-OG) for player.
-    const { data: goals } = await supabase
+    let goalsQuery = supabase
         .from('goal_events')
         .select(`
       league_team_id,
@@ -13,9 +13,16 @@ export async function run(supabase) {
       event_type,
       player:players(name),
       team:league_teams(nickname),
-      match:matches!inner (season)
-    `)
-        .eq('match.season', SEASON);
+      match:matches!inner (season, competition_id)
+    `);
+
+    if (competitionId !== null) {
+        goalsQuery = goalsQuery.eq('match.competition_id', competitionId);
+    } else {
+        goalsQuery = goalsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: goals } = await goalsQuery;
 
     if (!goals?.length) return;
 
@@ -61,12 +68,18 @@ export async function run(supabase) {
     if (!leader) return;
     const pctStr = (maxPct * 100).toFixed(1) + '%';
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'player_dependency',
         titulo: 'Dependencia total',
         descripcion: `${leader.name} ha marcado el ${pctStr} de los goles de su equipo (${leader.count} de ${leader.totalTeam}).`,
         payload: { category: 'jugadores', playerName: leader.name, value: maxPct, badge: `img/jugadores/${leader.name.toLowerCase().replace(/\s+/g, '-')}.jpg` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

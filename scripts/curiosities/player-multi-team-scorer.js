@@ -1,18 +1,25 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Multi Team Scorer (Season: ${SEASON})`);
+    console.log(`Starting: Multi Team Scorer (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // Who scored against the most unique opponents?
-    const { data: goals } = await supabase
+    let goalsQuery = supabase
         .from('goal_events')
         .select(`
       player_id, 
       league_team_id,
       player:players(name),
-      match:matches!inner (id, season, home_league_team_id, away_league_team_id)
+      match:matches!inner (id, season, home_league_team_id, away_league_team_id, competition_id)
     `)
-        .eq('match.season', SEASON)
         .neq('event_type', 'own_goal');
+
+    if (competitionId !== null) {
+        goalsQuery = goalsQuery.eq('match.competition_id', competitionId);
+    } else {
+        goalsQuery = goalsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: goals } = await goalsQuery;
 
     if (!goals?.length) return;
 
@@ -47,12 +54,18 @@ export async function run(supabase) {
 
     const pName = playerInfo.get(leaderId);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'player_multi_team_scorer',
         titulo: 'Mercenario del gol',
         descripcion: `${pName} no hace distinciones: ha marcado gol a ${maxUnique} equipos diferentes esta temporada.`,
         payload: { category: 'jugadores', playerName: pName, value: maxUnique, badge: `img/jugadores/${pName.toLowerCase().replace(/\s+/g, '-')}.jpg` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

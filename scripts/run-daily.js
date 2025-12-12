@@ -79,6 +79,67 @@ const TASKS = [
     teamMostLosses, teamFewestWins, teamBenOGs, matchMostReds, playerBadBoy, matchMostFouls
 ];
 
+/**
+ * Obtiene el competition_id a usar para las curiosidades
+ * Prioridad:
+ * 1. Variable de entorno COMPETITION_ID
+ * 2. Competición oficial activa de la temporada actual
+ * 3. Primera competición activa de la temporada
+ */
+async function getCompetitionId(supabase) {
+    // 1. Intentar desde variable de entorno
+    const envCompetitionId = process.env.COMPETITION_ID;
+    if (envCompetitionId) {
+        const id = parseInt(envCompetitionId, 10);
+        if (!isNaN(id)) {
+            console.log(`Using competition_id from env: ${id}`);
+            return id;
+        }
+    }
+
+    // 2. Buscar competición oficial activa de la temporada actual
+    const SEASON = process.env.SEASON || '2025-26';
+    const { data: competitions, error } = await supabase
+        .from('competitions')
+        .select('id')
+        .eq('season', SEASON)
+        .eq('status', 'active')
+        .eq('is_official', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    if (error) {
+        console.warn(`Error fetching official competition: ${error.message}`);
+    } else if (competitions && competitions.length > 0) {
+        const id = competitions[0].id;
+        console.log(`Using official active competition_id: ${id}`);
+        return id;
+    }
+
+    // 3. Fallback: primera competición activa de la temporada
+    const { data: fallbackComps, error: fallbackError } = await supabase
+        .from('competitions')
+        .select('id')
+        .eq('season', SEASON)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    if (fallbackError) {
+        console.warn(`Error fetching fallback competition: ${fallbackError.message}`);
+        return null;
+    }
+
+    if (fallbackComps && fallbackComps.length > 0) {
+        const id = fallbackComps[0].id;
+        console.log(`Using fallback active competition_id: ${id}`);
+        return id;
+    }
+
+    console.warn(`No active competition found for season ${SEASON}. Curiosities will not be linked to a competition.`);
+    return null;
+}
+
 async function main() {
     console.log('--- Daily Curiosity Dispatcher ---');
     console.log(`Pool size: ${TASKS.length} tasks`);
@@ -90,7 +151,24 @@ async function main() {
 
     try {
         const supabase = getSupabaseAdmin();
-        await selectedTask.run(supabase);
+        
+        // Obtener competition_id
+        const competitionId = await getCompetitionId(supabase);
+        if (competitionId !== null) {
+            console.log(`Running task with competition_id: ${competitionId}`);
+        } else {
+            console.warn('Running task without competition_id (legacy mode)');
+        }
+
+        // Pasar competition_id al script (compatibilidad hacia atrás: si no lo acepta, solo recibe supabase)
+        if (selectedTask.run.length === 2) {
+            // El script acepta (supabase, competitionId)
+            await selectedTask.run(supabase, competitionId);
+        } else {
+            // El script solo acepta (supabase) - modo legacy
+            await selectedTask.run(supabase);
+        }
+
         console.log('--- Task Completed Successfully ---');
     } catch (err) {
         console.error('--- Task Failed ---');

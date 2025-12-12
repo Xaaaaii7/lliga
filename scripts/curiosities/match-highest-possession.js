@@ -1,19 +1,26 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting Daily Curiosity: Highest Possession (Season: ${SEASON})`);
+    console.log(`Starting Daily Curiosity: Highest Possession (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // Fixed columns: local_team_id -> home_league_team_id, jornada -> round_id
-    const { data: stats, error } = await supabase
+    let statsQuery = supabase
         .from('match_team_stats')
         .select(`
       possession,
       league_team_id,
       match_id,
       team:league_teams (nickname, display_name),
-      match:matches!inner (season, round_id, home_league_team_id, away_league_team_id)
+      match:matches!inner (season, round_id, home_league_team_id, away_league_team_id, competition_id)
     `)
-        .eq('match.season', SEASON)
         .not('possession', 'is', null);
+
+    if (competitionId !== null) {
+        statsQuery = statsQuery.eq('match.competition_id', competitionId);
+    } else {
+        statsQuery = statsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: stats, error } = await statsQuery;
 
     if (error) throw new Error(error.message);
     if (!stats?.length) return;
@@ -38,7 +45,7 @@ export async function run(supabase) {
     const pct = maxPos.toFixed(1) + '%';
     console.log(`Highest possession: ${teamName} with ${pct}`);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'match_highest_possession',
@@ -51,5 +58,11 @@ export async function run(supabase) {
             matchId: best.match_id,
             badge: `img/${(teamName || 'default').toLowerCase()}.png`
         }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

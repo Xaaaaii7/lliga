@@ -357,17 +357,31 @@ const CoreStats = {
       const cfg = getSupabaseConfig();
       const season = cfg?.season || null;
 
+      // Obtener competition_id del contexto
+      let competitionId = null;
+      try {
+        const { getCurrentCompetitionId } = await import('../modules/competitions.js');
+        competitionId = await getCurrentCompetitionId();
+      } catch (e) {
+        console.debug('No se pudo obtener competition_id para curiosidades:', e);
+      }
+
       const hoyStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-      // 1) intento coger curiosidad de HOY para la season activa
+      // 1) intento coger curiosidad de HOY para la competición activa o season
       let query = supabase
         .from('daily_curiosities')
-        .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at')
+        .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at, competition_id')
         .eq('fecha', hoyStr)
         .order('created_at', { ascending: false })
         .limit(1);
 
-      if (season) query = query.eq('season', season);
+      // Prioridad: competition_id sobre season
+      if (competitionId !== null) {
+        query = query.eq('competition_id', competitionId);
+      } else if (season) {
+        query = query.eq('season', season);
+      }
 
       let { data, error } = await query;
       if (error) {
@@ -377,13 +391,18 @@ const CoreStats = {
 
       let row = (data && data[0]) || null;
 
-      // 2) si hoy no hay, cojo la última curiosidad de la season
+      // 2) si hoy no hay, cojo la última curiosidad de la competición o season
       if (!row) {
         let q2 = supabase
           .from('daily_curiosities')
-          .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at');
+          .select('id, fecha, season, tipo, titulo, descripcion, payload, created_at, competition_id');
 
-        if (season) q2 = q2.eq('season', season);
+        // Prioridad: competition_id sobre season
+        if (competitionId !== null) {
+          q2 = q2.eq('competition_id', competitionId);
+        } else if (season) {
+          q2 = q2.eq('season', season);
+        }
 
         const res2 = await q2
           .order('fecha', { ascending: false })

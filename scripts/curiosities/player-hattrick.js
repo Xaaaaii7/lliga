@@ -1,12 +1,19 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting Daily Curiosity: Player Hattrick (Season: ${SEASON})`);
+    console.log(`Starting Daily Curiosity: Player Hattrick (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    // 1. Fetch matches from season
-    const { data: matches, error: mErr } = await supabase
+    // 1. Fetch matches from season or competition
+    let matchesQuery = supabase
         .from('matches')
-        .select('id')
-        .eq('season', SEASON);
+        .select('id');
+
+    if (competitionId !== null) {
+        matchesQuery = matchesQuery.eq('competition_id', competitionId);
+    } else {
+        matchesQuery = matchesQuery.eq('season', SEASON);
+    }
+
+    const { data: matches, error: mErr } = await matchesQuery;
 
     if (mErr) throw new Error(mErr.message);
     if (!matches?.length) return;
@@ -74,7 +81,7 @@ export async function run(supabase) {
 
     console.log(`Winner: ${pName} with ${maxGoals} goals`);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'player_hattrick',
@@ -88,5 +95,12 @@ export async function run(supabase) {
             jornada: jornada,
             badge: `img/jugadores/${(pName.toLowerCase().replace(/\s+/g, '-'))}.jpg`
         }
-    });
+    };
+
+    // Añadir competition_id si está disponible
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

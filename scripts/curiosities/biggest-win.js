@@ -1,9 +1,9 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting Daily Curiosity: Biggest Win (Season: ${SEASON})`);
+    console.log(`Starting Daily Curiosity: Biggest Win (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // 1. Fetch matches
-    const { data: matches, error: matchesError } = await supabase
+    let matchesQuery = supabase
         .from('matches')
         .select(`
     id,
@@ -13,9 +13,16 @@ export async function run(supabase) {
     away_goals,
     round_id
   `)
-        .eq('season', SEASON)
         .not('home_goals', 'is', null)
         .not('away_goals', 'is', null);
+
+    if (competitionId !== null) {
+        matchesQuery = matchesQuery.eq('competition_id', competitionId);
+    } else {
+        matchesQuery = matchesQuery.eq('season', SEASON);
+    }
+
+    const { data: matches, error: matchesError } = await matchesQuery;
     // NOTE: 'round_id' seems to be the column name instead of 'jornada' in schema provided earlier.
     // But let's check matches columns again if needed. The schema dump said 'round_id'.
 
@@ -88,6 +95,10 @@ export async function run(supabase) {
         descripcion: description,
         payload: payload
     };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
 
     const { error: insertError } = await supabase
         .from('daily_curiosities')

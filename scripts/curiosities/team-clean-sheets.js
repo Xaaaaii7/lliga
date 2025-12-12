@@ -1,9 +1,9 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting Daily Curiosity: Clean Sheets (Season: ${SEASON})`);
+    console.log(`Starting Daily Curiosity: Clean Sheets (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // Fixed: goles_local -> home_goals, etc.
-    const { data: matches, error } = await supabase
+    let matchesQuery = supabase
         .from('matches')
         .select(`
       home_league_team_id,
@@ -13,9 +13,16 @@ export async function run(supabase) {
       home:league_teams!matches_home_league_team_id_fkey (nickname, display_name),
       away:league_teams!matches_away_league_team_id_fkey (nickname, display_name)
     `)
-        .eq('season', SEASON)
         .not('home_goals', 'is', null)
         .not('away_goals', 'is', null);
+
+    if (competitionId !== null) {
+        matchesQuery = matchesQuery.eq('competition_id', competitionId);
+    } else {
+        matchesQuery = matchesQuery.eq('season', SEASON);
+    }
+
+    const { data: matches, error } = await matchesQuery;
 
     if (error) throw new Error(error.message);
     if (!matches?.length) return;
@@ -48,7 +55,7 @@ export async function run(supabase) {
 
     console.log(`Leader: ${leader.name} with ${leader.count} clean sheets`);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_clean_sheets',
@@ -60,5 +67,11 @@ export async function run(supabase) {
             value: leader.count,
             badge: `img/${(leader.name || 'default').toLowerCase()}.png`
         }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

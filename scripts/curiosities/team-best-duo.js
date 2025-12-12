@@ -1,19 +1,26 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Best Duo (Season: ${SEASON})`);
+    console.log(`Starting: Best Duo (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // 1. Fetch goals
-    const { data: goals } = await supabase
+    let goalsQuery = supabase
         .from('goal_events')
         .select(`
       league_team_id,
       player_id,
       player:players (name),
       team:league_teams (nickname),
-      match:matches!inner (season)
+      match:matches!inner (season, competition_id)
     `)
-        .eq('match.season', SEASON)
         .neq('event_type', 'own_goal'); // Exclude OGs
+
+    if (competitionId !== null) {
+        goalsQuery = goalsQuery.eq('match.competition_id', competitionId);
+    } else {
+        goalsQuery = goalsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: goals } = await goalsQuery;
 
     if (!goals?.length) return;
 
@@ -65,12 +72,18 @@ export async function run(supabase) {
 
     if (!leader) return;
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_best_duo',
         titulo: 'Dupla Letal',
         descripcion: `La pareja ${leader.p1} (${leader.g1}) y ${leader.p2} (${leader.g2}) del ${leader.tName} suman ${leader.total} goles juntos.`,
         payload: { category: 'equipos', nickname: leader.tName, value: leader.total, badge: `img/${leader.tName.toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

@@ -1,20 +1,25 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Unique Scorers (Season: ${SEASON})`);
+    console.log(`Starting: Unique Scorers (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
     // 1. Fetch goal events
-    const { data: goals, error } = await supabase
+    let goalsQuery = supabase
         .from('goal_events')
-        .select('league_team_id, player_id, team:league_teams(nickname), event_type')
-        .eq('match.season', SEASON)
         .select(`
       league_team_id,
       player_id,
       event_type,
       team:league_teams (nickname),
-      match:matches!inner (season)
-    `)
-        .eq('match.season', SEASON);
+      match:matches!inner (season, competition_id)
+    `);
+
+    if (competitionId !== null) {
+        goalsQuery = goalsQuery.eq('match.competition_id', competitionId);
+    } else {
+        goalsQuery = goalsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: goals, error } = await goalsQuery;
 
     if (error) throw new Error(error.message);
     if (!goals?.length) return;
@@ -46,12 +51,18 @@ export async function run(supabase) {
 
     if (!leader) return;
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_unique_scorers',
         titulo: 'Goles muy repartidos',
         descripcion: `El equipo ${leader.name} es el más coral: ha tenido ${leader.count} goleadores diferentes.`,
         payload: { category: 'equipos', nickname: leader.name, value: leader.count, badge: `img/${leader.name.toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

@@ -1,12 +1,19 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Best Home Defense (Season: ${SEASON})`);
+    console.log(`Starting: Best Home Defense (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    const { data: matches } = await supabase
+    let matchesQuery = supabase
         .from('matches')
         .select('home_league_team_id, away_goals')
-        .eq('season', SEASON)
         .not('away_goals', 'is', null);
+
+    if (competitionId !== null) {
+        matchesQuery = matchesQuery.eq('competition_id', competitionId);
+    } else {
+        matchesQuery = matchesQuery.eq('season', SEASON);
+    }
+
+    const { data: matches } = await matchesQuery;
 
     if (!matches?.length) return;
 
@@ -36,12 +43,18 @@ export async function run(supabase) {
     const name = t?.nickname || 'Unknown';
     const valFixed = bestAvg.toFixed(2);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_best_home_defense',
         titulo: 'Fortín en casa',
         descripcion: `El ${name} es el mejor local defensivo: solo encaja ${valFixed} goles por partido en su estadio.`,
         payload: { category: 'equipos', nickname: name, value: parseFloat(valFixed), badge: `img/${name.toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

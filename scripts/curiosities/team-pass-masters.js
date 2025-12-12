@@ -1,17 +1,24 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Pass Masters (Season: ${SEASON})`);
+    console.log(`Starting: Pass Masters (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    const { data: stats } = await supabase
+    let statsQuery = supabase
         .from('match_team_stats')
         .select(`
       passes,
       passes_completed,
       league_team_id,
       team:league_teams (nickname),
-      match:matches!inner (season)
-    `)
-        .eq('match.season', SEASON);
+      match:matches!inner (season, competition_id)
+    `);
+
+    if (competitionId !== null) {
+        statsQuery = statsQuery.eq('match.competition_id', competitionId);
+    } else {
+        statsQuery = statsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: stats } = await statsQuery;
 
     if (!stats?.length) return;
 
@@ -39,12 +46,18 @@ export async function run(supabase) {
 
     const pctStr = (maxPct * 100).toFixed(1) + '%';
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_pass_masters',
         titulo: 'Maestros del pase',
         descripcion: `El equipo ${leader.name} lidera la precisión de pase con un ${pctStr}.`,
         payload: { category: 'equipos', nickname: leader.name, value: maxPct, badge: `img/${(leader.name || '').toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

@@ -1,17 +1,24 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting Daily Curiosity: Team Most Saves (Season: ${SEASON})`);
+    console.log(`Starting Daily Curiosity: Team Most Saves (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    const { data: stats, error } = await supabase
+    let statsQuery = supabase
         .from('match_team_stats')
         .select(`
       saves,
       league_team_id,
       team:league_teams (nickname, display_name),
-      match:matches!inner (season)
+      match:matches!inner (season, competition_id)
     `)
-        .eq('match.season', SEASON)
         .not('saves', 'is', null);
+
+    if (competitionId !== null) {
+        statsQuery = statsQuery.eq('match.competition_id', competitionId);
+    } else {
+        statsQuery = statsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: stats, error } = await statsQuery;
 
     if (error) throw new Error(error.message);
     if (!stats?.length) { console.log('No stats'); return; }
@@ -40,7 +47,7 @@ export async function run(supabase) {
     const avgFixed = maxAvg.toFixed(2);
     console.log(`Leader: ${leader.name} with ${avgFixed} saves/match`);
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'team_most_saves',
@@ -53,5 +60,11 @@ export async function run(supabase) {
             total: leader.saves,
             badge: `img/${(leader.name || 'default').toLowerCase()}.png`
         }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

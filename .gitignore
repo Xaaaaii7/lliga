@@ -12,3 +12,4 @@ js/modules/config.js
 .DS_Store
 Thumbs.db
 *.md
+*.sql

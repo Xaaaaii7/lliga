@@ -1,16 +1,23 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Own Goals (Season: ${SEASON})`);
+    console.log(`Starting: Own Goals (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    const { data: goals } = await supabase
+    let goalsQuery = supabase
         .from('goal_events')
         .select(`
       player:players (name),
       team:league_teams (nickname),
-      match:matches!inner (season)
+      match:matches!inner (season, competition_id)
     `)
-        .eq('match.season', SEASON)
         .eq('event_type', 'own_goal');
+
+    if (competitionId !== null) {
+        goalsQuery = goalsQuery.eq('match.competition_id', competitionId);
+    } else {
+        goalsQuery = goalsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: goals } = await goalsQuery;
 
     // If no own goals, skip or fallback?
     if (!goals?.length) return;
@@ -31,12 +38,18 @@ export async function run(supabase) {
 
     if (!leader) return;
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'player_own_goals',
         titulo: 'Mala suerte',
         descripcion: `El jugador ${leader.name} (${leader.team}) ha marcado ${leader.count} goles en propia puerta esta temporada.`,
         payload: { category: 'jugadores', playerName: leader.name, value: leader.count, badge: `img/jugadores/${leader.name.toLowerCase().replace(/\s+/g, '-')}.jpg` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }

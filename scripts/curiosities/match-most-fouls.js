@@ -1,15 +1,22 @@
-export async function run(supabase) {
+export async function run(supabase, competitionId = null) {
     const SEASON = process.env.SEASON || '2025-26';
-    console.log(`Starting: Match Most Fouls (Season: ${SEASON})`);
+    console.log(`Starting: Match Most Fouls (Season: ${SEASON}${competitionId ? `, Competition: ${competitionId}` : ''})`);
 
-    const { data: stats } = await supabase
+    let statsQuery = supabase
         .from('match_team_stats')
         .select(`
       fouls,
       match_id,
-      match:matches!inner (season)
-    `)
-        .eq('match.season', SEASON);
+      match:matches!inner (season, competition_id)
+    `);
+
+    if (competitionId !== null) {
+        statsQuery = statsQuery.eq('match.competition_id', competitionId);
+    } else {
+        statsQuery = statsQuery.eq('match.season', SEASON);
+    }
+
+    const { data: stats } = await statsQuery;
 
     if (!stats?.length) return;
 
@@ -37,12 +44,18 @@ export async function run(supabase) {
     const hName = match.home?.nickname || 'Local';
     const aName = match.away?.nickname || 'Visitor';
 
-    await supabase.from('daily_curiosities').insert({
+    const entry = {
         fecha: new Date().toISOString().slice(0, 10),
         season: SEASON,
         tipo: 'match_most_fouls',
         titulo: 'Juego interrumpido',
         descripcion: `El partido ${hName} vs ${aName} se detuvo constantemente: se pitaron ${max} faltas.`,
         payload: { category: 'partidos', matchId: bestMId, value: max, badge: `img/${hName.toLowerCase()}.png` }
-    });
+    };
+
+    if (competitionId !== null) {
+        entry.competition_id = competitionId;
+    }
+
+    await supabase.from('daily_curiosities').insert(entry);
 }
